@@ -5,13 +5,13 @@
 ![PyQt6](https://img.shields.io/badge/PyQt6-6.6.1-green.svg)
 ![SQLite](https://img.shields.io/badge/SQLite-3-orange.svg)
 
-## 📋 Descripción
+## Descripción
 
 **GesMonth** es un sistema profesional de escritorio para la gestión de pagos y cuotas mensuales desarrollado en Python. Utiliza PyQt6 para la interfaz gráfica y SQLite como base de datos, ofreciendo una solución completa, moderna y fácil de usar para el control de pagos recurrentes.
 
-## ✨ Características Principales
+## Características Principales
 
-### 📊 Dashboard Inteligente
+### Dashboard Inteligente
 - Métricas clave del negocio en tiempo real
 - Total de clientes activos
 - Clientes en mora (basado en último registro)
@@ -20,7 +20,7 @@
 - Total recaudado del año en curso
 - Footer con información de la aplicación
 
-### 👥 Gestión de Clientes
+### Gestión de Clientes
 - CRUD completo (Crear, Leer, Actualizar, Eliminar)
 - Día de cobro personalizable (1-31)
 - Búsqueda por nombre o documento
@@ -28,27 +28,27 @@
 - Estados: activo/inactivo
 - Valor de cuota mensual configurable
 
-### 📅 Control de Cuotas Mensuales
+###  Control de Cuotas Mensuales
 - Grid visual de meses organizados por año
 - Sistema de estados avanzado:
-  - ✅ **Pagado**: Cuota completamente pagada
-  - ❌ **Impago**: Sin pago registrado (genera mora)
-  - ⚠️ **Con Deuda**: Pago parcial o deuda heredada
-  - ⏳ **Pendiente**: Aún no vencido
+  -  **Pago**: Cuota completamente pagada
+  -  **Impago**: Sin pago registrado (genera mora)
+  -  **Con Deuda**: Pago parcial o deuda heredada
+  -  **Pendiente**: Aún no vencido
 - Seguimiento de deuda acumulada entre meses
 - Registro de fecha de inicio de mora
 - Soporte para pagos parciales
 - Colores visuales intuitivos
 - Dialog con detalles completos de cada cuota
 
-### 💰 Registro de Pagos
+### Registro de Pagos
 - Múltiples métodos de pago configurables
 - Prevención automática de pagos duplicados
 - Historial completo por cliente
 - Asociación automática al mes correspondiente
 - Eliminación en cascada al cambiar estados de cuotas
 
-### 📈 Reportes y Estadísticas
+### Reportes y Estadísticas
 - Filtrado por año y mes específico
 - Estadísticas detalladas:
   - Total de cuotas registradas
@@ -58,7 +58,7 @@
 - Desglose por método de pago
 - Visualización con tarjetas profesionales
 
-### ⚙️ Configuración Completa
+### Configuración Completa
 - Gestión de métodos de pago personalizados
 - Configuración de años de facturación
 - Respaldo manual de base de datos
@@ -67,7 +67,7 @@
 - Modo pantalla completa
 - Opción para salir de la aplicación
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 El proyecto está organizado siguiendo el patrón MVC (Modelo-Vista-Controlador) y buenas prácticas de programación:
 
@@ -103,7 +103,7 @@ GesMonth/
         └── main.qss           # Estilos CSS (Glassmorphismo)
 ```
 
-## 🚀 Instalación Rápida
+## Instalación Rápida
 
 ### Windows
 
@@ -191,9 +191,9 @@ Para distribuir a usuarios finales:
 
 **Nota**: El ejecutable debe estar junto a la carpeta `assets` para funcionar correctamente.
 
-📖 **Guía completa de compilación**: Ver [BUILD.md](BUILD.md)
+**Guía completa de compilación**: Ver [BUILD.md](BUILD.md)
 
-## �💻 Guía de Uso
+## Guía de Uso
 
 ### 1. Dashboard
 - **Métricas en tiempo real**: Total clientes, clientes en mora, clientes al día
@@ -239,7 +239,7 @@ Para distribuir a usuarios finales:
   - Modo pantalla completa
   - Salir de la aplicación
 
-## 🗄️ Base de Datos
+## Base de Datos
 
 SQLite con 5 tablas principales y índices optimizados:
 
@@ -299,7 +299,7 @@ SQLite con 5 tablas principales y índices optimizados:
 - `idx_cuotas_año_mes`: Búsqueda por período
 - `idx_cuotas_estado`: Filtrado por estado
 
-## 🎨 Diseño y Personalización
+## Diseño y Personalización
 
 ### Interfaz de Usuario
 - **Tema oscuro moderno** con degradados azules
@@ -335,7 +335,7 @@ QLabel {
 }
 ```
 
-## 🔧 Características Técnicas
+## Características Técnicas
 
 ### Arquitectura
 - **Patrón MVC**: Separación clara de responsabilidades
@@ -355,7 +355,7 @@ QLabel {
 - **Fechas válidas**: Verificación de rangos de fechas
 - **Estados consistentes**: Transiciones de estado controladas
 
-## 📦 Dependencias
+## Dependencias
 
 ```
 PyQt6==6.6.1          # Framework GUI moderno
@@ -401,7 +401,7 @@ pip install -r requirements.txt
 - Si el último mes registrado es "impago", el cliente está en mora
 - Los meses sin registrar no cuentan como mora
 
-## 🔒 Seguridad
+## Seguridad
 
 - **Consultas preparadas**: Prevención de inyección SQL
 - **Validación de entrada**: Todos los formularios validan datos
@@ -409,7 +409,7 @@ pip install -r requirements.txt
 - **Sin credenciales**: No se almacenan contraseñas (aplicación local)
 - **Respaldos manuales**: El usuario controla cuándo y dónde respaldar
 
-## 🚀 Roadmap (Futuras Mejoras)
+## Roadmap (Futuras Mejoras)
 
 - [ ] Exportación de reportes a Excel
 - [ ] Gráficos estadísticos con matplotlib
@@ -422,11 +422,11 @@ pip install -r requirements.txt
 - [ ] Backup automático programado
 - [ ] Dashboard con gráficos interactivos
 
-## 📝 Licencia
+## Licencia
 
-Este proyecto es de código abierto y está disponible para uso personal, educativo y comercial.
+Este proyecto es de código licenciado para uso privado.
 
-## 👨‍💻 Desarrollo
+## Desarrollo
 
 ### Tecnologías Utilizadas
 - **Python 3.8+**: Lenguaje de programación
@@ -496,17 +496,17 @@ Las contribuciones son bienvenidas. Para contribuir:
 - Mantén el estilo de código existente
 - Actualiza la documentación si es necesario
 
-## 📧 Soporte y Contacto
+## Soporte y Contacto
 
 - **Issues**: Reporta bugs o sugiere mejoras abriendo un issue
 - **Documentación**: Consulta la carpeta `docs/` para más detalles
 - **Preguntas**: Abre una discusión en el repositorio
 
-## 🙏 Agradecimientos
+## Agradecimientos
 
-- **PyQt6**: Por el excelente framework GUI
+- **PyQt6**: Por framework GUI
 - **Python Community**: Por las herramientas y librerías
-- **Usuarios**: Por su feedback y sugerencias
+- **Claude Sonnet 4.5**: Por diseño UI/UX
 
 ---
 
@@ -516,7 +516,7 @@ Las contribuciones son bienvenidas. Para contribuir:
 
 Sistema profesional de gestión de pagos y cuotas mensuales
 
-Desarrollado con ❤️ usando Python y PyQt6
+Desarrollado por Dilan Acuña
 
 [📖 Documentación](docs/) • [🐛 Reportar Bug](../../issues) • [💡 Sugerir Feature](../../issues)
 
