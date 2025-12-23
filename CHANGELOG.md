@@ -19,7 +19,6 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 
 - **Documentación Mejorada**
   - README completo para usuarios finales (Linux y Windows)
-  - Eliminación de emojis en toda la documentación
   - Estructura de paquete simplificada (solo ejecutable, LICENSE y README)
 
 - **GitHub Actions**
