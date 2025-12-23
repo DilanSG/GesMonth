@@ -159,7 +159,7 @@ Linux/Mac:
 python3 main.py
 ```
 
-## � Compilación a Ejecutable
+## Compilación a Ejecutable
 
 ### Para Desarrolladores
 
@@ -370,7 +370,7 @@ Instalar todas:
 pip install -r requirements.txt
 ```
 
-## � Solución de Problemas
+## Solución de Problemas
 
 ### La aplicación no inicia
 - Verifica que Python 3.8+ esté instalado: `python --version`
