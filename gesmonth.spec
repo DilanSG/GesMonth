@@ -9,6 +9,14 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
 
+# Icono según plataforma
+icon_path = None
+if sys.platform == 'win32':
+    icon_path = 'assets/icons/LOGO.ico'  # Windows necesita .ico
+elif sys.platform == 'darwin':
+    icon_path = 'assets/icons/LOGO.png'  # macOS puede usar .png
+# Linux ignora el icono en PyInstaller
+
 # Datos adicionales a incluir
 datas = [
     ('assets', 'assets'),  # Incluir carpeta de assets (estilos, iconos)
@@ -82,7 +90,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='assets/icons/LOGO.png',  # Icono de la aplicación
+    icon=icon_path,  # Icono condicional según plataforma
 )
 
 coll = COLLECT(
