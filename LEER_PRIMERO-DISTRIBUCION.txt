@@ -1,0 +1,112 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║                        GESMONTH v1.0.1                            ║
+║          Sistema de Gestión de Pagos Mensuales                    ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+¡Gracias por descargar GesMonth!
+
+═══════════════════════════════════════════════════════════════════
+CONTENIDO DEL PAQUETE
+═══════════════════════════════════════════════════════════════════
+
+GesMonth-v1.0.0-Linux/
+├── GesMonth/
+│   ├── GesMonth              # Ejecutable principal
+│   ├── assets/               # Recursos (estilos, iconos)
+│   ├── _internal/            # Librerías del sistema
+│   └── VERSION               # Versión de la aplicación
+├── README.txt                # Este archivo
+└── LICENSE.txt               # Licencia
+
+═══════════════════════════════════════════════════════════════════
+INSTALACIÓN RÁPIDA
+═══════════════════════════════════════════════════════════════════
+
+1. Extrae el archivo tar.gz a una carpeta de tu elección:
+   $ tar -xzf GesMonth-v1.0.0-Linux.tar.gz
+
+2. Entra a la carpeta del programa:
+   $ cd GesMonth-v1.0.0-Linux/GesMonth
+
+3. Ejecuta la aplicación:
+   $ ./GesMonth
+
+¡Eso es todo! La aplicación iniciará automáticamente.
+
+═══════════════════════════════════════════════════════════════════
+SOLUCIÓN DE PROBLEMAS
+═══════════════════════════════════════════════════════════════════
+
+PROBLEMA: El ejecutable no inicia
+SOLUCIÓN: 
+  • Verifica que tengas permisos de ejecución:
+    $ chmod +x GesMonth
+  • Ejecuta desde terminal para ver mensajes de error:
+    $ ./GesMonth
+
+PROBLEMA: No se ven los estilos
+SOLUCIÓN: 
+  • Asegúrate de que la carpeta assets/ esté junto al ejecutable
+  • No muevas el ejecutable fuera de su carpeta
+
+PROBLEMA: Error de librerías faltantes
+SOLUCIÓN: 
+  • Todas las librerías están incluidas en _internal/
+  • Si hay problemas, instala las librerías Qt6 de tu distribución:
+    Ubuntu/Debian: $ sudo apt install qt6-base-dev
+    Fedora: $ sudo dnf install qt6-qtbase
+    Arch: $ sudo pacman -S qt6-base
+
+═══════════════════════════════════════════════════════════════════
+REQUISITOS DEL SISTEMA
+═══════════════════════════════════════════════════════════════════
+
+- Linux (64-bit)
+- Librerías gráficas Qt6 (incluidas)
+- 200 MB de espacio en disco
+- 512 MB de RAM (mínimo)
+- Resolución mínima: 1024x768
+
+═══════════════════════════════════════════════════════════════════
+PRIMEROS PASOS
+═══════════════════════════════════════════════════════════════════
+
+1. Al iniciar por primera vez, GesMonth creará automáticamente una
+   base de datos SQLite en la misma carpeta del ejecutable.
+
+2. El Dashboard mostrará estadísticas iniciales (todo en 0).
+
+3. Ve a "Clientes" para agregar tus primeros clientes.
+
+4. Luego ve a "Cuotas" para registrar pagos mensuales.
+
+5. Usa "Reportes" para exportar información a Excel.
+
+═══════════════════════════════════════════════════════════════════
+CARACTERÍSTICAS PRINCIPALES
+═══════════════════════════════════════════════════════════════════
+
+- Dashboard con estadísticas en tiempo real
+- Gestión completa de clientes (CRUD)
+- Registro de pagos mensuales
+- Control de cuotas por año/mes
+- Reportes exportables a Excel
+- Interfaz moderna con efectos de cristal (glassmorphism)
+- Base de datos SQLite integrada
+- Búsqueda y filtrado avanzado
+
+═══════════════════════════════════════════════════════════════════
+SOPORTE Y CONTACTO
+═══════════════════════════════════════════════════════════════════
+
+Desarrollado por: Dilan Acuña
+Versión: 1.0.1
+Fecha: Diciembre 2024
+Licencia: MIT
+
+Para reportar problemas o sugerencias, visita:
+https://github.com/DIlanSG/GesMonth
+
+═══════════════════════════════════════════════════════════════════
+
+¡Disfruta usando GesMonth para gestionar tus pagos mensuales!

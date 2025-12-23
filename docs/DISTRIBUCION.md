@@ -1,10 +1,10 @@
-# Guía Rápida de Distribución - GesMonth v1.0.0
+# Guía Rápida de Distribución - GesMonth v1.0.1
 
 Esta guía te ayuda a crear paquetes de distribución de GesMonth para usuarios finales.
 
-## 🎯 Proceso Completo
+## Proceso Completo
 
-### 1️⃣ Preparación (Una sola vez)
+### 1. Preparación (Una sola vez)
 
 ```bash
 # Instalar dependencias incluyendo PyInstaller
@@ -12,7 +12,7 @@ Esta guía te ayuda a crear paquetes de distribución de GesMonth para usuarios 
 install.bat   # Windows
 ```
 
-### 2️⃣ Compilación
+### 2. Compilación
 
 Genera el ejecutable standalone:
 
@@ -30,7 +30,7 @@ build.bat
 
 **Tiempo estimado**: 3-5 minutos
 
-### 3️⃣ Empaquetado para Distribución
+### 3. Empaquetado para Distribución
 
 Crea el paquete comprimido listo para distribuir:
 
@@ -47,13 +47,13 @@ package.bat
 - Linux: `GesMonth-v1.0.0-Linux.tar.gz`
 
 **Contenido del paquete**:
-- ✅ Ejecutable (GesMonth.exe o GesMonth)
-- ✅ Carpeta assets/ con estilos
-- ✅ LEER_PRIMERO.txt (manual de usuario)
-- ✅ VERSION
-- ✅ LICENSE.txt
+- Ejecutable (GesMonth.exe o GesMonth)
+- Carpeta assets/ con estilos
+- LEER_PRIMERO.txt (manual de usuario)
+- VERSION
+- LICENSE.txt
 
-### 4️⃣ Distribución
+### 4. Distribución
 
 **Opción A - Descarga directa**:
 1. Sube el archivo .zip o .tar.gz a tu hosting/servidor
@@ -69,7 +69,7 @@ package.bat
 2. Genera enlace público
 3. Comparte con usuarios
 
-## 📋 Checklist de Distribución
+## Checklist de Distribución
 
 Antes de distribuir, verifica:
 
@@ -82,7 +82,7 @@ Antes de distribuir, verifica:
 - [ ] Tamaño del archivo razonable (~60 MB comprimido)
 - [ ] Nombre del archivo con versión correcta
 
-## 🚀 Instrucciones para Usuarios Finales
+## Instrucciones para Usuarios Finales
 
 ### Windows
 1. Descargar `GesMonth-v1.0.0-Windows.zip`
@@ -97,7 +97,7 @@ Antes de distribuir, verifica:
 4. Ejecutar: `./GesMonth`
 5. Leer `LEER_PRIMERO.txt` para más información
 
-## ⚡ Comandos Rápidos
+## Comandos Rápidos
 
 ### Proceso completo de compilación y empaquetado:
 
@@ -111,7 +111,7 @@ build.bat && package.bat
 ./build.sh && ./package.sh
 ```
 
-## 📦 Estructura del Paquete Final
+## Estructura del Paquete Final
 
 ```
 GesMonth-v1.0.0-Windows.zip
@@ -125,7 +125,7 @@ GesMonth-v1.0.0-Windows.zip
     └── VERSION              # Versión (1.0.0)
 ```
 
-## 🔍 Solución de Problemas
+## Solución de Problemas
 
 ### El build falla
 - Verifica que el venv esté activado
@@ -142,7 +142,7 @@ GesMonth-v1.0.0-Windows.zip
 - Verifica que sea la arquitectura correcta (64-bit)
 - En Linux, verifica permisos: `chmod +x GesMonth`
 
-## 📝 Notas Importantes
+## Notas Importantes
 
 1. **No incluir la base de datos**: `gesmonth.db` se crea automáticamente
 2. **Assets obligatorios**: La carpeta `assets/` debe estar junto al ejecutable
@@ -177,4 +177,4 @@ Ejecuta en orden:
 
 ---
 
-GesMonth v1.0.0 - Desarrollado por Dilan Acuña
+GesMonth v1.0.1 - Desarrollado por Dilan Acuña

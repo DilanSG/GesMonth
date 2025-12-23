@@ -2,6 +2,31 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [1.0.1] - 2025-12-23
+
+### Mejoras en Distribución
+
+#### Cambios Principales
+- **Ejecutable Standalone**: Aplicación empaquetada con PyInstaller
+  - Scripts de compilación automatizados (build.bat/sh)
+  - Scripts de empaquetado para distribución (package.bat/sh)
+  - Paquetes listos para distribuir sin dependencias de Python
+
+- **Optimización de Assets**
+  - Corrección de rutas para PyInstaller (sys.frozen)
+  - Assets movidos al nivel correcto junto al ejecutable
+  - Eliminación de dependencias problemáticas (pkg_resources)
+
+- **Documentación Mejorada**
+  - README completo para usuarios finales (Linux y Windows)
+  - Eliminación de emojis en toda la documentación
+  - Estructura de paquete simplificada (solo ejecutable, LICENSE y README)
+
+- **GitHub Actions**
+  - Workflow configurado para builds automáticos
+  - Generación de releases para Windows y Linux
+  - Distribución automatizada con cada tag de versión
+
 ## [1.0.0] - 2025-12-23
 
 ### Primera Versión Estable

@@ -1,6 +1,6 @@
 # GesMonth - Sistema de Gestión de Pagos Mensuales
 
-![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-1.0.1-brightgreen.svg)
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![PyQt6](https://img.shields.io/badge/PyQt6-6.6.1-green.svg)
 ![SQLite](https://img.shields.io/badge/SQLite-3-orange.svg)
@@ -512,7 +512,7 @@ Las contribuciones son bienvenidas. Para contribuir:
 
 <div align="center">
 
-**GesMonth v1.0.0**
+**GesMonth v1.0.1**
 
 Sistema profesional de gestión de pagos y cuotas mensuales
 

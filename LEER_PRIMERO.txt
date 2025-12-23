@@ -1,5 +1,5 @@
 ╔═══════════════════════════════════════════════════════════════╗
-║                   GesMonth v1.0.0                             ║
+║                   GesMonth v1.0.1                             ║
 ║          Sistema de Gestión de Pagos Mensuales               ║
 ╚═══════════════════════════════════════════════════════════════╝
 
@@ -14,10 +14,26 @@ gimnasios, o cualquier servicio con cobros recurrentes.
 INICIO RÁPIDO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+Windows:
+────────
 1. Doble clic en GesMonth.exe
 2. La aplicación iniciará en pantalla completa
-3. La base de datos se crea automáticamente
-4. ¡Listo para usar!
+3. ¡Listo para usar!
+
+Linux:
+──────
+Opción 1 - Desde terminal (recomendado):
+   cd GesMonth/
+   ./GesMonth
+
+Opción 2 - Con el launcher:
+   Doble clic en GesMonth.sh
+
+Opción 3 - Integración con el escritorio:
+   Doble clic en GesMonth.desktop
+   (puede pedir permisos la primera vez)
+
+La base de datos se crea automáticamente en la primera ejecución.
 
 
  CARACTERÍSTICAS PRINCIPALES
@@ -156,10 +172,10 @@ LICENCIA
 Codigo licenciado para uso privado.
 
 
-📌 INFORMACIÓN TÉCNICA
+INFORMACIÓN TÉCNICA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Versión: 1.0.0
+Versión: 1.0.1
 Fecha: Diciembre 2025
 Tecnología: Python + PyQt6 + SQLite
 Desarrollador: Dilan Acuña

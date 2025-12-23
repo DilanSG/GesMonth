@@ -5,7 +5,7 @@ REM Genera el ejecutable standalone con PyInstaller
 REM ============================================
 
 echo ============================================
-echo GesMonth - Compilador v1.0.0
+echo GesMonth - Compilador v1.0.1
 echo ============================================
 echo.
 

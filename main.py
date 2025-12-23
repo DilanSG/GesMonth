@@ -15,7 +15,15 @@ from database.connection import DatabaseConnection
 def load_stylesheet(app: QApplication):
     """Carga el archivo de estilos QSS"""
     try:
-        style_path = os.path.join(os.path.dirname(__file__), 'assets', 'styles', 'main.qss')
+        # Obtener el directorio base (funciona tanto en desarrollo como en ejecutable)
+        if getattr(sys, 'frozen', False):
+            # Si está ejecutándose como ejecutable de PyInstaller
+            base_path = os.path.dirname(sys.executable)
+        else:
+            # Si está ejecutándose como script Python
+            base_path = os.path.dirname(__file__)
+        
+        style_path = os.path.join(base_path, 'assets', 'styles', 'main.qss')
         with open(style_path, 'r', encoding='utf-8') as f:
             app.setStyleSheet(f.read())
     except Exception as e:
@@ -34,8 +42,16 @@ def main():
     app.setApplicationName("GesMonth")
     app.setOrganizationName("GesMonth")
     
+    # Obtener el directorio base (funciona tanto en desarrollo como en ejecutable)
+    if getattr(sys, 'frozen', False):
+        # Si está ejecutándose como ejecutable de PyInstaller
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # Si está ejecutándose como script Python
+        base_path = os.path.dirname(__file__)
+    
     # Establecer icono de la aplicación
-    icon_path = os.path.join(os.path.dirname(__file__), 'assets', 'icons', 'LOGO.png')
+    icon_path = os.path.join(base_path, 'assets', 'icons', 'LOGO.png')
     if os.path.exists(icon_path):
         app.setWindowIcon(QIcon(icon_path))
     

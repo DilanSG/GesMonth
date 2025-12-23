@@ -311,7 +311,7 @@ class ConfiguracionView(QWidget):
         details_layout = QHBoxLayout()
         details_layout.setSpacing(15)
         
-        version = QLabel("v1.0.0")
+        version = QLabel("v1.0.1")
         version.setStyleSheet("font-size: 10px; color: #94a3b8;")
         details_layout.addWidget(version)
         

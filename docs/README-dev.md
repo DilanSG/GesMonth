@@ -1,6 +1,6 @@
 # GesMonth - Guía Técnica Completa para Desarrolladores
 
-## 📋 Índice
+## Índice
 1. [Visión general y arquitectura](#visión-general-y-arquitectura)
 2. [Stack tecnológico](#stack-tecnológico)
 3. [Estructura del proyecto](#estructura-del-proyecto)

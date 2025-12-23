@@ -166,7 +166,7 @@ class DashboardView(QWidget):
         footer_layout.addWidget(separator1)
         
         # Versión
-        version = QLabel("v1.0.0")
+        version = QLabel("v1.0.1")
         version.setStyleSheet("font-size: 14px; color: #64748b; border: none;")
         footer_layout.addWidget(version)
         

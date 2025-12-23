@@ -1,14 +1,14 @@
-# Guía de Compilación - GesMonth v1.0.0
+# Guía de Compilación - GesMonth v1.0.1
 
 Esta guía explica cómo compilar GesMonth en un ejecutable standalone usando PyInstaller.
 
-## 📋 Requisitos Previos
+## Requisitos Previos
 
 - Python 3.8 o superior instalado
 - Entorno virtual configurado (ejecutar `install.bat` o `install.sh` primero)
 - PyInstaller 6.3.0 (se instala automáticamente con los scripts)
 
-## 🔨 Compilación en Windows
+## Compilación en Windows
 
 ### Método Automático (Recomendado)
 
@@ -43,7 +43,7 @@ Esta guía explica cómo compilar GesMonth en un ejecutable standalone usando Py
    pyinstaller --clean --noconfirm gesmonth.spec
    ```
 
-## 🐧 Compilación en Linux/Mac
+## Compilación en Linux/Mac
 
 ### Método Automático (Recomendado)
 
@@ -71,19 +71,26 @@ Esta guía explica cómo compilar GesMonth en un ejecutable standalone usando Py
    pyinstaller --clean --noconfirm gesmonth.spec
    ```
 
-## 📦 Estructura del Ejecutable
+## Estructura del Ejecutable
 
 Después de la compilación, la carpeta `dist` contendrá:
 
 ```
 dist/
-├── GesMonth.exe (Windows) o GesMonth (Linux/Mac)
-└── assets/
-    └── styles/
-        └── main.qss
+└── GesMonth/                    # Carpeta con todo el paquete
+    ├── GesMonth (ejecutable)    # Ejecutable principal
+    ├── assets/                  # Recursos incluidos
+    │   ├── icons/
+    │   │   └── LOGO.png
+    │   └── styles/
+    │       └── main.qss
+    ├── _internal/               # Librerías internas de PyInstaller
+    └── VERSION                  # Archivo de versión
 ```
 
-## 🚀 Distribución
+**Importante**: Para ejecutar la aplicación, debes mantener toda la carpeta `GesMonth` junta. No muevas solo el ejecutable.
+
+## Distribución
 
 ### Para Usuarios Finales
 
@@ -110,7 +117,7 @@ GesMonth-v1.0.0/
 └── LICENSE.txt
 ```
 
-## 🔧 Optimizaciones del Spec File
+## Optimizaciones del Spec File
 
 El archivo `gesmonth.spec` incluye:
 
@@ -136,7 +143,7 @@ El archivo `gesmonth.spec` incluye:
 - `upx=True`: Compresión UPX para reducir tamaño
 - `onefile=True`: Todo en un solo ejecutable
 
-## 📊 Tamaño del Ejecutable
+## Tamaño del Ejecutable
 
 - **Sin comprimir**: ~150-200 MB
 - **Con UPX**: ~80-120 MB
@@ -148,7 +155,7 @@ El tamaño incluye:
 - SQLite
 - Librerías adicionales
 
-## ⚠️ Problemas Comunes
+## Problemas Comunes
 
 ### Error: "PyInstaller not found"
 **Solución**: Instala PyInstaller manualmente
@@ -189,7 +196,7 @@ signtool sign /f certificado.pfx /p password /t http://timestamp.digicert.com di
 - Certificado de firma de código (.pfx)
 - Windows SDK instalado
 
-## 📝 Notas Importantes
+## Notas Importantes
 
 1. **Base de Datos**: No incluir `gesmonth.db` en el ejecutable
    - La BD se crea automáticamente en la primera ejecución
@@ -210,7 +217,7 @@ signtool sign /f certificado.pfx /p password /t http://timestamp.digicert.com di
    - Linux: Ubuntu 18.04+, Debian 10+, Fedora 30+
    - Mac: macOS 10.14+
 
-## 🎯 Checklist de Distribución
+## Checklist de Distribución
 
 - [ ] Compilación exitosa sin errores
 - [ ] Ejecutable probado en máquina limpia
@@ -231,4 +238,4 @@ Si encuentras problemas durante la compilación:
 
 ---
 
-**GesMonth v1.0.0** - Sistema de Gestión de Pagos Mensuales
+**GesMonth v1.0.1** - Sistema de Gestión de Pagos Mensuales

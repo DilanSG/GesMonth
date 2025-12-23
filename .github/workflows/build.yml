@@ -1,0 +1,114 @@
+name: Build Releases
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --clean --noconfirm gesmonth.spec
+      
+      - name: Create distribution package
+        run: |
+          ./package.bat
+        shell: cmd
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: GesMonth-v*-Windows.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --clean --noconfirm gesmonth.spec
+      
+      - name: Create distribution package
+        run: |
+          chmod +x package.sh
+          ./package.sh
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-build
+          path: GesMonth-v*-Linux.tar.gz
+
+  create-release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download Windows build
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-build
+      
+      - name: Download Linux build
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-build
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            GesMonth-*.zip
+            GesMonth-*.tar.gz
+          body: |
+            ## GesMonth ${{ github.ref_name }}
+            
+            Sistema profesional de gestión de pagos y cuotas mensuales.
+            
+            ### Descargas
+            - **Windows**: `GesMonth-${{ github.ref_name }}-Windows.zip`
+            - **Linux**: `GesMonth-${{ github.ref_name }}-Linux.tar.gz`
+            
+            ### Instalación
+            
+            **Windows:**
+            1. Descarga y descomprime el archivo ZIP
+            2. Entra a la carpeta GesMonth/
+            3. Ejecuta GesMonth.exe
+            
+            **Linux:**
+            1. Descarga y descomprime el archivo tar.gz
+            2. Entra a la carpeta GesMonth/
+            3. Ejecuta ./GesMonth
+            
+            Ver README.txt incluido en el paquete para más información.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

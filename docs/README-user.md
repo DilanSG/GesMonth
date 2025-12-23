@@ -499,7 +499,7 @@ Actualmente solo en español. Cambiar el idioma requiere modificar el código fu
 
 ## Contacto y soporte
 - Desarrollador: Dilan Acuña
-- Versión: 1.0.0
+- Versión: 1.0.1
 - Última actualización: Diciembre 2025
 
 ---
