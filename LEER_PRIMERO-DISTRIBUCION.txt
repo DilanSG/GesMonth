@@ -101,7 +101,7 @@ SOPORTE Y CONTACTO
 
 Desarrollado por: Dilan Acuña
 Versión: 1.0.1
-Fecha: Diciembre 2024
+Fecha: 23 Diciembre 2025
 Licencia: MIT
 
 Para reportar problemas o sugerencias, visita:
