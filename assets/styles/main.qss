@@ -1,0 +1,490 @@
+/* 
+   Estilos Glassmorphismo Profesionales para GesMonth
+   Diseño moderno con efectos de cristal y profundidad
+*/
+
+/* Estilos globales */
+QWidget {
+    font-family: 'Inter', 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+    font-size: 14px;
+    color: #e0e7ff;
+}
+
+QMainWindow {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #0f172a,
+        stop:0.5 #1e293b,
+        stop:1 #0f172a
+    );
+}
+
+/* Sidebar con efecto glassmorphismo */
+#sidebar {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(30, 41, 59, 0.95),
+        stop:1 rgba(15, 23, 42, 0.95)
+    );
+    border-right: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+#sidebarHeader {
+    font-size: 26px;
+    font-weight: 700;
+    color: #60a5fa;
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 rgba(59, 130, 246, 0.1),
+        stop:1 rgba(99, 102, 241, 0.1)
+    );
+    padding: 25px 20px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+/* Botones de navegación con efecto hover glassmorphismo */
+QPushButton#navButton {
+    background: transparent;
+    color: #cbd5e1;
+    border: none;
+    text-align: left;
+    padding: 16px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+    border-radius: 0px;
+}
+
+QPushButton#navButton:hover {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 rgba(59, 130, 246, 0.15),
+        stop:1 rgba(99, 102, 241, 0.15)
+    );
+    border-left: 3px solid #60a5fa;
+    color: #e0e7ff;
+}
+
+QPushButton#navButton[active="true"] {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 rgba(59, 130, 246, 0.2),
+        stop:1 rgba(99, 102, 241, 0.2)
+    );
+    border-left: 3px solid #60a5fa;
+    color: #60a5fa;
+    font-weight: bold;
+}
+
+/* Títulos de página con glassmorphismo */
+QLabel#pageTitle {
+    font-size: 32px;
+    font-weight: 700;
+    color: #e0e7ff;
+    padding-bottom: 10px;
+    padding-top: 5px;
+}
+
+/* Tarjetas de estadísticas con efecto cristal */
+QFrame#statCard {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(30, 41, 59, 0.6),
+        stop:1 rgba(15, 23, 42, 0.4)
+    );
+    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    padding: 5px;
+}
+
+QLabel#cardIcon {
+    font-size: 40px;
+    padding-right: 12px;
+    color: #60a5fa;
+}
+
+QLabel#cardTitle {
+    font-size: 13px;
+    color: #94a3b8;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+QLabel#cardValue {
+    font-size: 36px;
+    font-weight: 700;
+    color: #e0e7ff;
+    padding-top: 8px;
+}
+
+/* Botones principales con efecto glassmorphismo */
+QPushButton#primaryButton {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #3b82f6,
+        stop:1 #6366f1
+    );
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 12px 28px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+QPushButton#primaryButton:hover {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #2563eb,
+        stop:1 #4f46e5
+    );
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+QPushButton#primaryButton:pressed {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #1e40af,
+        stop:1 #4338ca
+    );
+}
+
+/* Botones secundarios con glassmorphismo */
+QPushButton#secondaryButton {
+    background: rgba(71, 85, 105, 0.5);
+    color: #e0e7ff;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+QPushButton#secondaryButton:hover {
+    background: rgba(71, 85, 105, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+}
+
+/* Botones de reportes con efecto cristal */
+QPushButton#reportButton {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(30, 41, 59, 0.6),
+        stop:1 rgba(15, 23, 42, 0.4)
+    );
+    color: #e0e7ff;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 18px 20px;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: left;
+}
+
+QPushButton#reportButton:hover {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 rgba(59, 130, 246, 0.3),
+        stop:1 rgba(99, 102, 241, 0.3)
+    );
+    border: 1px solid rgba(96, 165, 250, 0.5);
+    color: #60a5fa;
+}
+
+/* Campos de entrada con glassmorphismo */
+QLineEdit {
+    padding: 12px 16px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+    background: rgba(30, 41, 59, 0.4);
+    color: #e0e7ff;
+    font-size: 14px;
+    selection-background-color: rgba(59, 130, 246, 0.3);
+}
+
+QLineEdit:focus {
+    border: 1px solid #60a5fa;
+    background: rgba(30, 41, 59, 0.6);
+}
+
+QLineEdit:disabled {
+    background: rgba(30, 41, 59, 0.2);
+    color: #64748b;
+}
+
+QLineEdit::placeholder {
+    color: #64748b;
+}
+
+/* ComboBox con glassmorphismo */
+QComboBox {
+    padding: 12px 16px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+    background: rgba(30, 41, 59, 0.4);
+    color: #e0e7ff;
+    font-size: 14px;
+}
+
+QComboBox:focus {
+    border: 1px solid #60a5fa;
+    background: rgba(30, 41, 59, 0.6);
+}
+
+QComboBox::drop-down {
+    border: none;
+    padding-right: 15px;
+}
+
+QComboBox::down-arrow {
+    image: none;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #94a3b8;
+    margin-right: 10px;
+}
+
+QComboBox QAbstractItemView {
+    background: rgba(15, 23, 42, 0.95);
+    color: #e0e7ff;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 8px;
+    selection-background-color: rgba(59, 130, 246, 0.3);
+    padding: 5px;
+}
+
+/* DateEdit con glassmorphismo */
+QDateEdit {
+    padding: 12px 16px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+    background: rgba(30, 41, 59, 0.4);
+    color: #e0e7ff;
+    font-size: 14px;
+}
+
+QDateEdit:focus {
+    border: 1px solid #60a5fa;
+    background: rgba(30, 41, 59, 0.6);
+}
+
+QDateEdit::drop-down {
+    border: none;
+    padding-right: 15px;
+}
+
+QDateEdit::down-arrow {
+    image: none;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #94a3b8;
+    margin-right: 10px;
+}
+
+/* SpinBox con glassmorphismo */
+QDoubleSpinBox, QSpinBox {
+    padding: 12px 16px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+    background: rgba(30, 41, 59, 0.4);
+    color: #e0e7ff;
+    font-size: 14px;
+}
+
+QDoubleSpinBox:focus, QSpinBox:focus {
+    border: 1px solid #60a5fa;
+    background: rgba(30, 41, 59, 0.6);
+}
+
+/* Tablas con efecto glassmorphismo mejorado */
+QTableWidget {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(30, 41, 59, 0.5),
+        stop:1 rgba(15, 23, 42, 0.3)
+    );
+    alternate-background-color: rgba(15, 23, 42, 0.25);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 16px;
+    gridline-color: transparent;
+    color: #e0e7ff;
+    padding: 8px;
+}
+
+QTableWidget::item {
+    padding: 8px 12px;
+    border: none;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+}
+
+QTableWidget::item:hover {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+QTableWidget::item:selected {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 rgba(59, 130, 246, 0.35),
+        stop:1 rgba(99, 102, 241, 0.35)
+    );
+    color: white;
+    border-radius: 8px;
+}
+
+QHeaderView::section {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(30, 41, 59, 0.9),
+        stop:1 rgba(15, 23, 42, 0.9)
+    );
+    color: #94a3b8;
+    padding: 16px 12px;
+    border: none;
+    border-right: 1px solid rgba(148, 163, 184, 0.1);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+QHeaderView::section:horizontal {
+    border-right: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+/* ScrollBar con diseño minimalista */
+QScrollBar:vertical {
+    border: none;
+    background: rgba(30, 41, 59, 0.3);
+    width: 10px;
+    margin: 0px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgba(96, 165, 250, 0.5);
+    border-radius: 5px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: rgba(96, 165, 250, 0.7);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background: rgba(30, 41, 59, 0.3);
+    height: 10px;
+    margin: 0px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal {
+    background: rgba(96, 165, 250, 0.5);
+    border-radius: 5px;
+    min-width: 30px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: rgba(96, 165, 250, 0.7);
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+/* Diálogos con glassmorphismo */
+QDialog {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 rgba(15, 23, 42, 0.95),
+        stop:1 rgba(30, 41, 59, 0.95)
+    );
+    color: #e0e7ff;
+}
+
+QLabel#configLabel {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e0e7ff;
+}
+
+/* Labels generales */
+QLabel {
+    color: #cbd5e1;
+}
+
+/* MessageBox */
+QMessageBox {
+    background: rgba(15, 23, 42, 0.95);
+    color: #e0e7ff;
+}
+
+QMessageBox QPushButton {
+    min-width: 90px;
+    padding: 10px 20px;
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #3b82f6,
+        stop:1 #6366f1
+    );
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+QMessageBox QPushButton:hover {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #2563eb,
+        stop:1 #4f46e5
+    );
+}
+
+/* Tabs para ConfiguracionView */
+QTabWidget::pane {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 8px;
+    background: rgba(30, 41, 59, 0.4);
+}
+
+QTabBar::tab {
+    background: rgba(30, 41, 59, 0.4);
+    color: #94a3b8;
+    padding: 12px 24px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-bottom: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    margin-right: 2px;
+}
+
+QTabBar::tab:selected {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(59, 130, 246, 0.3),
+        stop:1 rgba(99, 102, 241, 0.3)
+    );
+    color: #60a5fa;
+    border-bottom: 2px solid #60a5fa;
+}
+
+QTabBar::tab:hover:!selected {
+    background: rgba(30, 41, 59, 0.6);
+    color: #cbd5e1;
+}
+
+/* Secciones de configuración */
+QFrame#configSection {
+    background: rgba(30, 41, 59, 0.3);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+}

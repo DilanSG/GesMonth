@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# PyInstaller
+*.spec.bak
+*.manifest
+*.spec~
+
+# Base de datos
+*.db
+*.db-journal
+backup_*.db
+respaldo_*.db
+gesmonth.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Reportes generados
+*.xlsx
+*.xls
+
+# Testing y desarrollo
+test.py
+*.log
+.pytest_cache/
+.coverage
