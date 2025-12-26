@@ -191,36 +191,39 @@ GesMonth/
         └── main.qss           # Estilos CSS (Glassmorphismo)
 ```
 
-## Historial de Versiones
+### Historial de Versiones
 
-### v2.1.0 - 26 de diciembre de 2025
-- **Licencia Source Available (SAL)**: Nueva licencia para uso personal/educativo
-- **Sistema de datos persistente**: Bases de datos en carpeta `.data/` junto al ejecutable
-- **Organización de scripts**: Todos los scripts en carpeta `scripts/` centralizada
-- **Versionado dinámico**: Plantillas con reemplazo automático de versión
-- **Persistencia de configuración**: Tema y pantalla completa se guardan entre sesiones
-- **Toggle switches modernos**: Controles animados reemplazan dropdowns tradicionales
-- **Splash screen inteligente**: Adaptación responsiva según modo de pantalla
-- **Mejoras de interfaz**: Login minimalista, iconografía SVG mejorada
-- **Sincronización de temas**: Integración completa entre componentes
+**v2.1.0 (26 dic 2025):**
+- Licencia Source Available (SAL)
+- Sistema de datos persistente (.data/)
+- Versionado dinámico
+- Persistencia de tema y pantalla completa
+- Toggle switches modernos
+- Splash screen inteligente
 
-### v2.0.0 - Noviembre 2025
-- **Sistema de autenticación**: Login seguro con bcrypt
-- **4 niveles de roles**: Superadmin, Admin, Operador, Solo Lectura
-- **Gestión de usuarios**: Panel exclusivo para superadmin
-- **Sistema de auditoría**: Registro completo de acciones
-- **Protección anti-fuerza bruta**: Bloqueo tras intentos fallidos
-- **Sesiones seguras**: Tokens únicos y expiración automática
+**v2.0.0 (25 dic 2024):**
+- Sistema de autenticación (bcrypt)
+- 4 roles de usuario
+- Gestión de usuarios y auditoría
+- Protección anti-fuerza bruta
+- Sistema de temas claro/oscuro
 
-### v1.0.1 - Octubre 2025
-- **Dashboard con métricas**: Visualización de estadísticas clave
-- **Gestión de clientes**: CRUD completo con validaciones
-- **Control de cuotas**: Grid visual con estados avanzados
-- **Sistema de pagos**: Registro con prevención de duplicados
-- **Reportes**: Filtrado por período y método de pago
-- **Configuración**: Panel de ajustes y mantenimiento
-- **Base de datos optimizada**: Índices y consultas preparadas
-- **Interfaz glassmorphism**: Tema oscuro moderno
+**v1.0.1 (23 dic 2024):**
+- Ejecutable standalone con PyInstaller
+- Scripts de compilación y empaquetado
+- Optimización de assets y rutas
+- GitHub Actions para builds automáticos
+
+**v1.0.0 (23 dic 2024):**
+- Release inicial
+- Dashboard con métricas clave
+- Gestión completa de clientes (CRUD)
+- Control de cuotas mensuales
+- Registro de pagos
+- Reportes y estadísticas
+- Interfaz glassmorphism
+
+---
 
 ## Instalación
 
