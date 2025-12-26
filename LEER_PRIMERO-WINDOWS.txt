@@ -1,5 +1,5 @@
 ╔═══════════════════════════════════════════════════════════════════╗
-║                        GESMONTH v1.0.1                            ║
+║                        GESMONTH v{{VERSION}}                      ║
 ║          Sistema de Gestión de Pagos Mensuales                    ║
 ╚═══════════════════════════════════════════════════════════════════╝
 
@@ -21,7 +21,7 @@ INSTALACIÓN RÁPIDA
 CONTENIDO DEL PAQUETE
 ═══════════════════════════════════════════════════════════════════
 
-GesMonth-v1.0.0-Windows/
+GesMonth-v{{VERSION}}-Windows/
 ├── GesMonth/
 │   ├── GesMonth.exe          # Ejecutable principal
 │   ├── assets/               # Recursos (estilos, iconos)
@@ -105,14 +105,18 @@ CARACTERÍSTICAS PRINCIPALES
 UBICACIÓN DE LA BASE DE DATOS
 ═══════════════════════════════════════════════════════════════════
 
-La base de datos (gesmonth.db) se crea automáticamente en la misma
-carpeta donde está GesMonth.exe.
+La base de datos (gesmonth.db) se crea automáticamente en la 
+carpeta .data .
 
 Para hacer respaldo:
   • Copia el archivo gesmonth.db a otro lugar seguro
 
 Para restaurar:
   • Reemplaza gesmonth.db con tu copia de respaldo
+
+
+Esta accion también se puede hacer con los usuarios, si quieres 
+conservar los datos de usuarios guarda la carpeta .data completa
 
 ═══════════════════════════════════════════════════════════════════
 DESINSTALACIÓN
@@ -122,22 +126,22 @@ GesMonth no modifica el registro de Windows ni instala archivos
 en otras ubicaciones. Para desinstalarlo:
 
 1. Cierra la aplicación si está abierta
-2. Elimina la carpeta completa GesMonth-v1.0.0-Windows/
+2. Elimina la carpeta completa GesMonth-v{{VERSION}}-Windows/
 
 Si quieres conservar tus datos:
-  • Guarda el archivo gesmonth.db antes de eliminar la carpeta
+  • Guarda la carpeta .data antes de eliminar la carpeta
 
 ═══════════════════════════════════════════════════════════════════
 SOPORTE Y CONTACTO
 ═══════════════════════════════════════════════════════════════════
 
 Desarrollado por: Dilan Acuña
-Versión: 1.0.1
-Fecha:23 Diciembre 2025
-Licencia: MIT
+Versión: {{VERSION}}
+Fecha: Diciembre 2025
+Licencia: Source Available License (SAL)
 
 Para reportar problemas o sugerencias, visita:
-https://github.com/DilanSG/GesMonth
+https://github.com/DIlanSG/GesMonth
 
 ═══════════════════════════════════════════════════════════════════
 

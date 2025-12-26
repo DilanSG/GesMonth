@@ -1,5 +1,5 @@
 ╔═══════════════════════════════════════════════════════════════════╗
-║                        GESMONTH v1.0.1                            ║
+║                        GESMONTH v{{VERSION}}                      ║
 ║          Sistema de Gestión de Pagos Mensuales                    ║
 ╚═══════════════════════════════════════════════════════════════════╝
 
@@ -9,7 +9,7 @@
 CONTENIDO DEL PAQUETE
 ═══════════════════════════════════════════════════════════════════
 
-GesMonth-v1.0.0-Linux/
+GesMonth-v{{VERSION}}-Linux/
 ├── GesMonth/
 │   ├── GesMonth              # Ejecutable principal
 │   ├── assets/               # Recursos (estilos, iconos)
@@ -100,9 +100,9 @@ SOPORTE Y CONTACTO
 ═══════════════════════════════════════════════════════════════════
 
 Desarrollado por: Dilan Acuña
-Versión: 1.0.1
-Fecha: 23 Diciembre 2025
-Licencia: MIT
+Versión: {{VERSION}}
+Fecha: Diciembre 2025
+Licencia: Source Available License (SAL)
 
 Para reportar problemas o sugerencias, visita:
 https://github.com/DIlanSG/GesMonth
