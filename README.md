@@ -199,6 +199,7 @@ Compatibilidad Mejorada con Windows
 - Compatible con todos los codepages de Windows (CP-1252, CP-1250, etc.)
 - Funcionamiento garantizado independientemente del idioma del sistema
 - Gestión robusta de archivos SVG y recursos
+
 **v2.1.0 (26 dic 2025):**
 - Licencia Source Available (SAL)
 - Sistema de datos persistente (.data/)
