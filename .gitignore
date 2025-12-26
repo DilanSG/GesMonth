@@ -42,3 +42,5 @@ test.py
 *.log
 .pytest_cache/
 .coverage
+GesMonth-v*.tar.gz
+GesMonth-v*.zip

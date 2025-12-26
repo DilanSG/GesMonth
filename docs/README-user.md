@@ -1,53 +1,618 @@
-# GesMonth - Manual de Usuario Completo
+# GesMonth v2.1.0 - Manual de Usuario
 
-## Índice
-1. [Descripción general](#descripción-general)
-2. [Instalación y requisitos](#instalación-y-requisitos)
-3. [Primeros pasos](#primeros-pasos)
-4. [Guía de pantallas](#guía-de-pantallas)
-5. [Casos de uso detallados](#casos-de-uso-detallados)
-6. [Solución de problemas](#solución-de-problemas)
-7. [Mantenimiento y respaldos](#mantenimiento-y-respaldos)
-8. [Preguntas frecuentes](#preguntas-frecuentes)
+## Tabla de Contenidos
+
+1. [Introducción](#introducción)
+2. [Primeros Pasos](#primeros-pasos)
+3. [Sistema de Autenticación](#sistema-de-autenticación)
+4. [Navegación](#navegación)
+5. [Dashboard](#dashboard)
+6. [Gestión de Clientes](#gestión-de-clientes)
+7. [Control de Cuotas](#control-de-cuotas)
+8. [Registro de Pagos](#registro-de-pagos)
+9. [Reportes](#reportes)
+10. [Configuración](#configuración)
+11. [Gestión de Usuarios](#gestión-de-usuarios)
+12. [Solución de Problemas](#solución-de-problemas)
+13. [Preguntas Frecuentes](#preguntas-frecuentes)
 
 ---
 
-## Descripción general
+## Introducción
 
 ### ¿Qué es GesMonth?
-GesMonth es una aplicación de escritorio profesional diseñada para gestionar clientes, pagos mensuales y control de cuotas. Es ideal para pequeños negocios, academias, gimnasios o cualquier negocio con membresías o pagos recurrentes.
 
-### Características principales
-- **Gestión de clientes**: Registra información completa (nombre, documento, teléfono, cuota mensual)
-- **Control de pagos**: Registra pagos con fecha, mes y método de pago
-- **Seguimiento de cuotas**: Visualización mensual por año del estado de cada cliente (pagado/impago/pendiente)
-- **Reportes Excel**: Exporta listas de clientes, historial de pagos y clientes en mora
-- **Dashboard intuitivo**: Vista rápida de estadísticas clave del mes actual
-- **Respaldos automáticos**: Crea copias de seguridad de tu base de datos
-- **Búsqueda rápida**: Encuentra clientes por nombre o documento al instante
+GesMonth es un sistema profesional de escritorio para la gestión de pagos y cuotas mensuales. Diseñado específicamente para pequeños negocios, academias, centros de formación, gimnasios y cualquier organización que maneje cobros recurrentes.
+
+### Características Principales
+
+- **Sistema de autenticación multi-nivel**: 4 roles de usuario con permisos específicos
+- **Dashboard inteligente**: Métricas en tiempo real del estado del negocio
+- **Gestión completa de clientes**: Alta, baja, modificación y búsqueda avanzada
+- **Control visual de cuotas**: Grid mensual con estados (Pagado, Impago, Con Deuda, Pendiente)
+- **Seguimiento de mora**: Control automático de fechas de inicio de mora
+- **Pagos parciales**: Soporte para abonos y deudas acumuladas
+- **Reportes detallados**: Estadísticas por período y método de pago
+- **Temas personalizables**: Modo claro y oscuro con persistencia
+- **Respaldos seguros**: Exportación manual de base de datos
+- **Datos locales**: Sin internet, máxima privacidad
 
 ### Ventajas
-- **Datos locales**: No depende de internet; toda la información está en tu computadora
-- **Privacidad**: Tus datos nunca salen de tu equipo
-- **Rápido y ligero**: Interfaz fluida sin latencia
-- **Multiplataforma**: Funciona en Windows, Linux y Mac
+
+- **Privacidad total**: Todos los datos permanecen en tu equipo
+- **Sin dependencias**: No requiere internet ni servidores externos
+- **Multiplataforma**: Windows, Linux y macOS
+- **Interfaz moderna**: Diseño glassmorphism profesional
+- **Rápido y eficiente**: Sin latencia de red
+- **Seguro**: Contraseñas encriptadas con bcrypt
 
 ---
 
-## Instalación y requisitos
+## Primeros Pasos
 
-### Requisitos del sistema
-- **Sistema operativo**: Windows 10+, Linux (Ubuntu 20.04+, Fedora 35+), macOS 11+
-- **Python**: Versión 3.11 o superior
-- **RAM**: Mínimo 2 GB (recomendado 4 GB)
-- **Espacio en disco**: 100 MB para la aplicación + espacio para la base de datos (crece según uso)
-- **Resolución**: Mínimo 1280x720 píxeles
+### Requisitos del Sistema
 
-### Instalación paso a paso
+**Mínimos:**
+- Sistema operativo: Windows 10+, Linux (Ubuntu 20.04+), macOS 11+
+- RAM: 2 GB
+- Espacio en disco: 200 MB
+- Resolución: 1024x768 píxeles
 
-#### En Linux/Mac:
-```bash
-# 1. Asegúrate de tener Python 3.11+
+**Recomendados:**
+- RAM: 4 GB o más
+- Resolución: 1920x1080 píxeles o superior
+
+### Instalación
+
+#### Windows
+
+1. Descargar `GesMonth-v2.1.0-Windows.zip`
+2. Descomprimir el archivo
+3. Abrir la carpeta `GesMonth/`
+4. Ejecutar `GesMonth.exe`
+
+#### Linux
+
+1. Descargar `GesMonth-v2.1.0-Linux.tar.gz`
+2. Abrir terminal y ejecutar:
+   ```bash
+   tar -xzf GesMonth-v2.1.0-Linux.tar.gz
+   cd GesMonth-v2.1.0-Linux/GesMonth
+   ./GesMonth
+   ```
+
+### Primera Ejecución
+
+Al ejecutar GesMonth por primera vez:
+
+1. Se mostrará un **splash screen** durante la carga
+2. Aparecerá la **pantalla de login**
+3. Usa las credenciales por defecto:
+   ```
+   Usuario: admin
+   Contraseña: admin123
+   ```
+4. **IMPORTANTE**: Cambia la contraseña inmediatamente después del primer acceso
+
+La aplicación creará automáticamente dos bases de datos en la carpeta `.data/`:
+- `gesmonth.db`: Datos del negocio (clientes, cuotas, pagos)
+- `users.db`: Usuarios y sesiones
+
+---
+
+## Sistema de Autenticación
+
+### Niveles de Acceso
+
+GesMonth implementa 4 niveles de roles con permisos diferenciados:
+
+#### 1. Superadmin
+- **Acceso completo** a todas las funciones
+- Puede **gestionar usuarios** (crear, editar, eliminar)
+- Acceso a **auditoría del sistema**
+- Única persona que puede cambiar roles
+- Por defecto: usuario `admin`
+
+#### 2. Admin
+- Acceso completo a gestión de negocio
+- Puede gestionar clientes, cuotas y pagos
+- Acceso a reportes y configuración
+- **NO** puede gestionar usuarios
+
+#### 3. Operador
+- Puede ver y registrar pagos
+- Puede buscar y ver información de clientes
+- **NO** puede eliminar registros
+- **NO** puede acceder a configuración avanzada
+
+#### 4. Solo Lectura
+- Solo puede **consultar** información
+- Ver dashboard, clientes y reportes
+- **NO** puede modificar ni registrar datos
+- Ideal para supervisores o contadores
+
+### Cambio de Contraseña
+
+Para cambiar tu contraseña:
+
+1. Ir a **Configuración**
+2. Sección **"Usuario"** (aparece tu nombre)
+3. Click en **"Cambiar Contraseña"**
+4. Ingresar contraseña actual
+5. Ingresar nueva contraseña (2 veces)
+6. Confirmar
+
+**Requisitos de contraseña:**
+- Mínimo 6 caracteres
+- Se recomienda usar mayúsculas, minúsculas y números
+
+### Seguridad
+
+- **Encriptación bcrypt**: Las contraseñas nunca se guardan en texto plano
+- **Bloqueo automático**: Tras 5 intentos fallidos, la cuenta se bloquea por 15 minutos
+- **Sesiones seguras**: Tokens únicos por sesión
+- **Auditoría**: Todas las acciones importantes quedan registradas
+
+---
+
+## Navegación
+
+### Barra Lateral (Sidebar)
+
+La navegación principal se encuentra en el lado izquierdo de la ventana:
+
+1. **Home** (Dashboard): Vista general del negocio
+2. **Clientes**: Gestión de clientes
+3. **Cuotas**: Control mensual de pagos
+4. **Reportes**: Estadísticas y análisis
+5. **Configuración**: Ajustes del sistema
+
+### Header
+
+En la parte superior encontrarás:
+- **Nombre de usuario** actual
+- **Fecha y hora** en tiempo real
+- **Botón de logout** (cerrar sesión)
+- **Botón de apagado** (salir de la aplicación)
+
+### Atajos de Teclado
+
+- **Esc**: Cerrar diálogos o cancelar acciones
+- **Enter**: Confirmar en formularios
+- **Ctrl+F**: Enfocar campo de búsqueda (donde aplique)
+
+---
+
+## Dashboard
+
+El Dashboard muestra métricas clave del estado actual del negocio.
+
+### Tarjetas de Información
+
+**Total Clientes:**
+- Cantidad de clientes activos en el sistema
+- No incluye clientes inactivos
+
+**Clientes en Mora:**
+- Clientes con último mes registrado como "Impago"
+- Color rojo indica alerta
+
+**Clientes al Día:**
+- Clientes con pagos al corriente
+- Color verde indica estado positivo
+
+**Total Recaudado (Mes Actual):**
+- Suma de todos los pagos del mes en curso
+- Se actualiza en tiempo real
+- Formato de moneda local
+
+**Total Recaudado (Año):**
+- Suma de todos los pagos del año en curso
+- Permite visualizar tendencia anual
+
+### Actualización de Datos
+
+El Dashboard se actualiza automáticamente al:
+- Abrir la vista
+- Registrar un nuevo pago
+- Cambiar estado de una cuota
+- Activar/desactivar clientes
+
+---
+
+## Gestión de Clientes
+
+### Agregar Nuevo Cliente
+
+1. Click en **"Agregar Cliente"**
+2. Completar el formulario:
+   - **Nombre**: Nombre completo
+   - **Documento**: DNI, RUT, CC (único por cliente)
+   - **Teléfono**: Número de contacto (opcional)
+   - **Valor Cuota**: Monto mensual a cobrar
+   - **Día de Cobro**: Día del mes (1-31)
+3. Click en **"Guardar"**
+
+**Validaciones:**
+- El documento debe ser único (no duplicados)
+- El valor de cuota debe ser mayor a 0
+- El día de cobro debe estar entre 1 y 31
+
+### Buscar Clientes
+
+El campo de búsqueda en la parte superior permite filtrar por:
+- Nombre (coincidencia parcial)
+- Documento (coincidencia exacta)
+
+La búsqueda es **instantánea** conforme escribes.
+
+### Editar Cliente
+
+1. Seleccionar cliente de la lista
+2. Click en **"Editar"**
+3. Modificar los campos necesarios
+4. **Guardar cambios**
+
+**Nota**: El documento no se puede cambiar una vez creado el cliente.
+
+### Desactivar Cliente
+
+En lugar de eliminar, se recomienda **desactivar**:
+
+1. Seleccionar cliente
+2. Click en **"Desactivar"**
+3. El cliente desaparece de las vistas activas
+4. Sus datos históricos se conservan
+
+Para reactivar: Filtrar por "Inactivos" y click en "Activar"
+
+### Eliminar Cliente
+
+**Advertencia**: Esta acción es irreversible y elimina:
+- Datos del cliente
+- Todas sus cuotas registradas
+- Todo su historial de pagos
+
+Solo usar en casos excepcionales.
+
+---
+
+## Control de Cuotas
+
+La vista de Cuotas muestra un grid visual organizado por año y mes.
+
+### Grid de Meses
+
+Cada cliente tiene 12 casillas por año, una por mes:
+
+- **Verde (Pago)**: Cuota completamente pagada
+- **Rojo (Impago)**: Sin pago registrado, genera mora
+- **Amarillo (Con Deuda)**: Pago parcial o deuda heredada
+- **Gris (Pendiente)**: Mes aún no vencido
+
+### Seleccionar Año
+
+En la parte superior, dropdown para seleccionar el año a visualizar.
+Los años disponibles se configuran en **Configuración > Años de Facturación**.
+
+### Registrar Pago
+
+1. Click en el **mes** del cliente
+2. Seleccionar **"Registrar Pago"**
+3. Completar:
+   - **Monto**: Cantidad pagada
+   - **Método de pago**: Efectivo, Transferencia, etc.
+   - **Fecha**: Por defecto es hoy
+4. **Guardar**
+
+**Comportamiento:**
+- Si el monto cubre la cuota completa: Estado → "Pago"
+- Si el monto es menor: Estado → "Con Deuda"
+- La deuda acumulada se calcula automáticamente
+
+### Marcar Impago
+
+1. Click en el **mes** del cliente
+2. Seleccionar **"Marcar como Impago"**
+3. Confirmar
+
+**Efecto:**
+- Estado cambia a "Impago"
+- Se registra fecha de inicio de mora
+- El cliente aparece en "Clientes en Mora" del Dashboard
+
+### Pago Parcial
+
+Si un cliente paga menos del monto total:
+
+1. Registrar el pago con el monto real
+2. El sistema calcula la deuda: `Valor Cuota - Monto Pagado`
+3. La deuda se **acumula** al siguiente mes
+
+**Ejemplo:**
+- Cuota: $100
+- Pago: $60
+- Deuda: $40
+- Siguiente mes: $100 + $40 = $140 total a pagar
+
+### Ver Detalles
+
+Click en cualquier mes para ver el dialog de detalles:
+- Historial de pagos del mes
+- Deuda acumulada
+- Fecha de mora (si aplica)
+- Botones de acción rápida
+
+---
+
+## Registro de Pagos
+
+### Vista de Pagos
+
+Muestra el historial completo de pagos registrados:
+- Fecha de pago
+- Cliente
+- Mes correspondiente
+- Monto
+- Método de pago
+
+### Filtros
+
+- **Por cliente**: Buscar por nombre
+- **Por mes**: Filtrar por período (YYYY-MM)
+- **Por método**: Solo pagos de un método específico
+
+### Prevención de Duplicados
+
+El sistema automáticamente previene registrar el mismo pago dos veces:
+- Ventana de 5 segundos entre pagos del mismo cliente
+- Alerta visual si se detecta duplicación potencial
+
+### Eliminar Pago
+
+Solo superadmin y admin pueden eliminar pagos.
+
+**Precaución**: Al eliminar un pago:
+- Se recalcula el estado de la cuota
+- Se actualiza la deuda acumulada
+- Puede afectar meses posteriores si había deuda
+
+---
+
+## Reportes
+
+### Estadísticas Generales
+
+Seleccionar **Año** y **Mes** para ver:
+
+**Métricas de Cuotas:**
+- Total cuotas registradas
+- Cantidad pagadas
+- Cantidad sin pagar (impagos)
+- Cantidad con deuda parcial
+
+**Por Método de Pago:**
+- Desglose de montos por cada método
+- Total recaudado por método
+- Porcentaje de uso
+
+### Exportación (Próximamente)
+
+En versiones futuras se podrá exportar a Excel:
+- Lista de clientes
+- Historial de pagos
+- Clientes en mora
+- Reportes personalizados
+
+---
+
+## Configuración
+
+### Métodos de Pago
+
+Administra los métodos disponibles para registrar pagos:
+
+**Agregar método:**
+1. Ingresar nombre (ej: "Tarjeta de Crédito")
+2. Click en "Agregar"
+
+**Editar método:**
+1. Seleccionar de la lista
+2. Cambiar nombre
+3. Guardar
+
+**Desactivar método:**
+- Los métodos no se eliminan, se desactivan
+- Esto preserva el historial de pagos anteriores
+
+### Años de Facturación
+
+Define qué años aparecen en el Control de Cuotas:
+
+- Por defecto: Año actual
+- Agregar años anteriores o futuros según necesidad
+- Los años se muestran en orden descendente
+
+### Temas
+
+Cambiar entre modo claro y oscuro:
+
+1. Toggle en **"Tema Oscuro"**
+2. El cambio es instantáneo
+3. La preferencia se guarda para próximas sesiones
+
+### Pantalla Completa
+
+Activar/desactivar modo pantalla completa:
+- Útil para maximizar espacio de trabajo
+- La preferencia se guarda automáticamente
+
+### Mantenimiento
+
+**Respaldar Base de Datos:**
+1. Click en "Respaldar Base de Datos"
+2. Seleccionar ubicación
+3. Se crea archivo `.db` con fecha y hora
+
+**Recomendación**: Hacer respaldos semanales o antes de cambios importantes.
+
+**Limpiar Pagos Duplicados:**
+- Busca y elimina pagos duplicados automáticamente
+- Útil si se detectan inconsistencias
+
+### Reiniciar Aplicación
+
+Cierra y reabre GesMonth (útil tras cambios de configuración importantes).
+
+---
+
+## Gestión de Usuarios
+
+**Solo disponible para Superadmin**
+
+### Crear Usuario
+
+1. Ir a **Configuración > Gestión de Usuarios**
+2. Click en **"Agregar Usuario"**
+3. Completar:
+   - Nombre de usuario (único)
+   - Contraseña
+   - Rol (Superadmin, Admin, Operador, Solo Lectura)
+4. Guardar
+
+### Editar Usuario
+
+- Cambiar rol
+- Resetear contraseña
+- Activar/desactivar
+
+### Auditoría
+
+Ver registro completo de acciones:
+- Usuario que realizó la acción
+- Fecha y hora
+- Tabla afectada
+- Detalles de la operación
+
+Útil para:
+- Rastrear cambios importantes
+- Resolver discrepancias
+- Seguridad y control
+
+---
+
+## Solución de Problemas
+
+### La aplicación no inicia
+
+**Windows:**
+- Verificar que todas las carpetas estén presentes: `GesMonth.exe`, `assets/`, `_internal/`, `.data/`
+- Ejecutar desde cmd para ver errores
+- Revisar antivirus (puede bloquear ejecutables desconocidos)
+
+**Linux:**
+- Dar permisos de ejecución: `chmod +x GesMonth`
+- Instalar dependencias Qt6: `sudo apt install qt6-base-dev`
+- Ejecutar desde terminal para ver mensajes de error
+
+### No se ven los estilos
+
+- Verificar que la carpeta `assets/` esté junto al ejecutable
+- No mover archivos fuera de su ubicación original
+- Reinstalar si el problema persiste
+
+### Error al guardar datos
+
+- Verificar permisos de escritura en la carpeta `.data/`
+- Asegurar espacio en disco disponible
+- Si el problema continúa, restaurar desde un respaldo
+
+### Olvidé mi contraseña
+
+**Si eres superadmin:**
+- Solo otro superadmin puede resetear tu contraseña
+- Si eres el único superadmin, contactar soporte técnico
+
+**Si no eres superadmin:**
+- Solicitar al superadmin que resetee tu contraseña
+
+### Datos inconsistentes
+
+1. Ir a **Configuración > Mantenimiento**
+2. Ejecutar **"Limpiar Pagos Duplicados"**
+3. Hacer **respaldo** de la base de datos
+4. Si persiste, restaurar desde respaldo anterior
+
+### Actualización de versión
+
+Al actualizar GesMonth:
+1. **Hacer respaldo** de `.data/gesmonth.db` y `.data/users.db`
+2. Descomprimir nueva versión
+3. Copiar archivos `.data/` de la versión anterior
+4. Ejecutar nueva versión
+
+---
+
+## Preguntas Frecuentes
+
+**¿Necesito internet para usar GesMonth?**
+- No. GesMonth funciona completamente offline.
+
+**¿Dónde se guardan mis datos?**
+- En la carpeta `.data/` junto al ejecutable, en archivos SQLite.
+
+**¿Puedo usar GesMonth en varios equipos?**
+- Sí, pero deberás copiar manualmente la carpeta `.data/` entre equipos.
+- No hay sincronización automática.
+
+**¿Cuántos clientes puedo registrar?**
+- Prácticamente ilimitado. SQLite soporta millones de registros.
+
+**¿Puedo exportar mis datos?**
+- Sí, haciendo respaldo de las bases de datos (archivos `.db`)
+- Exportación a Excel próximamente
+
+**¿Es seguro?**
+- Sí. Contraseñas encriptadas, datos locales, sin conexión a internet.
+
+**¿Cómo actualizo la aplicación?**
+- Descargar nueva versión, copiar archivos `.data/` a la nueva instalación.
+
+**¿Puedo cambiar los colores o el tema?**
+- Los archivos QSS en `assets/styles/` se pueden editar manualmente.
+- Requiere conocimientos de CSS.
+
+**¿Hay versión móvil?**
+- No. GesMonth está diseñado para escritorio.
+
+**¿Puedo generar facturas?**
+- Actualmente no. Está en el roadmap de futuras versiones.
+
+---
+
+## Soporte y Contacto
+
+**Documentación adicional:**
+- [Guía de Desarrollo](DESARROLLO.md)
+- [Sistema de Autenticación](SISTEMA-AUTENTICACION.md)
+- [Compilación](BUILD.md)
+
+**Reportar problemas:**
+- GitHub Issues: https://github.com/DIlanSG/GesMonth/issues
+- Email: dilansg@gesmonth.com
+
+**Antes de reportar:**
+- Verificar que estás usando la última versión
+- Revisar esta guía y la sección de solución de problemas
+- Incluir capturas de pantalla y pasos para reproducir el error
+
+---
+
+**GesMonth v2.1.0** - Sistema de Gestión de Pagos Mensuales
+
+Desarrollado por Dilan Acuña | Licencia: Source Available (SAL)
+
+Última actualización: 26 de diciembre de 2025
 python3 --version
 
 # 2. Ve a la carpeta del proyecto

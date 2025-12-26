@@ -48,6 +48,45 @@ class ConfigController:
         self.db.get_connection().commit()
         return anos_formatted
 
+    def get_theme(self) -> str:
+        """Obtiene el tema actual ('dark' o 'light')"""
+        try:
+            cursor = self.db.get_connection().cursor()
+            cursor.execute("SELECT valor FROM configuracion WHERE clave = 'theme'")
+            row = cursor.fetchone()
+            if row and row["valor"] in ["dark", "light"]:
+                return row["valor"]
+        except Exception:
+            pass
+        return "dark"  # Por defecto modo oscuro
+
+    def set_theme(self, theme: str) -> bool:
+        """
+        Establece el tema de la aplicación
+        
+        Args:
+            theme: 'dark' o 'light'
+            
+        Returns:
+            True si se guardó correctamente
+        """
+        if theme not in ["dark", "light"]:
+            return False
+
+        try:
+            cursor = self.db.get_connection().cursor()
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO configuracion (clave, valor)
+                VALUES ('theme', ?)
+                """,
+                (theme,),
+            )
+            self.db.get_connection().commit()
+            return True
+        except Exception:
+            return False
+
     def create_backup(self, destination_path: str | None = None) -> str:
         """Crea un respaldo de la base de datos.
         Si destination_path es None, se guarda junto al archivo original.
@@ -62,3 +101,39 @@ class ConfigController:
 
         shutil.copy2(db_path, backup_path)
         return backup_path
+
+    def get_fullscreen(self) -> bool:
+        """Obtiene la configuración de pantalla completa"""
+        try:
+            cursor = self.db.get_connection().cursor()
+            cursor.execute("SELECT valor FROM configuracion WHERE clave = 'fullscreen'")
+            row = cursor.fetchone()
+            if row and row["valor"] in ["true", "false"]:
+                return row["valor"] == "true"
+        except Exception:
+            pass
+        return False  # Por defecto NO en pantalla completa
+
+    def set_fullscreen(self, enabled: bool) -> bool:
+        """
+        Establece la configuración de pantalla completa
+        
+        Args:
+            enabled: True para activar pantalla completa, False para desactivar
+            
+        Returns:
+            True si se guardó correctamente
+        """
+        try:
+            cursor = self.db.get_connection().cursor()
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO configuracion (clave, valor)
+                VALUES ('fullscreen', ?)
+                """,
+                ("true" if enabled else "false",),
+            )
+            self.db.get_connection().commit()
+            return True
+        except Exception:
+            return False

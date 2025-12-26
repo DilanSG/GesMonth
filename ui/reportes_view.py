@@ -15,12 +15,277 @@ class ReportesView(QWidget):
         super().__init__()
         self.año_seleccionado = QDateTime.currentDateTime().date().year()
         self.mes_seleccionado = QDateTime.currentDateTime().date().month()
+        self.selector_frame = None
+        self.container_cuotas = None
+        self.container_metodos = None
         self._init_ui()
     
     def showEvent(self, event):
         """Se ejecuta cuando la vista se muestra"""
         super().showEvent(event)
+        self._actualizar_estilos_contenedores()
         self._actualizar_estadisticas()
+    
+    def _actualizar_estilos_contenedores(self):
+        """Actualiza los estilos de todos los contenedores según el tema actual"""
+        # Detectar tema actual
+        main_window = self.window()
+        is_dark = True
+        if hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
+        
+        # Actualizar selector de fecha
+        if self.selector_frame:
+            if is_dark:
+                self.selector_frame.setStyleSheet("""
+                    QFrame {
+                        background: rgba(30, 41, 59, 0.5);
+                        border: 1px solid rgba(71, 85, 105, 0.5);
+                        border-radius: 12px;
+                    }
+                    QLabel {
+                        border: none;
+                        background: transparent;
+                    }
+                """)
+            else:
+                self.selector_frame.setStyleSheet("""
+                    QFrame {
+                        background: rgba(255, 255, 255, 0.95);
+                        border: 2px solid rgba(148, 163, 184, 0.3);
+                        border-radius: 12px;
+                    }
+                    QLabel {
+                        border: none;
+                        background: transparent;
+                    }
+                """)
+            
+            # Actualizar label "Período:"
+            labels = self.selector_frame.findChildren(QLabel)
+            if labels:
+                for label in labels:
+                    if is_dark:
+                        label.setStyleSheet("font-size: 14px; color: #94a3b8; font-weight: 500; border: none;")
+                    else:
+                        label.setStyleSheet("font-size: 14px; color: #1e293b; font-weight: 700; border: none;")
+            
+            # Actualizar ComboBox de mes
+            if hasattr(self, 'combo_mes') and self.combo_mes:
+                if is_dark:
+                    self.combo_mes.setStyleSheet("""
+                        QComboBox {
+                            background: rgba(71, 85, 105, 0.3);
+                            border: 1px solid rgba(71, 85, 105, 0.5);
+                            border-radius: 6px;
+                            padding: 8px 12px;
+                            color: #cbd5e1;
+                            font-size: 14px;
+                        }
+                        QComboBox:hover {
+                            background: rgba(71, 85, 105, 0.4);
+                        }
+                        QComboBox::drop-down {
+                            border: none;
+                        }
+                        QComboBox::down-arrow {
+                            image: none;
+                            border-left: 4px solid transparent;
+                            border-right: 4px solid transparent;
+                            border-top: 6px solid #cbd5e1;
+                            margin-right: 8px;
+                        }
+                    """)
+                else:
+                    self.combo_mes.setStyleSheet("""
+                        QComboBox {
+                            background: rgba(255, 255, 255, 0.9);
+                            border: 2px solid rgba(148, 163, 184, 0.4);
+                            border-radius: 6px;
+                            padding: 8px 12px;
+                            color: #0f172a;
+                            font-size: 14px;
+                            font-weight: 600;
+                        }
+                        QComboBox:hover {
+                            background: rgba(248, 250, 252, 1);
+                            border: 2px solid rgba(148, 163, 184, 0.6);
+                        }
+                        QComboBox::drop-down {
+                            border: none;
+                        }
+                        QComboBox::down-arrow {
+                            image: none;
+                            border-left: 4px solid transparent;
+                            border-right: 4px solid transparent;
+                            border-top: 6px solid #475569;
+                            margin-right: 8px;
+                        }
+                    """)
+            
+            # Actualizar ComboBox de año
+            if hasattr(self, 'combo_año') and self.combo_año:
+                if is_dark:
+                    self.combo_año.setStyleSheet("""
+                        QComboBox {
+                            background: rgba(71, 85, 105, 0.3);
+                            border: 1px solid rgba(71, 85, 105, 0.5);
+                            border-radius: 6px;
+                            padding: 8px 12px;
+                            color: #cbd5e1;
+                            font-size: 14px;
+                        }
+                        QComboBox:hover {
+                            background: rgba(71, 85, 105, 0.4);
+                        }
+                        QComboBox::drop-down {
+                            border: none;
+                        }
+                        QComboBox::down-arrow {
+                            image: none;
+                            border-left: 4px solid transparent;
+                            border-right: 4px solid transparent;
+                            border-top: 6px solid #cbd5e1;
+                            margin-right: 8px;
+                        }
+                    """)
+                else:
+                    self.combo_año.setStyleSheet("""
+                        QComboBox {
+                            background: rgba(255, 255, 255, 0.9);
+                            border: 2px solid rgba(148, 163, 184, 0.4);
+                            border-radius: 6px;
+                            padding: 8px 12px;
+                            color: #0f172a;
+                            font-size: 14px;
+                            font-weight: 600;
+                        }
+                        QComboBox:hover {
+                            background: rgba(248, 250, 252, 1);
+                            border: 2px solid rgba(148, 163, 184, 0.6);
+                        }
+                        QComboBox::drop-down {
+                            border: none;
+                        }
+                        QComboBox::down-arrow {
+                            image: none;
+                            border-left: 4px solid transparent;
+                            border-right: 4px solid transparent;
+                            border-top: 6px solid #475569;
+                            margin-right: 8px;
+                        }
+                    """)
+        
+        # Actualizar contenedor de cuotas
+        if self.container_cuotas:
+            if is_dark:
+                self.container_cuotas.setStyleSheet("""
+                    QFrame {
+                        background: rgba(30, 41, 59, 0.5);
+                        border: 1px solid rgba(71, 85, 105, 0.5);
+                        border-radius: 12px;
+                    }
+                    QLabel {
+                        border: none;
+                        background: transparent;
+                    }
+                """)
+            else:
+                self.container_cuotas.setStyleSheet("""
+                    QFrame {
+                        background: rgba(255, 255, 255, 0.95);
+                        border: 2px solid rgba(148, 163, 184, 0.3);
+                        border-radius: 12px;
+                    }
+                    QLabel {
+                        border: none;
+                        background: transparent;
+                    }
+                """)
+            
+            # Actualizar título de sección
+            section_labels = self.container_cuotas.findChildren(QLabel)
+            if section_labels:
+                title_label = section_labels[0]
+                if is_dark:
+                    title_label.setStyleSheet("font-size: 18px; font-weight: 700; color: #e0e7ff; border: none;")
+                else:
+                    title_label.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; border: none;")
+        
+        # Actualizar contenedor de métodos de pago
+        if self.container_metodos:
+            if is_dark:
+                self.container_metodos.setStyleSheet("""
+                    QFrame {
+                        background: rgba(30, 41, 59, 0.5);
+                        border: 1px solid rgba(71, 85, 105, 0.5);
+                        border-radius: 12px;
+                    }
+                    QLabel {
+                        border: none;
+                        background: transparent;
+                    }
+                """)
+            else:
+                self.container_metodos.setStyleSheet("""
+                    QFrame {
+                        background: rgba(255, 255, 255, 0.95);
+                        border: 2px solid rgba(148, 163, 184, 0.3);
+                        border-radius: 12px;
+                    }
+                    QLabel {
+                        border: none;
+                        background: transparent;
+                    }
+                """)
+            
+            # Actualizar título de sección
+            section_labels = self.container_metodos.findChildren(QLabel)
+            if section_labels:
+                title_label = section_labels[0]
+                if is_dark:
+                    title_label.setStyleSheet("font-size: 18px; font-weight: 700; color: #e0e7ff; border: none;")
+                else:
+                    title_label.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; border: none;")
+        
+        # Actualizar tarjetas de estadísticas
+        if hasattr(self, 'stat_total_cuotas') and self.stat_total_cuotas:
+            for stat_card in [self.stat_total_cuotas, self.stat_cuotas_pagadas, 
+                             self.stat_cuotas_impago, self.stat_cuotas_deuda]:
+                if stat_card:
+                    if is_dark:
+                        stat_card.setStyleSheet("""
+                            QFrame {
+                                background: rgba(30, 41, 59, 0.5);
+                                border: 1px solid rgba(71, 85, 105, 0.5);
+                                border-radius: 12px;
+                            }
+                            QLabel {
+                                border: none;
+                                background: transparent;
+                            }
+                        """)
+                    else:
+                        stat_card.setStyleSheet("""
+                            QFrame {
+                                background: rgba(255, 255, 255, 0.95);
+                                border: 2px solid rgba(148, 163, 184, 0.3);
+                                border-radius: 12px;
+                            }
+                            QLabel {
+                                border: none;
+                                background: transparent;
+                            }
+                        """)
+                    
+                    # Actualizar etiqueta de título dentro de la tarjeta
+                    labels = stat_card.findChildren(QLabel)
+                    if len(labels) >= 2:
+                        titulo_label = labels[0]
+                        if is_dark:
+                            titulo_label.setStyleSheet("font-size: 14px; color: #94a3b8; font-weight: 500; border: none;")
+                        else:
+                            titulo_label.setStyleSheet("font-size: 14px; color: #475569; font-weight: 600; border: none;")
     
     def _init_ui(self):
         """Inicializa la interfaz"""
@@ -78,26 +343,48 @@ class ReportesView(QWidget):
     
     def _crear_selectores_fecha(self, layout: QVBoxLayout):
         """Crea los selectores de mes y año"""
-        selector_frame = QFrame()
-        selector_frame.setStyleSheet("""
-            QFrame {
-                background: rgba(30, 41, 59, 0.5);
-                border: 1px solid rgba(71, 85, 105, 0.5);
-                border-radius: 12px;
-            }
-            QLabel {
-                border: none;
-                background: transparent;
-            }
-        """)
+        # Detectar tema actual
+        main_window = self.window()
+        is_dark = True
+        if hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
         
-        selector_layout = QHBoxLayout(selector_frame)
+        self.selector_frame = QFrame()
+        if is_dark:
+            self.selector_frame.setStyleSheet("""
+                QFrame {
+                    background: rgba(30, 41, 59, 0.5);
+                    border: 1px solid rgba(71, 85, 105, 0.5);
+                    border-radius: 12px;
+                }
+                QLabel {
+                    border: none;
+                    background: transparent;
+                }
+            """)
+        else:
+            self.selector_frame.setStyleSheet("""
+                QFrame {
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 2px solid rgba(148, 163, 184, 0.3);
+                    border-radius: 12px;
+                }
+                QLabel {
+                    border: none;
+                    background: transparent;
+                }
+            """)
+        
+        selector_layout = QHBoxLayout(self.selector_frame)
         selector_layout.setContentsMargins(25, 20, 25, 20)
         selector_layout.setSpacing(20)
         
         # Label
         label = QLabel("Período:")
-        label.setStyleSheet("font-size: 14px; color: #94a3b8; font-weight: 500; border: none;")
+        if is_dark:
+            label.setStyleSheet("font-size: 14px; color: #94a3b8; font-weight: 500; border: none;")
+        else:
+            label.setStyleSheet("font-size: 14px; color: #1e293b; font-weight: 700; border: none;")
         selector_layout.addWidget(label)
         
         # Selector de mes
@@ -111,29 +398,56 @@ class ReportesView(QWidget):
         # Seleccionar mes actual por defecto
         self.combo_mes.setCurrentIndex(self.mes_seleccionado)
         self.combo_mes.setMinimumWidth(180)
-        self.combo_mes.setStyleSheet("""
-            QComboBox {
-                background: rgba(71, 85, 105, 0.3);
-                border: 1px solid rgba(71, 85, 105, 0.5);
-                border-radius: 6px;
-                padding: 8px 12px;
-                color: #cbd5e1;
-                font-size: 14px;
-            }
-            QComboBox:hover {
-                background: rgba(71, 85, 105, 0.4);
-            }
-            QComboBox::drop-down {
-                border: none;
-            }
-            QComboBox::down-arrow {
-                image: none;
-                border-left: 4px solid transparent;
-                border-right: 4px solid transparent;
-                border-top: 6px solid #cbd5e1;
-                margin-right: 8px;
-            }
-        """)
+        if is_dark:
+            self.combo_mes.setStyleSheet("""
+                QComboBox {
+                    background: rgba(71, 85, 105, 0.3);
+                    border: 1px solid rgba(71, 85, 105, 0.5);
+                    border-radius: 6px;
+                    padding: 8px 12px;
+                    color: #cbd5e1;
+                    font-size: 14px;
+                }
+                QComboBox:hover {
+                    background: rgba(71, 85, 105, 0.4);
+                }
+                QComboBox::drop-down {
+                    border: none;
+                }
+                QComboBox::down-arrow {
+                    image: none;
+                    border-left: 4px solid transparent;
+                    border-right: 4px solid transparent;
+                    border-top: 6px solid #cbd5e1;
+                    margin-right: 8px;
+                }
+            """)
+        else:
+            self.combo_mes.setStyleSheet("""
+                QComboBox {
+                    background: rgba(255, 255, 255, 0.9);
+                    border: 2px solid rgba(148, 163, 184, 0.4);
+                    border-radius: 6px;
+                    padding: 8px 12px;
+                    color: #0f172a;
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+                QComboBox:hover {
+                    background: rgba(248, 250, 252, 1);
+                    border: 2px solid rgba(148, 163, 184, 0.6);
+                }
+                QComboBox::drop-down {
+                    border: none;
+                }
+                QComboBox::down-arrow {
+                    image: none;
+                    border-left: 4px solid transparent;
+                    border-right: 4px solid transparent;
+                    border-top: 6px solid #475569;
+                    margin-right: 8px;
+                }
+            """)
         self.combo_mes.currentIndexChanged.connect(self._on_fecha_changed)
         selector_layout.addWidget(self.combo_mes)
         
@@ -150,35 +464,62 @@ class ReportesView(QWidget):
             self.combo_año.setCurrentIndex(index_año)
         
         self.combo_año.setMinimumWidth(150)
-        self.combo_año.setStyleSheet("""
-            QComboBox {
-                background: rgba(71, 85, 105, 0.3);
-                border: 1px solid rgba(71, 85, 105, 0.5);
-                border-radius: 6px;
-                padding: 8px 12px;
-                color: #cbd5e1;
-                font-size: 14px;
-            }
-            QComboBox:hover {
-                background: rgba(71, 85, 105, 0.4);
-            }
-            QComboBox::drop-down {
-                border: none;
-            }
-            QComboBox::down-arrow {
-                image: none;
-                border-left: 4px solid transparent;
-                border-right: 4px solid transparent;
-                border-top: 6px solid #cbd5e1;
-                margin-right: 8px;
-            }
-        """)
+        if is_dark:
+            self.combo_año.setStyleSheet("""
+                QComboBox {
+                    background: rgba(71, 85, 105, 0.3);
+                    border: 1px solid rgba(71, 85, 105, 0.5);
+                    border-radius: 6px;
+                    padding: 8px 12px;
+                    color: #cbd5e1;
+                    font-size: 14px;
+                }
+                QComboBox:hover {
+                    background: rgba(71, 85, 105, 0.4);
+                }
+                QComboBox::drop-down {
+                    border: none;
+                }
+                QComboBox::down-arrow {
+                    image: none;
+                    border-left: 4px solid transparent;
+                    border-right: 4px solid transparent;
+                    border-top: 6px solid #cbd5e1;
+                    margin-right: 8px;
+                }
+            """)
+        else:
+            self.combo_año.setStyleSheet("""
+                QComboBox {
+                    background: rgba(255, 255, 255, 0.9);
+                    border: 2px solid rgba(148, 163, 184, 0.4);
+                    border-radius: 6px;
+                    padding: 8px 12px;
+                    color: #0f172a;
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+                QComboBox:hover {
+                    background: rgba(248, 250, 252, 1);
+                    border: 2px solid rgba(148, 163, 184, 0.6);
+                }
+                QComboBox::drop-down {
+                    border: none;
+                }
+                QComboBox::down-arrow {
+                    image: none;
+                    border-left: 4px solid transparent;
+                    border-right: 4px solid transparent;
+                    border-top: 6px solid #475569;
+                    margin-right: 8px;
+                }
+            """)
         self.combo_año.currentIndexChanged.connect(self._on_fecha_changed)
         selector_layout.addWidget(self.combo_año)
         
         selector_layout.addStretch()
         
-        layout.addWidget(selector_frame)
+        layout.addWidget(self.selector_frame)
     
     def _on_fecha_changed(self):
         """Se ejecuta cuando cambia la selección de fecha"""
@@ -188,26 +529,48 @@ class ReportesView(QWidget):
     
     def _crear_seccion_cuotas(self, layout: QVBoxLayout):
         """Crea la sección de estadísticas de cuotas"""
-        container = QFrame()
-        container.setStyleSheet("""
-            QFrame {
-                background: rgba(30, 41, 59, 0.5);
-                border: 1px solid rgba(71, 85, 105, 0.5);
-                border-radius: 12px;
-            }
-            QLabel {
-                border: none;
-                background: transparent;
-            }
-        """)
+        # Detectar tema actual
+        main_window = self.window()
+        is_dark = True
+        if hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
         
-        container_layout = QVBoxLayout(container)
+        self.container_cuotas = QFrame()
+        if is_dark:
+            self.container_cuotas.setStyleSheet("""
+                QFrame {
+                    background: rgba(30, 41, 59, 0.5);
+                    border: 1px solid rgba(71, 85, 105, 0.5);
+                    border-radius: 12px;
+                }
+                QLabel {
+                    border: none;
+                    background: transparent;
+                }
+            """)
+        else:
+            self.container_cuotas.setStyleSheet("""
+                QFrame {
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 2px solid rgba(148, 163, 184, 0.3);
+                    border-radius: 12px;
+                }
+                QLabel {
+                    border: none;
+                    background: transparent;
+                }
+            """)
+        
+        container_layout = QVBoxLayout(self.container_cuotas)
         container_layout.setContentsMargins(25, 25, 25, 25)
         container_layout.setSpacing(20)
         
         # Título de la sección
         section_title = QLabel("Estadísticas de Cuotas")
-        section_title.setStyleSheet("font-size: 18px; font-weight: 700; color: #e0e7ff; border: none;")
+        if is_dark:
+            section_title.setStyleSheet("font-size: 18px; font-weight: 700; color: #e0e7ff; border: none;")
+        else:
+            section_title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; border: none;")
         container_layout.addWidget(section_title)
         
         # Grid de estadísticas
@@ -251,30 +614,52 @@ class ReportesView(QWidget):
         grid.setColumnStretch(1, 1)
         
         container_layout.addLayout(grid)
-        layout.addWidget(container)
+        layout.addWidget(self.container_cuotas)
     
     def _crear_seccion_metodos_pago(self, layout: QVBoxLayout):
         """Crea la sección de estadísticas por método de pago"""
-        container = QFrame()
-        container.setStyleSheet("""
-            QFrame {
-                background: rgba(30, 41, 59, 0.5);
-                border: 1px solid rgba(71, 85, 105, 0.5);
-                border-radius: 12px;
-            }
-            QLabel {
-                border: none;
-                background: transparent;
-            }
-        """)
+        # Detectar tema actual
+        main_window = self.window()
+        is_dark = True
+        if hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
         
-        container_layout = QVBoxLayout(container)
+        self.container_metodos = QFrame()
+        if is_dark:
+            self.container_metodos.setStyleSheet("""
+                QFrame {
+                    background: rgba(30, 41, 59, 0.5);
+                    border: 1px solid rgba(71, 85, 105, 0.5);
+                    border-radius: 12px;
+                }
+                QLabel {
+                    border: none;
+                    background: transparent;
+                }
+            """)
+        else:
+            self.container_metodos.setStyleSheet("""
+                QFrame {
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 2px solid rgba(148, 163, 184, 0.3);
+                    border-radius: 12px;
+                }
+                QLabel {
+                    border: none;
+                    background: transparent;
+                }
+            """)
+        
+        container_layout = QVBoxLayout(self.container_metodos)
         container_layout.setContentsMargins(25, 25, 25, 25)
         container_layout.setSpacing(20)
         
         # Título de la sección
         section_title = QLabel("Estadísticas por Método de Pago")
-        section_title.setStyleSheet("font-size: 18px; font-weight: 700; color: #e0e7ff; border: none;")
+        if is_dark:
+            section_title.setStyleSheet("font-size: 18px; font-weight: 700; color: #e0e7ff; border: none;")
+        else:
+            section_title.setStyleSheet("font-size: 18px; font-weight: 700; color: #0f172a; border: none;")
         container_layout.addWidget(section_title)
         
         # Contenedor dinámico para los métodos
@@ -283,24 +668,43 @@ class ReportesView(QWidget):
         self.metodos_container.setContentsMargins(0, 0, 0, 0)
         container_layout.addLayout(self.metodos_container)
         
-        layout.addWidget(container)
+        layout.addWidget(self.container_metodos)
     
     def _crear_stat_card(self, titulo: str, valor: str, color: str) -> QFrame:
         """Crea una tarjeta de estadística"""
+        # Detectar tema actual
+        main_window = self.window()
+        is_dark = True
+        if hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
+        
         card = QFrame()
         card.setMinimumHeight(130)
         card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        card.setStyleSheet(f"""
-            QFrame {{
-                background: rgba(30, 41, 59, 0.5);
-                border: 1px solid rgba(71, 85, 105, 0.5);
-                border-radius: 12px;
-            }}
-            QLabel {{
-                border: none;
-                background: transparent;
-            }}
-        """)
+        if is_dark:
+            card.setStyleSheet(f"""
+                QFrame {{
+                    background: rgba(30, 41, 59, 0.5);
+                    border: 1px solid rgba(71, 85, 105, 0.5);
+                    border-radius: 12px;
+                }}
+                QLabel {{
+                    border: none;
+                    background: transparent;
+                }}
+            """)
+        else:
+            card.setStyleSheet(f"""
+                QFrame {{
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 2px solid rgba(148, 163, 184, 0.3);
+                    border-radius: 12px;
+                }}
+                QLabel {{
+                    border: none;
+                    background: transparent;
+                }}
+            """)
         
         card_layout = QVBoxLayout(card)
         card_layout.setContentsMargins(25, 25, 25, 25)
@@ -308,7 +712,10 @@ class ReportesView(QWidget):
         
         # Título
         titulo_label = QLabel(titulo)
-        titulo_label.setStyleSheet("font-size: 14px; color: #94a3b8; font-weight: 500; border: none;")
+        if is_dark:
+            titulo_label.setStyleSheet("font-size: 14px; color: #94a3b8; font-weight: 500; border: none;")
+        else:
+            titulo_label.setStyleSheet("font-size: 14px; color: #475569; font-weight: 600; border: none;")
         titulo_label.setWordWrap(True)
         card_layout.addWidget(titulo_label)
         
@@ -324,26 +731,45 @@ class ReportesView(QWidget):
     
     def _crear_fila_metodo(self, nombre: str, cantidad: int, total: float) -> QFrame:
         """Crea una fila para mostrar estadísticas de un método de pago"""
+        # Detectar tema actual
+        main_window = self.window()
+        is_dark = True
+        if hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
+        
         row = QFrame()
         row.setMinimumHeight(70)
         row.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        row.setStyleSheet("""
-            QFrame {
-                background: rgba(30, 41, 59, 0.3);
-                border: 1px solid rgba(71, 85, 105, 0.5);
-                border-radius: 10px;
-            }
-            QLabel {
-                border: none;
-                background: transparent;
-            }
-        """)
+        if is_dark:
+            row.setStyleSheet("""
+                QFrame {
+                    background: rgba(30, 41, 59, 0.3);
+                    border: 1px solid rgba(71, 85, 105, 0.5);
+                    border-radius: 10px;
+                }
+                QLabel {
+                    border: none;
+                    background: transparent;
+                }
+            """)
+        else:
+            row.setStyleSheet("""
+                QFrame {
+                    background: rgba(255, 255, 255, 0.9);
+                    border: 2px solid rgba(148, 163, 184, 0.3);
+                    border-radius: 10px;
+                }
+                QLabel {
+                    border: none;
+                    background: transparent;
+                }
+            """)
         
         row_layout = QHBoxLayout(row)
         row_layout.setContentsMargins(20, 15, 20, 15)
         row_layout.setSpacing(15)
         
-        # Columna 1: Nombre del método
+        # Columna 1: Nombre del método con indicador de color
         nombre_widget = QWidget()
         nombre_layout = QVBoxLayout(nombre_widget)
         nombre_layout.setContentsMargins(0, 0, 0, 0)
@@ -353,9 +779,27 @@ class ReportesView(QWidget):
         label_metodo.setStyleSheet("font-size: 11px; color: #64748b;")
         nombre_layout.addWidget(label_metodo)
         
+        # Contenedor horizontal para el color + nombre
+        nombre_container = QWidget()
+        nombre_container_layout = QHBoxLayout(nombre_container)
+        nombre_container_layout.setContentsMargins(0, 0, 0, 0)
+        nombre_container_layout.setSpacing(10)
+        
+        # Buscar el color del método de pago
+        metodos = MetodoPago.obtener_todos()
+        color_metodo = "#3b82f6"  # Color por defecto
+        for m in metodos:
+            if m.nombre == nombre:
+                color_metodo = m.color
+                break
+        
+        # Nombre del método con su color
         nombre_label = QLabel(nombre)
-        nombre_label.setStyleSheet("font-size: 16px; color: #cbd5e1; font-weight: 600;")
-        nombre_layout.addWidget(nombre_label)
+        nombre_label.setStyleSheet(f"font-size: 16px; color: {color_metodo}; font-weight: 700;")
+        nombre_container_layout.addWidget(nombre_label)
+        nombre_container_layout.addStretch()
+        
+        nombre_layout.addWidget(nombre_container)
         
         row_layout.addWidget(nombre_widget, 2)
         
@@ -370,7 +814,10 @@ class ReportesView(QWidget):
         cantidad_layout.addWidget(label_cantidad)
         
         cantidad_label = QLabel(f"{cantidad}")
-        cantidad_label.setStyleSheet("font-size: 16px; color: #94a3b8; font-weight: 500;")
+        if is_dark:
+            cantidad_label.setStyleSheet("font-size: 16px; color: #94a3b8; font-weight: 500;")
+        else:
+            cantidad_label.setStyleSheet("font-size: 16px; color: #475569; font-weight: 600;")
         cantidad_layout.addWidget(cantidad_label)
         
         row_layout.addWidget(cantidad_widget, 1)
@@ -430,9 +877,28 @@ class ReportesView(QWidget):
     
     def _actualizar_valor_stat(self, card: QFrame, nuevo_valor: str):
         """Actualiza el valor de una tarjeta de estadística"""
+        # Detectar tema actual
+        main_window = self.window()
+        is_dark = True
+        if hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
+        
+        # Determinar color según el tipo de tarjeta
+        if card == self.stat_total_cuotas:
+            color = "#3b82f6" if is_dark else "#1e40af"
+        elif card == self.stat_cuotas_pagadas:
+            color = "#22c55e" if is_dark else "#15803d"
+        elif card == self.stat_cuotas_impago:
+            color = "#ef4444" if is_dark else "#b91c1c"
+        elif card == self.stat_cuotas_deuda:
+            color = "#eab308" if is_dark else "#a16207"
+        else:
+            color = "#3b82f6" if is_dark else "#1e40af"
+        
         valor_label = card.findChild(QLabel, "valor_stat")
         if valor_label:
             valor_label.setText(nuevo_valor)
+            valor_label.setStyleSheet(f"font-size: 36px; color: {color}; font-weight: 700; border: none;")
     
     def _actualizar_metodos_pago(self, año=None, mes=None):
         """Actualiza las estadísticas por método de pago"""

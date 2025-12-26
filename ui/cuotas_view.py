@@ -2,12 +2,9 @@
 Vista de control de cuotas mensuales - Todos los clientes
 """
 
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-                             QPushButton, QComboBox, QMessageBox, QDialog,
-                             QFormLayout, QLineEdit, QGridLayout, QScrollArea, QFrame,
-                             QCheckBox, QDoubleSpinBox)
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QComboBox, QMessageBox, QDialog, QFormLayout, QLineEdit, QGridLayout, QScrollArea, QFrame,QCheckBox, QDoubleSpinBox)
 from PyQt6.QtCore import Qt, QSize, QDateTime
-from PyQt6.QtGui import QIcon, QFont
+from PyQt6.QtGui import QIcon, QFont, QPalette, QColor
 from database.models import Cliente, CuotaMensual, MetodoPago, Pago
 from controllers.config_controller import ConfigController
 from ui.detalles_cuota_dialog import DetallesCuotaDialog
@@ -69,7 +66,7 @@ class CuotasView(QWidget):
     def refresh_data(self):
         """Recarga todos los clientes"""
         clientes = Cliente.obtener_todos()
-        self.clientes_filtrados = [c for c in clientes if c.estado == 'activo']
+        self.clientes_filtrados = [c for c in clientes if c.estado.lower() == 'activo']
         self._mostrar_clientes()
     
     def _filtrar_clientes(self, texto):
@@ -80,13 +77,13 @@ class CuotasView(QWidget):
         if texto:
             self.clientes_filtrados = [
                 c for c in clientes 
-                if c.estado == 'activo' and (
+                if c.estado.lower() == 'activo' and (
                     texto in c.nombre.lower() or 
                     texto in c.documento.lower()
                 )
             ]
         else:
-            self.clientes_filtrados = [c for c in clientes if c.estado == 'activo']
+            self.clientes_filtrados = [c for c in clientes if c.estado.lower() == 'activo']
         
         self._mostrar_clientes()
     
@@ -103,10 +100,19 @@ class CuotasView(QWidget):
                 child.widget().deleteLater()
         
         if not self.clientes_filtrados:
+            # Detectar tema para el mensaje
+            main_window = self.window()
+            is_dark = True
+            if hasattr(main_window, 'current_theme'):
+                is_dark = main_window.current_theme == 'dark'
+            
             # Mensaje cuando no hay clientes
             no_data = QLabel("No hay clientes activos")
             no_data.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            no_data.setStyleSheet("font-size: 16px; color: #94a3b8; padding: 40px;")
+            if is_dark:
+                no_data.setStyleSheet("font-size: 16px; color: #94a3b8; padding: 40px;")
+            else:
+                no_data.setStyleSheet("font-size: 16px; color: #475569; font-weight: 600; padding: 40px;")
             self.clientes_layout.addWidget(no_data)
             self.clientes_layout.addStretch()
             return
@@ -120,20 +126,51 @@ class CuotasView(QWidget):
     
     def _crear_tarjeta_cliente(self, cliente: Cliente) -> QFrame:
         """Crea una tarjeta con la información y grid de cuotas del cliente"""
+        # Detectar tema actual
+        main_window = self.window()
+        is_dark = True
+        if hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
+        
         tarjeta = QFrame()
         tarjeta.setObjectName("clientCard")
-        tarjeta.setStyleSheet("""
-            #clientCard {
-                background: rgba(30, 41, 59, 0.5);
-                border: 1px solid rgba(71, 85, 105, 0.5);
-                border-radius: 12px;
-                padding: 20px;
-            }
-            QLabel {
-                border: none;
-                background: transparent;
-            }
-        """)
+        
+        if is_dark:
+            tarjeta.setStyleSheet("""
+                #clientCard {
+                    background: rgba(30, 41, 59, 0.5);
+                    border: 1px solid rgba(71, 85, 105, 0.5);
+                    border-radius: 12px;
+                    padding: 20px;
+                }
+                QLabel {
+                    border: none;
+                    background: transparent;
+                }
+            """)
+            color_nombre = "#e0e7ff"
+            color_documento = "#94a3b8"
+            color_cuota_bg = "rgba(59, 130, 246, 0.1)"
+            color_cuota_border = "rgba(59, 130, 246, 0.3)"
+            color_cuota_text = "#3b82f6"
+        else:
+            tarjeta.setStyleSheet("""
+                #clientCard {
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 2px solid rgba(203, 213, 225, 0.6);
+                    border-radius: 12px;
+                    padding: 20px;
+                }
+                QLabel {
+                    border: none;
+                    background: transparent;
+                }
+            """)
+            color_nombre = "#0f172a"
+            color_documento = "#475569"
+            color_cuota_bg = "rgba(59, 130, 246, 0.08)"
+            color_cuota_border = "rgba(59, 130, 246, 0.3)"
+            color_cuota_text = "#2563eb"
         
         layout = QVBoxLayout(tarjeta)
         layout.setSpacing(15)
@@ -144,26 +181,26 @@ class CuotasView(QWidget):
         # Nombre y documento
         info_layout = QVBoxLayout()
         nombre = QLabel(cliente.nombre)
-        nombre.setStyleSheet("font-size: 20px; font-weight: 700; color: #e0e7ff; border: none;")
+        nombre.setStyleSheet(f"font-size: 20px; font-weight: 700; color: {color_nombre}; border: none;")
         info_layout.addWidget(nombre)
         
         documento = QLabel(cliente.documento)
-        documento.setStyleSheet("font-size: 14px; color: #94a3b8; border: none;")
+        documento.setStyleSheet(f"font-size: 14px; color: {color_documento}; border: none;")
         info_layout.addWidget(documento)
         
         header.addLayout(info_layout)
         header.addStretch()
         
         # Valor de cuota
-        cuota_label = QLabel(f"${cliente.valor_cuota:,.2f}/mes")
-        cuota_label.setStyleSheet("""
+        cuota_label = QLabel(f"${cliente.valor_cuota:,.0f}/mes")
+        cuota_label.setStyleSheet(f"""
             font-size: 22px;
             font-weight: 700;
-            color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
+            color: {color_cuota_text};
+            background: {color_cuota_bg};
             padding: 10px 20px;
             border-radius: 10px;
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            border: 1px solid {color_cuota_border};
         """)
         header.addWidget(cuota_label)
         
@@ -184,21 +221,38 @@ class CuotasView(QWidget):
     
     def _crear_grid_año(self, cliente: Cliente, año: int) -> QWidget:
         """Crea el grid de cuotas para un año"""
+        # Detectar tema actual
+        main_window = self.window()
+        is_dark = True
+        if hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
+        
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setSpacing(12)
         
         # Header del año
         header = QLabel(f"{año}")
-        header.setStyleSheet("""
-            font-size: 16px;
-            font-weight: 600;
-            color: #94a3b8;
-            padding: 8px 12px;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 8px;
-        """)
+        if is_dark:
+            header.setStyleSheet("""
+                font-size: 16px;
+                font-weight: 600;
+                color: #94a3b8;
+                padding: 8px 12px;
+                background: rgba(59, 130, 246, 0.1);
+                border: 1px solid rgba(59, 130, 246, 0.2);
+                border-radius: 8px;
+            """)
+        else:
+            header.setStyleSheet("""
+                font-size: 16px;
+                font-weight: 700;
+                color: #1e293b;
+                padding: 8px 12px;
+                background: rgba(59, 130, 246, 0.08);
+                border: 2px solid rgba(59, 130, 246, 0.25);
+                border-radius: 8px;
+            """)
         layout.addWidget(header)
         
         # Grid de meses
@@ -223,6 +277,12 @@ class CuotasView(QWidget):
     
     def _crear_celda_mes(self, cliente: Cliente, año: int, mes: int, nombre_mes: str) -> QFrame:
         """Crea una celda para un mes"""
+        # Detectar tema actual
+        main_window = self.window()
+        is_dark = True
+        if hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
+        
         frame = QFrame()
         frame.setMinimumSize(140, 110)
         frame.setMaximumSize(180, 130)
@@ -259,9 +319,14 @@ class CuotasView(QWidget):
         # Determinar colores y contenido
         if cuota:
             if cuota.estado == 'pagado':
-                color_fondo = "rgba(34, 197, 94, 0.25)"
-                border_color = "rgba(34, 197, 94, 0.5)"
-                color_texto = "#86efac"
+                if is_dark:
+                    color_fondo = "rgba(34, 197, 94, 0.25)"
+                    border_color = "rgba(34, 197, 94, 0.5)"
+                    color_texto = "#86efac"
+                else:
+                    color_fondo = "rgba(34, 197, 94, 0.15)"
+                    border_color = "rgba(34, 197, 94, 0.6)"
+                    color_texto = "#15803d"
                 
                 # Extraer hora de registro (formato: YYYY-MM-DD HH:MM:SS)
                 try:
@@ -281,8 +346,8 @@ class CuotasView(QWidget):
                     if cuota_ant.estado == 'impago':
                         deuda_previa = cuota_ant.monto + (cuota_ant.deuda_acumulada or 0)
                         monto_mostrar = cuota.monto + deuda_previa
-                    elif cuota_ant.estado == 'con_deuda' and not cuota_ant.metodo_pago:
-                        # Deuda heredada sin pagar
+                    elif cuota_ant.estado == 'con_deuda':
+                        # Deuda heredada (sea con o sin pago parcial previo)
                         deuda_previa = cuota_ant.deuda_acumulada or 0
                         monto_mostrar = cuota.monto + deuda_previa
                 
@@ -297,9 +362,14 @@ class CuotasView(QWidget):
                 # Verificar si se hizo un pago parcial (tiene método de pago) o es solo deuda heredada
                 if cuota.metodo_pago:
                     # PAGO PARCIAL REALIZADO - Verde claro
-                    color_fondo = "rgba(16, 185, 129, 0.25)"  # Verde esmeralda más claro
-                    border_color = "rgba(16, 185, 129, 0.5)"
-                    color_texto = "#6ee7b7"
+                    if is_dark:
+                        color_fondo = "rgba(16, 185, 129, 0.25)"
+                        border_color = "rgba(16, 185, 129, 0.5)"
+                        color_texto = "#6ee7b7"
+                    else:
+                        color_fondo = "rgba(16, 185, 129, 0.15)"
+                        border_color = "rgba(16, 185, 129, 0.6)"
+                        color_texto = "#047857"
                     
                     # Calcular deuda que había antes del pago
                     # La deuda_acumulada es lo que queda después del pago parcial
@@ -334,9 +404,14 @@ class CuotasView(QWidget):
                     font_size_3 = "8px"
                 else:
                     # DEUDA HEREDADA SIN PAGAR - Amarillo
-                    color_fondo = "rgba(234, 179, 8, 0.25)"
-                    border_color = "rgba(234, 179, 8, 0.5)"
-                    color_texto = "#fcd34d"
+                    if is_dark:
+                        color_fondo = "rgba(234, 179, 8, 0.25)"
+                        border_color = "rgba(234, 179, 8, 0.5)"
+                        color_texto = "#fcd34d"
+                    else:
+                        color_fondo = "rgba(234, 179, 8, 0.15)"
+                        border_color = "rgba(234, 179, 8, 0.6)"
+                        color_texto = "#a16207"
                     
                     deuda_total = cuota.monto + (cuota.deuda_acumulada or 0)
                     linea1 = f"Deuda Acumulada"
@@ -347,9 +422,14 @@ class CuotasView(QWidget):
                     font_size_3 = "14px"
                 
             else:  # impago
-                color_fondo = "rgba(239, 68, 68, 0.25)"
-                border_color = "rgba(239, 68, 68, 0.5)"
-                color_texto = "#fca5a5"
+                if is_dark:
+                    color_fondo = "rgba(239, 68, 68, 0.25)"
+                    border_color = "rgba(239, 68, 68, 0.5)"
+                    color_texto = "#fca5a5"
+                else:
+                    color_fondo = "rgba(239, 68, 68, 0.15)"
+                    border_color = "rgba(239, 68, 68, 0.6)"
+                    color_texto = "#b91c1c"
                 
                 # Usar fecha_inicio_mora si existe, si no calcular con día de cobro
                 if cuota.fecha_inicio_mora:
@@ -366,9 +446,14 @@ class CuotasView(QWidget):
                 
         elif deuda_mes_anterior > 0:
             # Mes sin registro pero con deuda del mes anterior - AMARILLO
-            color_fondo = "rgba(234, 179, 8, 0.25)"
-            border_color = "rgba(234, 179, 8, 0.5)"
-            color_texto = "#fcd34d"
+            if is_dark:
+                color_fondo = "rgba(234, 179, 8, 0.25)"
+                border_color = "rgba(234, 179, 8, 0.5)"
+                color_texto = "#fcd34d"
+            else:
+                color_fondo = "rgba(234, 179, 8, 0.15)"
+                border_color = "rgba(234, 179, 8, 0.6)"
+                color_texto = "#a16207"
             
             deuda_total = cliente.valor_cuota + deuda_mes_anterior
             linea1 = f"Deuda Pendiente"
@@ -380,9 +465,14 @@ class CuotasView(QWidget):
             
         elif es_mes_actual:
             # Mes actual sin registro - destacado
-            color_fondo = "rgba(255, 255, 255, 0.15)"
-            border_color = "rgba(96, 165, 250, 0.7)"
-            color_texto = "#ffffff"
+            if is_dark:
+                color_fondo = "rgba(255, 255, 255, 0.15)"
+                border_color = "rgba(96, 165, 250, 0.7)"
+                color_texto = "#ffffff"
+            else:
+                color_fondo = "rgba(59, 130, 246, 0.15)"
+                border_color = "rgba(59, 130, 246, 0.6)"
+                color_texto = "#1e40af"
             linea1 = "Mes Actual"
             linea2 = f"Vence: {cliente.dia_cobro:02d}"
             linea3 = f"${cliente.valor_cuota:,.0f}"
@@ -391,9 +481,14 @@ class CuotasView(QWidget):
             font_size_3 = "14px"
         else:
             # Pendiente
-            color_fondo = "rgba(71, 85, 105, 0.3)"
-            border_color = "rgba(148, 163, 184, 0.3)"
-            color_texto = "#94a3b8"
+            if is_dark:
+                color_fondo = "rgba(71, 85, 105, 0.3)"
+                border_color = "rgba(148, 163, 184, 0.3)"
+                color_texto = "#94a3b8"
+            else:
+                color_fondo = "rgba(148, 163, 184, 0.15)"
+                border_color = "rgba(148, 163, 184, 0.4)"
+                color_texto = "#475569"
             linea1 = f"{año}-{mes:02d}-{cliente.dia_cobro:02d}"
             linea2 = ""
             linea3 = f"${cliente.valor_cuota:,.0f}"
@@ -502,9 +597,20 @@ class RegistroCuotaDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
+        # Detectar tema actual desde la ventana principal
+        main_window = self.parent()
+        if main_window:
+            main_window = main_window.window()
+        self.is_dark = True
+        if main_window and hasattr(main_window, 'current_theme'):
+            self.is_dark = main_window.current_theme == 'dark'
+        
         # Título con nombre del cliente
         titulo = QLabel(self.cliente.nombre)
-        titulo.setStyleSheet("font-size: 20px; color: #cbd5e1; font-weight: 700;")
+        if self.is_dark:
+            titulo.setStyleSheet("font-size: 20px; color: #e0e7ff; font-weight: 700;")
+        else:
+            titulo.setStyleSheet("font-size: 20px; color: #1e293b; font-weight: 700;")
         titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(titulo)
         
@@ -513,7 +619,10 @@ class RegistroCuotaDialog(QDialog):
                  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
         
         mes_label = QLabel(f"{meses[self.mes - 1]} {self.año}")
-        mes_label.setStyleSheet("font-size: 16px; color: #94a3b8; font-weight: 500;")
+        if self.is_dark:
+            mes_label.setStyleSheet("font-size: 16px; color: #cbd5e1; font-weight: 500;")
+        else:
+            mes_label.setStyleSheet("font-size: 16px; color: #334155; font-weight: 600;")
         mes_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(mes_label)
         
@@ -553,7 +662,10 @@ class RegistroCuotaDialog(QDialog):
         parcial_layout.setContentsMargins(0, 0, 0, 0)
         
         self.check_pago_parcial = QCheckBox("Pago Parcial")
-        self.check_pago_parcial.setStyleSheet("font-size: 13px; color: #cbd5e1;")
+        if self.is_dark:
+            self.check_pago_parcial.setStyleSheet("font-size: 13px; color: #e0e7ff;")
+        else:
+            self.check_pago_parcial.setStyleSheet("font-size: 13px; color: #1e293b; font-weight: 600;")
         self.check_pago_parcial.toggled.connect(self._toggle_pago_parcial)
         parcial_layout.addWidget(self.check_pago_parcial)
         
@@ -561,10 +673,17 @@ class RegistroCuotaDialog(QDialog):
         self.spin_monto_parcial.setPrefix("$ ")
         self.spin_monto_parcial.setRange(0.01, deuda_total)
         self.spin_monto_parcial.setValue(deuda_total)
-        self.spin_monto_parcial.setDecimals(2)
+        self.spin_monto_parcial.setDecimals(0)
         self.spin_monto_parcial.setEnabled(False)
         self.spin_monto_parcial.setMinimumHeight(35)
         self.spin_monto_parcial.setStyleSheet("font-size: 14px;")
+        self.spin_monto_parcial.setStepType(QDoubleSpinBox.StepType.AdaptiveDecimalStepType)
+        self.spin_monto_parcial.lineEdit().selectAll()  # Seleccionar todo al inicio
+        # Conectar evento de foco para seleccionar todo el texto
+        def on_focus():
+            self.spin_monto_parcial.lineEdit().selectAll()
+        self.spin_monto_parcial.lineEdit().mousePressEvent = lambda event: (QDoubleSpinBox.lineEdit(self.spin_monto_parcial).mousePressEvent(event), on_focus())
+        self.spin_monto_parcial.lineEdit().focusInEvent = lambda event: (QDoubleSpinBox.lineEdit(self.spin_monto_parcial).focusInEvent(event), on_focus())
         parcial_layout.addWidget(self.spin_monto_parcial)
         
         layout.addWidget(parcial_container)
@@ -575,40 +694,80 @@ class RegistroCuotaDialog(QDialog):
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(15)
         
+        # Detectar tema para botones
+        main_window = self.parent()
+        if main_window:
+            main_window = main_window.window()
+        is_dark = True
+        if main_window and hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
+        
         btn_pago = QPushButton("Registrar Pago")
         btn_pago.setMinimumHeight(40)
         btn_pago.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_pago.setStyleSheet("""
-            QPushButton {
-                background: rgba(34, 197, 94, 0.25);
-                color: #22c55e;
-                border: 2px solid #22c55e;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 600;
-            }
-            QPushButton:hover {
-                background: rgba(34, 197, 94, 0.35);
-            }
-        """)
+        if is_dark:
+            btn_pago_style = """
+                QPushButton {
+                    background: rgba(34, 197, 94, 0.25);
+                    color: #22c55e;
+                    border: 2px solid #22c55e;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+                QPushButton:hover {
+                    background: rgba(34, 197, 94, 0.35);
+                }
+            """
+        else:
+            btn_pago_style = """
+                QPushButton {
+                    background: rgba(21, 128, 61, 0.15);
+                    color: #15803d;
+                    border: 2px solid #15803d;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 700;
+                }
+                QPushButton:hover {
+                    background: rgba(21, 128, 61, 0.25);
+                }
+            """
+        btn_pago.setStyleSheet(btn_pago_style)
         btn_pago.clicked.connect(self._registrar_pago)
         
         btn_impago = QPushButton("Registrar Impago")
         btn_impago.setMinimumHeight(40)
         btn_impago.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_impago.setStyleSheet("""
-            QPushButton {
-                background: rgba(239, 68, 68, 0.25);
-                color: #ef4444;
-                border: 2px solid #ef4444;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 600;
-            }
-            QPushButton:hover {
-                background: rgba(239, 68, 68, 0.35);
-            }
-        """)
+        if is_dark:
+            btn_impago_style = """
+                QPushButton {
+                    background: rgba(239, 68, 68, 0.25);
+                    color: #ef4444;
+                    border: 2px solid #ef4444;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+                QPushButton:hover {
+                    background: rgba(239, 68, 68, 0.35);
+                }
+            """
+        else:
+            btn_impago_style = """
+                QPushButton {
+                    background: rgba(185, 28, 28, 0.15);
+                    color: #b91c1c;
+                    border: 2px solid #b91c1c;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 700;
+                }
+                QPushButton:hover {
+                    background: rgba(185, 28, 28, 0.25);
+                }
+            """
+        btn_impago.setStyleSheet(btn_impago_style)
         btn_impago.clicked.connect(self._registrar_impago)
         
         btn_layout.addWidget(btn_pago)
@@ -621,16 +780,25 @@ class RegistroCuotaDialog(QDialog):
         linea_layout.setContentsMargins(0, 0, 0, 0)
         
         label_widget = QLabel(label)
-        label_widget.setStyleSheet("font-size: 14px; color: #94a3b8;")
+        if self.is_dark:
+            label_widget.setStyleSheet("font-size: 14px; color: #cbd5e1;")
+        else:
+            label_widget.setStyleSheet("font-size: 14px; color: #334155; font-weight: 600;")
         linea_layout.addWidget(label_widget)
         
         linea_layout.addStretch()
         
         valor_widget = QLabel(valor)
         if destacado:
-            valor_widget.setStyleSheet("font-size: 14px; color: #3b82f6; font-weight: 600;")
+            if self.is_dark:
+                valor_widget.setStyleSheet("font-size: 14px; color: #3b82f6; font-weight: 600;")
+            else:
+                valor_widget.setStyleSheet("font-size: 14px; color: #2563eb; font-weight: 700;")
         else:
-            valor_widget.setStyleSheet("font-size: 14px; color: #cbd5e1;")
+            if self.is_dark:
+                valor_widget.setStyleSheet("font-size: 14px; color: #e0e7ff;")
+            else:
+                valor_widget.setStyleSheet("font-size: 14px; color: #1e293b; font-weight: 600;")
         linea_layout.addWidget(valor_widget)
         
         layout.addLayout(linea_layout)
@@ -649,7 +817,7 @@ class RegistroCuotaDialog(QDialog):
                 "Pago Adelantado",
                 f"Este es un mes futuro.\n\n"
                 f"¿Desea registrar un ADELANTO de pago?\n\n"
-                f"Monto: ${self.cliente.valor_cuota:,.2f}",
+                f"Monto: ${self.cliente.valor_cuota:,.0f}",
                 tipo="question"
             )
             
@@ -794,7 +962,7 @@ class RegistroCuotaDialog(QDialog):
             self,
             "Confirmar Impago",
             f"¿Confirmar que {self.cliente.nombre} NO pagó la cuota de este mes?\n\n"
-            f"La deuda de ${self.cliente.valor_cuota:,.2f} se acumulará.",
+            f"La deuda de ${self.cliente.valor_cuota:,.0f} se acumulará.",
             tipo="question"
         )
         
@@ -857,10 +1025,31 @@ class MetodoPagoSeleccionDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
+        # Detectar tema actual desde la ventana principal
+        main_window = self.parent()
+        if main_window:
+            main_window = main_window.window()
+        is_dark = True
+        if main_window and hasattr(main_window, 'current_theme'):
+            is_dark = main_window.current_theme == 'dark'
+        
         # Título
         titulo = QLabel("Seleccionar Método de Pago")
-        titulo.setStyleSheet("font-size: 20px; color: #cbd5e1; font-weight: 700;")
+        titulo.setObjectName("dialogTitle")
         titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # Usar QPalette para forzar el color y evitar override del QSS
+        if is_dark:
+            titulo.setStyleSheet("QLabel#dialogTitle { font-size: 20px; font-weight: 700; }")
+            palette = titulo.palette()
+            palette.setColor(QPalette.ColorRole.WindowText, QColor("#cbd5e1"))
+            titulo.setPalette(palette)
+        else:
+            titulo.setStyleSheet("QLabel#dialogTitle { font-size: 20px; font-weight: 700; }")
+            palette = titulo.palette()
+            palette.setColor(QPalette.ColorRole.WindowText, QColor("#000000"))
+            titulo.setPalette(palette)
+        
         layout.addWidget(titulo)
         
         layout.addSpacing(10)
@@ -869,21 +1058,66 @@ class MetodoPagoSeleccionDialog(QDialog):
         for metodo in self.metodos:
             if metodo.activo:
                 btn = QPushButton(metodo.nombre)
-                btn.setMinimumHeight(40)
+                btn.setMinimumHeight(50)
                 btn.setCursor(Qt.CursorShape.PointingHandCursor)
-                btn.setStyleSheet("""
-                    QPushButton {
-                        background: rgba(59, 130, 246, 0.25);
-                        color: #3b82f6;
-                        border: 2px solid #3b82f6;
-                        border-radius: 8px;
-                        font-size: 14px;
-                        font-weight: 600;
-                    }
-                    QPushButton:hover {
-                        background: rgba(59, 130, 246, 0.35);
-                    }
-                """)
+                
+                # Determinar color del texto según brillo del fondo
+                color_fondo = metodo.color
+                hex_color = color_fondo.lstrip('#')
+                r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+                luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+                color_texto = "white" if luminance < 0.5 else "#1e293b"
+                
+                # Estilos según el tema
+                if is_dark:
+                    # Tema oscuro: fondo con transparencia, borde del color
+                    btn.setStyleSheet(f"""
+                        QPushButton {{
+                            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba({r}, {g}, {b}, 0.25),
+                                stop:1 rgba({r}, {g}, {b}, 0.15));
+                            color: {color_fondo};
+                            border: 2px solid {color_fondo};
+                            border-radius: 12px;
+                            font-size: 15px;
+                            font-weight: 700;
+                            padding: 0 20px;
+                        }}
+                        QPushButton:hover {{
+                            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba({r}, {g}, {b}, 0.35),
+                                stop:1 rgba({r}, {g}, {b}, 0.25));
+                            border-width: 2.5px;
+                        }}
+                        QPushButton:pressed {{
+                            background: rgba({r}, {g}, {b}, 0.45);
+                        }}
+                    """)
+                else:
+                    # Tema claro: fondo sólido suave con sombra
+                    btn.setStyleSheet(f"""
+                        QPushButton {{
+                            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba({r}, {g}, {b}, 0.15),
+                                stop:1 rgba({r}, {g}, {b}, 0.08));
+                            color: {color_fondo};
+                            border: 2.5px solid {color_fondo};
+                            border-radius: 12px;
+                            font-size: 15px;
+                            font-weight: 700;
+                            padding: 0 20px;
+                        }}
+                        QPushButton:hover {{
+                            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba({r}, {g}, {b}, 0.25),
+                                stop:1 rgba({r}, {g}, {b}, 0.18));
+                            border-width: 3px;
+                        }}
+                        QPushButton:pressed {{
+                            background: rgba({r}, {g}, {b}, 0.35);
+                        }}
+                    """)
+                
                 btn.clicked.connect(lambda checked, m=metodo.nombre: self._seleccionar(m))
                 layout.addWidget(btn)
     
@@ -915,19 +1149,40 @@ class ConfirmacionDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
+        # Detectar tema actual desde la ventana principal - navegar hasta MainWindow
+        is_dark = True
+        widget = self.parent()
+        while widget:
+            if hasattr(widget, 'current_theme'):
+                is_dark = widget.current_theme == 'dark'
+                break
+            widget = widget.parent() if hasattr(widget, 'parent') and callable(widget.parent) else None
+            if widget:
+                widget = widget.window()
+        
         # Título con color según tipo
         titulo = QLabel(self.titulo)
         titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         titulo.setWordWrap(True)
         
-        colores = {
-            "success": "#22c55e",
-            "error": "#ef4444",
-            "warning": "#eab308",
-            "question": "#3b82f6",
-            "info": "#cbd5e1"
-        }
-        color = colores.get(self.tipo, "#cbd5e1")
+        # Colores según tema para mayor intensidad en modo claro
+        if is_dark:
+            colores = {
+                "success": "#22c55e",
+                "error": "#ef4444",
+                "warning": "#eab308",
+                "question": "#3b82f6",
+                "info": "#cbd5e1"
+            }
+        else:
+            colores = {
+                "success": "#15803d",  # Verde más oscuro
+                "error": "#b91c1c",    # Rojo más oscuro
+                "warning": "#a16207",  # Amarillo más oscuro
+                "question": "#1e40af", # Azul más oscuro
+                "info": "#334155"
+            }
+        color = colores.get(self.tipo, "#cbd5e1" if is_dark else "#334155")
         
         titulo.setStyleSheet(f"font-size: 20px; color: {color}; font-weight: 700;")
         layout.addWidget(titulo)
@@ -936,7 +1191,11 @@ class ConfirmacionDialog(QDialog):
         
         # Mensaje
         mensaje_label = QLabel(self.mensaje)
-        mensaje_label.setStyleSheet("font-size: 14px; color: #cbd5e1; line-height: 1.5;")
+        mensaje_label.setObjectName("dialogMessage")
+        if is_dark:
+            mensaje_label.setStyleSheet("QLabel#dialogMessage { font-size: 14px; color: #cbd5e1; line-height: 1.5; }")
+        else:
+            mensaje_label.setStyleSheet("QLabel#dialogMessage { font-size: 14px; color: #000000 !important; font-weight: 700; line-height: 1.5; }")
         mensaje_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         mensaje_label.setWordWrap(True)
         layout.addWidget(mensaje_label)
@@ -952,19 +1211,35 @@ class ConfirmacionDialog(QDialog):
             btn_si = QPushButton("Sí")
             btn_si.setMinimumHeight(40)
             btn_si.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn_si.setStyleSheet("""
-                QPushButton {
-                    background: rgba(34, 197, 94, 0.25);
-                    color: #22c55e;
-                    border: 2px solid #22c55e;
-                    border-radius: 8px;
-                    font-size: 14px;
-                    font-weight: 600;
-                }
-                QPushButton:hover {
-                    background: rgba(34, 197, 94, 0.35);
-                }
-            """)
+            if is_dark:
+                btn_si_style = """
+                    QPushButton {
+                        background: rgba(34, 197, 94, 0.25);
+                        color: #22c55e;
+                        border: 2px solid #22c55e;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        font-weight: 600;
+                    }
+                    QPushButton:hover {
+                        background: rgba(34, 197, 94, 0.35);
+                    }
+                """
+            else:
+                btn_si_style = """
+                    QPushButton {
+                        background: rgba(21, 128, 61, 0.15);
+                        color: #15803d;
+                        border: 2px solid #15803d;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        font-weight: 700;
+                    }
+                    QPushButton:hover {
+                        background: rgba(21, 128, 61, 0.25);
+                    }
+                """
+            btn_si.setStyleSheet(btn_si_style)
             btn_si.clicked.connect(self.accept)
             btn_layout.addWidget(btn_si)
             
@@ -995,47 +1270,92 @@ class ConfirmacionDialog(QDialog):
             btn_aceptar.setCursor(Qt.CursorShape.PointingHandCursor)
             
             if self.tipo == "success":
-                estilo_btn = """
-                    QPushButton {
-                        background: rgba(34, 197, 94, 0.25);
-                        color: #22c55e;
-                        border: 2px solid #22c55e;
-                        border-radius: 8px;
-                        font-size: 14px;
-                        font-weight: 600;
-                    }
-                    QPushButton:hover {
-                        background: rgba(34, 197, 94, 0.35);
-                    }
-                """
+                if is_dark:
+                    estilo_btn = """
+                        QPushButton {
+                            background: rgba(34, 197, 94, 0.25);
+                            color: #22c55e;
+                            border: 2px solid #22c55e;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            font-weight: 600;
+                        }
+                        QPushButton:hover {
+                            background: rgba(34, 197, 94, 0.35);
+                        }
+                    """
+                else:
+                    estilo_btn = """
+                        QPushButton {
+                            background: rgba(21, 128, 61, 0.15);
+                            color: #15803d;
+                            border: 2px solid #15803d;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            font-weight: 700;
+                        }
+                        QPushButton:hover {
+                            background: rgba(21, 128, 61, 0.25);
+                        }
+                    """
             elif self.tipo == "error":
-                estilo_btn = """
-                    QPushButton {
-                        background: rgba(239, 68, 68, 0.25);
-                        color: #ef4444;
-                        border: 2px solid #ef4444;
-                        border-radius: 8px;
-                        font-size: 14px;
-                        font-weight: 600;
-                    }
-                    QPushButton:hover {
-                        background: rgba(239, 68, 68, 0.35);
-                    }
-                """
+                if is_dark:
+                    estilo_btn = """
+                        QPushButton {
+                            background: rgba(239, 68, 68, 0.25);
+                            color: #ef4444;
+                            border: 2px solid #ef4444;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            font-weight: 600;
+                        }
+                        QPushButton:hover {
+                            background: rgba(239, 68, 68, 0.35);
+                        }
+                    """
+                else:
+                    estilo_btn = """
+                        QPushButton {
+                            background: rgba(185, 28, 28, 0.15);
+                            color: #b91c1c;
+                            border: 2px solid #b91c1c;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            font-weight: 700;
+                        }
+                        QPushButton:hover {
+                            background: rgba(185, 28, 28, 0.25);
+                        }
+                    """
             elif self.tipo == "warning":
-                estilo_btn = """
-                    QPushButton {
-                        background: rgba(234, 179, 8, 0.25);
-                        color: #eab308;
-                        border: 2px solid #eab308;
-                        border-radius: 8px;
-                        font-size: 14px;
-                        font-weight: 600;
-                    }
-                    QPushButton:hover {
-                        background: rgba(234, 179, 8, 0.35);
-                    }
-                """
+                if is_dark:
+                    estilo_btn = """
+                        QPushButton {
+                            background: rgba(234, 179, 8, 0.25);
+                            color: #eab308;
+                            border: 2px solid #eab308;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            font-weight: 600;
+                        }
+                        QPushButton:hover {
+                            background: rgba(234, 179, 8, 0.35);
+                        }
+                    """
+                else:
+                    estilo_btn = """
+                        QPushButton {
+                            background: rgba(161, 98, 7, 0.15);
+                            color: #a16207;
+                            border: 2px solid #a16207;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            font-weight: 700;
+                        }
+                        QPushButton:hover {
+                            background: rgba(161, 98, 7, 0.25);
+                        }
+                    """
             else:  # info
                 estilo_btn = """
                     QPushButton {

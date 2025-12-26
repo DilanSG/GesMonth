@@ -36,18 +36,22 @@ if exist "GesMonth-v%VERSION%-Windows\GesMonth\_internal\assets" (
     rmdir /s /q GesMonth-v%VERSION%-Windows\GesMonth\_internal\assets
 )
 
-REM Copiar documentación para usuarios
-copy LEER_PRIMERO-WINDOWS.txt GesMonth-v%VERSION%-Windows\README.txt
+REM Copiar documentación con reemplazo de versión
+echo Generando README con version %VERSION%...
+powershell -Command "(Get-Content LEER_PRIMERO-WINDOWS.txt) -replace '{{VERSION}}', '%VERSION%' | Set-Content GesMonth-v%VERSION%-Windows\README.txt"
 copy VERSION GesMonth-v%VERSION%-Windows\GesMonth\
 
-REM Crear archivo de licencia simple
-echo GesMonth v%VERSION% > GesMonth-v%VERSION%-Windows\LICENSE.txt
-echo. >> GesMonth-v%VERSION%-Windows\LICENSE.txt
-echo Este software es de código abierto. >> GesMonth-v%VERSION%-Windows\LICENSE.txt
-echo Disponible para uso personal, educativo y comercial. >> GesMonth-v%VERSION%-Windows\LICENSE.txt
-echo. >> GesMonth-v%VERSION%-Windows\LICENSE.txt
-echo Desarrollado por Dilan Acuña >> GesMonth-v%VERSION%-Windows\LICENSE.txt
-echo Diciembre 2025 >> GesMonth-v%VERSION%-Windows\LICENSE.txt
+REM Copiar licencia
+copy LICENSE GesMonth-v%VERSION%-Windows\LICENSE.txt
+
+REM Crear carpeta .data con archivos .db placeholder vacíos
+echo Creando estructura de datos...
+mkdir GesMonth-v%VERSION%-Windows\GesMonth\.data
+type nul > GesMonth-v%VERSION%-Windows\GesMonth\.data\gesmonth.db
+type nul > GesMonth-v%VERSION%-Windows\GesMonth\.data\users.db
+REM Permisos de solo lectura (la app los eliminará y creará nuevos al iniciar)
+attrib +R GesMonth-v%VERSION%-Windows\GesMonth\.data\gesmonth.db
+attrib +R GesMonth-v%VERSION%-Windows\GesMonth\.data\users.db
 
 REM Crear archivo ZIP
 echo Comprimiendo...

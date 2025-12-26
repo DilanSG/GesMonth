@@ -292,22 +292,23 @@ class Pago:
 class MetodoPago:
     """Modelo para gestionar métodos de pago"""
     
-    def __init__(self, id: Optional[int] = None, nombre: str = "", activo: bool = True):
+    def __init__(self, id: Optional[int] = None, nombre: str = "", activo: bool = True, color: str = "#3b82f6"):
         self.id = id
         self.nombre = nombre
         self.activo = activo
+        self.color = color
     
     @staticmethod
-    def crear(nombre: str) -> int:
+    def crear(nombre: str, color: str = "#3b82f6") -> int:
         """Crea un nuevo método de pago"""
         db = DatabaseConnection()
         conn = db.get_connection()
         cursor = conn.cursor()
         
         cursor.execute('''
-            INSERT INTO metodos_pago (nombre, activo)
-            VALUES (?, 1)
-        ''', (nombre,))
+            INSERT INTO metodos_pago (nombre, activo, color)
+            VALUES (?, 1, ?)
+        ''', (nombre, color))
         
         conn.commit()
         return cursor.lastrowid
@@ -325,7 +326,8 @@ class MetodoPago:
         return [MetodoPago(
             id=row['id'],
             nombre=row['nombre'],
-            activo=bool(row['activo'])
+            activo=bool(row['activo']),
+            color=row['color'] if 'color' in row.keys() else '#3b82f6'
         ) for row in rows]
     
     @staticmethod
@@ -341,11 +343,12 @@ class MetodoPago:
         return [MetodoPago(
             id=row['id'],
             nombre=row['nombre'],
-            activo=True
+            activo=True,
+            color=row['color'] if 'color' in row.keys() else '#3b82f6'
         ) for row in rows]
     
     @staticmethod
-    def actualizar(metodo_id: int, nombre: str, activo: bool = True) -> bool:
+    def actualizar(metodo_id: int, nombre: str, activo: bool = True, color: str = "#3b82f6") -> bool:
         """Actualiza un método de pago"""
         db = DatabaseConnection()
         conn = db.get_connection()
@@ -353,9 +356,9 @@ class MetodoPago:
         
         cursor.execute('''
             UPDATE metodos_pago 
-            SET nombre = ?, activo = ?
+            SET nombre = ?, activo = ?, color = ?
             WHERE id = ?
-        ''', (nombre, 1 if activo else 0, metodo_id))
+        ''', (nombre, 1 if activo else 0, color, metodo_id))
         
         conn.commit()
         return cursor.rowcount > 0
@@ -401,6 +404,11 @@ class CuotaMensual:
         
         fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
+        # Obtener día de cobro del cliente para generar fecha de mora si es necesario
+        cursor.execute('SELECT dia_cobro FROM clientes WHERE id = ?', (cliente_id,))
+        cliente_row = cursor.fetchone()
+        dia_cobro = cliente_row['dia_cobro'] if cliente_row and 'dia_cobro' in cliente_row.keys() else 5
+        
         # Si se proporciona deuda_previa, usarla; si no, buscar en la BD
         if deuda_previa is None:
             cursor.execute('''
@@ -430,8 +438,14 @@ class CuotaMensual:
                 VALUES (?, ?, ?, 'pagado', ?, ?, ?, 0.0, NULL)
             ''', (cliente_id, año, mes, monto, metodo_pago, fecha_actual))
         else:
-            # Pago parcial - queda deuda, mantener fecha_inicio_mora
+            # Pago parcial - queda deuda
             deuda_restante = deuda_total - monto_pagado
+            
+            # Si no había fecha de inicio de mora previa, generarla ahora usando la fecha del mes que se está pagando
+            # (esto pasa cuando se hace un pago parcial en un mes sin mora previa)
+            if fecha_inicio_mora is None:
+                fecha_inicio_mora = f"{año}-{mes:02d}-{dia_cobro:02d} 00:00:00"
+            
             cursor.execute('''
                 INSERT OR REPLACE INTO cuotas_mensuales 
                 (cliente_id, año, mes, estado, monto, metodo_pago, fecha_registro, deuda_acumulada, fecha_inicio_mora)

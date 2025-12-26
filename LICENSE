@@ -1,0 +1,46 @@
+GesMonth - Sistema de Gestión de Pagos Mensuales
+Copyright (c) 2025 Dilan Acuña
+
+Source Available License (SAL)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to use,
+copy, and modify the Software for personal, educational, or internal business
+purposes, subject to the following conditions:
+
+1. PERMITTED USES:
+   - View and study the source code
+   - Use the Software for personal or internal business purposes
+   - Modify the Software for personal or internal business purposes
+   - Create derivative works for personal or internal use
+
+2. RESTRICTIONS:
+   - The Software may NOT be redistributed, in whole or in part, modified or
+     unmodified, without explicit written permission from the copyright holder
+   - The Software may NOT be sold, sublicensed, or offered as a commercial
+     product or service without explicit written permission
+   - The Software may NOT be used as part of a commercial software-as-a-service
+     (SaaS) offering without explicit written permission
+   - Derivative works may NOT be publicly distributed without explicit written
+     permission from the copyright holder
+
+3. ATTRIBUTION:
+   - The above copyright notice and this permission notice shall be included in
+     all copies or substantial portions of the Software
+   - Any use of the Software must include attribution to the original author
+
+4. WARRANTY DISCLAIMER:
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+
+5. COMMERCIAL LICENSING:
+   For commercial use, redistribution rights, or removal of restrictions,
+   please contact: dilansg@gesmonth.com
+
+This is a Source Available License - the code is visible and modifiable for
+permitted uses, but redistribution and commercial use require permission.

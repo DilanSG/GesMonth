@@ -5,6 +5,8 @@ Gestión de conexión a la base de datos SQLite
 import sqlite3
 import os
 from typing import Optional
+from pathlib import Path
+from utils import get_data_path
 
 
 class DatabaseConnection:
@@ -22,7 +24,8 @@ class DatabaseConnection:
     def __init__(self):
         """Inicializa la conexión a la base de datos"""
         if self._connection is None:
-            self._db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'gesmonth.db')
+            # Base de datos en carpeta .data
+            self._db_path = get_data_path('gesmonth.db')
             self._connection = sqlite3.connect(self._db_path, check_same_thread=False)
             # Asegura integridad referencial en SQLite
             self._connection.execute("PRAGMA foreign_keys = ON")
@@ -103,7 +106,8 @@ class DatabaseConnection:
             CREATE TABLE IF NOT EXISTS metodos_pago (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre TEXT UNIQUE NOT NULL,
-                activo INTEGER DEFAULT 1
+                activo INTEGER DEFAULT 1,
+                color TEXT DEFAULT '#3b82f6'
             )
         ''')
         
@@ -130,6 +134,12 @@ class DatabaseConnection:
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_cuotas_cliente ON cuotas_mensuales(cliente_id)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_cuotas_año_mes ON cuotas_mensuales(año, mes)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_cuotas_estado ON cuotas_mensuales(estado)')
+        
+        # Migración: Agregar columna color a metodos_pago si no existe
+        cursor.execute("PRAGMA table_info(metodos_pago)")
+        columns = [row[1] for row in cursor.fetchall()]
+        if 'color' not in columns:
+            cursor.execute("ALTER TABLE metodos_pago ADD COLUMN color TEXT DEFAULT '#3b82f6'")
         
         self._connection.commit()
     

@@ -2,7 +2,298 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
-## [1.0.1] - 2025-12-23
+## [2.1.0] - 2025-12-26
+
+### Añadido
+
+#### Licencia Source Available
+- **Nueva licencia SAL**: El proyecto ahora está bajo Source Available License
+- Código fuente visible y modificable para uso personal/educativo
+- Restricciones de redistribución y uso comercial sin permiso
+- Archivo LICENSE creado con términos completos
+
+#### Sistema de Gestión de Datos
+- **Carpeta `.data/` persistente**: Bases de datos ahora se almacenan junto al ejecutable
+- Archivos placeholder en paquetes distribuibles (solo lectura)
+- Sistema automático de inicialización de BDs en primera ejecución
+- Script `ver_datos.py` para inspección y edición de bases de datos
+- Separación clara entre recursos estáticos (assets) y datos persistentes (.data)
+
+#### Organización de Scripts
+- **Nueva carpeta `scripts/`**: Todos los scripts organizados (.sh, .bat)
+- Rutas actualizadas en README.md y documentación
+- Scripts de build, install, run y package centralizados
+
+#### Versionado Dinámico
+- **Plantillas con {{VERSION}}**: Archivos de distribución usan versión dinámica
+- Script de empaquetado reemplaza automáticamente {{VERSION}} con valor de archivo VERSION
+- README.txt generado con versión correcta en cada build
+- Eliminación de versiones hardcodeadas
+
+#### Sistema de Persistencia de Configuración
+- **Persistencia de tema**: El tema seleccionado (claro/oscuro) ahora se guarda en la base de datos
+- **Persistencia de pantalla completa**: La preferencia de pantalla completa se mantiene entre sesiones
+- Nuevos métodos en `ConfigController`: `get_theme()`, `set_theme()`, `get_fullscreen()`, `set_fullscreen()`
+- El login ahora carga automáticamente el último tema usado
+- La ventana principal aplica automáticamente el modo pantalla completa guardado
+
+#### Toggle Switch Moderno
+- **Reemplazo de controles tradicionales**: Sustituido dropdown y checkbox por toggle switches animados
+- Implementación personalizada de `ToggleSwitch` con `QPropertyAnimation`
+- Animación suave de 200ms con curva `InOutCubic`
+- Colores dinámicos: azul (#3b82f6) cuando está activo, gris (#cbd5e1) cuando está inactivo
+- Integrado en vista de Configuración y vista de Login
+- Sincronización automática del estado visual con el tema guardado
+
+#### Splash Screen Inteligente
+- **Responsividad adaptativa**: El splash screen ajusta su tamaño según el modo de visualización
+  - Pantalla completa: cubre toda la pantalla
+  - Modo ventana: mismo tamaño que la ventana principal (1200x700), centrado
+- Transición fluida entre splash y ventana principal con animación de fade
+- Posicionamiento perfecto para experiencia visual natural
+- Elementos escalables (logo, título, espaciado) proporcionales al tamaño de pantalla
+
+### Mejorado
+
+#### Interfaz de Login
+- **Diseño minimalista**: Removido texto de credenciales por defecto para mayor seguridad
+- **Toggle de tema centralizado**: Control de tema con etiqueta "Tema Oscuro" centrada
+- Implementación de `ToggleSwitch` reemplazando checkbox tradicional
+- Estado inicial del toggle sincronizado con tema guardado
+- Mejor experiencia de usuario con controles más intuitivos
+
+#### Iconografía SVG
+- **Icono de configuración mejorado**: Engranaje de 8 dientes con colores responsivos
+- Reemplazo de `fill="#000000"` por colores adaptativos según tema
+- Colores optimizados: `#94a3b8` (tema oscuro), `#64748b` (tema claro)
+- SVGs más legibles en ambos temas
+
+#### Header de Sidebar
+- **Diseño centrado**: Información del usuario reorganizada con mejor alineación
+- Texto "Bienvenido" seguido del nombre de usuario
+- Badge de rol removido para diseño más limpio
+- Mejor jerarquía visual de la información
+
+#### Sistema de Temas
+- **Integración completa**: ThemeController ahora integrado con ConfigController
+- Acceso a configuración de pantalla completa desde ThemeController
+- Cambios de tema se guardan automáticamente en la base de datos
+- Sincronización perfecta entre login, splash screen y aplicación principal
+
+### Corregido
+
+- **Bug de toggle en configuración**: El toggle ahora muestra correctamente el estado visual cuando el tema es oscuro
+- **Sincronización de tema**: Forzado el repintado del toggle con `update()` para visualización correcta
+- **Posición del círculo en toggle**: Sincronización manual de `_circle_position` al cargar la vista
+- **Transición de splash**: Reorganizado el flujo de carga para mostrar splash primero, luego cargar ventana
+- **Centrado de ventana principal**: La ventana ahora se centra correctamente después del splash screen
+
+### Archivos Modificados
+
+```
+main.py                          # Integración de splash responsivo y carga de configuración
+ui/splash_screen.py              # Sistema responsivo según modo fullscreen
+ui/login_view.py                 # Toggle switch, carga de tema, diseño minimalista
+ui/configuracion_view.py         # Toggle switch, sincronización de estado visual
+ui/main_window.py                # Aplicación de configuración guardada al inicio
+controllers/config_controller.py # Métodos get/set para tema y fullscreen
+controllers/theme_controller.py  # Integración con ConfigController
+```
+
+### Notas Técnicas
+
+#### ToggleSwitch Implementation
+- Basado en `QCheckBox` con pintura personalizada
+- Tamaño fijo: 60x30 píxeles
+- Posiciones del círculo: 3 (izquierda/claro), 33 (derecha/oscuro)
+- Animación manejada manualmente en `mousePressEvent` para evitar conflictos
+
+#### Persistencia de Configuración
+- Tabla `configuracion` en base de datos con pares clave-valor
+- Valores boolean guardados como strings "true"/"false"
+- Carga automática al iniciar login y ventana principal
+
+#### Flujo de Inicialización Mejorado
+1. Login muestra con tema guardado
+2. Splash screen se muestra con tamaño correcto (fullscreen o ventana)
+3. Ventana principal se carga en segundo plano (oculta)
+4. Splash hace fade out después de 5 segundos
+5. Ventana principal aparece centrada en pantalla
+
+---
+
+## [2.0.0] - 2024-12-25
+
+### Cambios y mejoras
+
+#### Sistema de Temas
+- Controlador de temas centralizado (ThemeController), con persistencia en la base de datos.
+- Soporte para cambiar y recordar el tema (oscuro/claro) en toda la aplicación.
+- QSS dinámico para ambos temas, incluyendo el login y la ventana principal.
+- Icono de check SVG para el QCheckBox de selección de tema.
+
+### Sistema de Autenticación Completo
+
+#### Nuevas Funcionalidades Principales
+
+**Sistema de Login**
+- Autenticación segura con contraseñas encriptadas usando bcrypt
+- Prevención de ataques de fuerza bruta (bloqueo tras 5 intentos fallidos)
+- Desbloqueo automático después de 15 minutos
+- Validación de credenciales en tiempo real
+
+**Base de Datos de Usuarios**
+- Nueva base de datos SQLite separada (users.db) en ~/gesmonth_data/
+- Tres tablas: usuarios, sesiones, logs_auditoria
+- Creación automática de superadministrador al primer inicio
+  - Usuario: admin
+  - Contraseña: admin123 (debe cambiarse)
+
+**Sistema de Roles y Permisos**
+- 4 niveles de acceso jerárquico:
+  1. **Superadmin**: Control total + creación de usuarios
+  2. **Admin**: Gestión completa de datos sin crear usuarios
+  3. **Operador**: Crear y editar registros
+  4. **Solo Lectura**: Visualización únicamente
+- Control de acceso basado en roles (RBAC)
+- Validación de permisos en cada acción
+
+**Gestión de Usuarios**
+- Panel exclusivo para superadministradores
+- Crear usuarios con roles específicos
+- Editar información de usuarios existentes
+- Activar/Desactivar cuentas (sin eliminar historial)
+- Cambiar contraseñas de otros usuarios
+- Protección del usuario superadmin original (no editable)
+
+**Sistema de Auditoría**
+- Registro automático de todas las acciones
+- Trazabilidad completa: usuario, acción, fecha/hora
+- Base para futuras funcionalidades de reporting
+- Logs persistentes en base de datos
+
+**Sesiones y Seguridad**
+- Sistema de tokens para gestionar sesiones activas
+- Cierre de sesión seguro
+- Display de usuario actual en sidebar
+- Botón de logout visible en todo momento
+
+#### Interfaz de Login
+- Implementación de glassmorphism y gradientes en la UI.
+- Selector de tema claro/oscuro con checkbox personalizado (icono SVG de check).
+- El tema seleccionado se aplica y persiste en toda la app.
+
+
+#### Otros
+- Refactor de eventos de cierre: ahora la ventana de login se puede cerrar normalmente.
+- Mejoras menores de accesibilidad y experiencia de usuario en el login.
+- Actualización de dependencias y assets (nuevo SVG en assets/icons/checkmark.svg).
+
+#### Archivos Nuevos
+
+```
+database/
+├── user_connection.py       # Conexión y setup de users.db (usuarios, sesiones, auditoría)
+├── user_models.py           # Modelos: Usuario, Sesion, AuditoriaLog
+
+controllers/
+├── auth_controller.py       # Lógica de autenticación, login y permisos
+├── theme_controller.py      # Gestión y persistencia de tema claro/oscuro
+
+ui/
+├── login_view.py            # Pantalla de login moderna con selector de tema
+├── usuarios_management.py   # Panel de gestión de usuarios (CRUD, roles, activación)
+├── theme_colors.py          # Sistema de colores dinámicos para temas
+
+assets/
+├── icons/checkmark.svg      # Icono SVG para el check personalizado del QCheckBox
+├── icons/LOGO.ico           # Nuevo icono de la app
+├── icons/LOGO.png           # Nuevo icono de la app
+├── styles/light.qss         # Estilos QSS para tema claro
+├── styles/dark.qss          # Estilos QSS para tema oscuro
+
+docs/
+├── SISTEMA-AUTENTICACION.md # Documentación completa del sistema de login y roles
+├── TEMAS.md                 # Documentación sobre el sistema de temas
+```
+
+#### Archivos Modificados
+
+```
+main.py                      # Integración del flujo de login y temas
+ui/main_window.py            # Display de usuario, logout, y soporte de temas
+ui/configuracion_view.py     # Nueva pestaña de gestión de usuarios, soporte de temas
+ui/dashboard_view.py         # Ajustes visuales y soporte de temas
+ui/clientes_view.py          # Mejoras visuales y soporte de temas
+ui/pagos_view.py             # Mejoras visuales y soporte de temas
+ui/cuotas_view.py            # Mejoras visuales y soporte de temas
+ui/reportes_view.py          # Mejoras visuales y soporte de temas
+requirements.txt             # Agregado bcrypt, PyQt6, y dependencias de UI modernas
+README.md                    # Documentación actualizada para nuevas funciones y temas
+VERSION                      # 1.0.1 → 2.0.0
+```
+
+#### Dependencias Agregadas
+
+```
+bcrypt==4.1.2                # Encriptación de contraseñas
+PyQt6==6.7.1                 # Actualización de PyQt6 para soporte de nuevos estilos
+PyQt6-Qt6==6.7.3             # Qt6 para compatibilidad visual
+pandas, openpyxl, Pillow      # Para reportes y exportación
+```
+
+#### Mejoras de UI
+
+**Sidebar**
+- Información del usuario actual (nombre y rol)
+- Separador visual después del header de usuario
+- Botón "Cerrar Sesión" en la parte inferior
+
+**Configuración**
+- Nueva pestaña "Gestión de Usuarios" (visible solo para superadmin)
+- Botones con glassmorphism design
+- Tabla completa con acciones por usuario
+
+**Login**
+- Diseño moderno con gradientes
+- Campos de texto con focus states
+- Mensajes de error contextuales
+- Prevención de cierre sin autenticación
+
+#### Seguridad Implementada
+
+- Contraseñas hasheadas con bcrypt (salt rounds)
+- Validación de longitud mínima (6 caracteres)
+- Bloqueo temporal tras intentos fallidos
+- Sesiones con tokens únicos
+- Prevención de inyección SQL (prepared statements)
+- Separación de bases de datos (datos vs usuarios)
+
+#### Notas de Migración
+
+**Compatibilidad**
+- Compatible con versiones anteriores
+- Base de datos principal (gesmonth.db) no modificada
+- Datos existentes permanecen intactos
+
+**Primer Inicio**
+- Se creará automáticamente ~/gesmonth_data/users.db
+- Usuario superadmin generado con credenciales por defecto
+- Recomendado: cambiar contraseña inmediatamente
+
+
+#### Próximas Mejoras Planificadas
+
+- Visualizador gráfico de logs de auditoría
+- Exportación de logs a Excel
+- Recuperación de contraseña
+- Autenticación de dos factores (2FA)
+- Expiración automática de sesiones
+- Notificaciones de actividad sospechosa
+
+---
+
+## [1.0.1] - 2024-12-23
 
 ### Mejoras en Distribución
 
@@ -85,7 +376,6 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 - Timestamp en tiempo real en el footer
 - Transiciones suaves
 - Responsive y escalable
-- Sin emojis en la interfaz
 
 #### Base de Datos
 - SQLite integrado

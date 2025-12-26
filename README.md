@@ -1,15 +1,103 @@
 # GesMonth - Sistema de Gestión de Pagos Mensuales
 
-![Version](https://img.shields.io/badge/Version-1.0.1-brightgreen.svg)
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![PyQt6](https://img.shields.io/badge/PyQt6-6.6.1-green.svg)
+![Version](https://img.shields.io/badge/Version-2.1.0-brightgreen.svg)
+![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
+![PyQt6](https://img.shields.io/badge/PyQt6-6.7.1-green.svg)
 ![SQLite](https://img.shields.io/badge/SQLite-3-orange.svg)
+![Security](https://img.shields.io/badge/Security-bcrypt-red.svg)
 
 ## Descripción
 
-**GesMonth** es un sistema profesional de escritorio para la gestión de pagos y cuotas mensuales desarrollado en Python. Utiliza PyQt6 para la interfaz gráfica y SQLite como base de datos, ofreciendo una solución completa, moderna y fácil de usar para el control de pagos recurrentes.
+**GesMonth** es un sistema profesional de escritorio para la gestión de pagos y cuotas mensuales. Diseñado para pequeños negocios, academias, centros de formación y cualquier organización que requiera control de pagos recurrentes de manera eficiente y segura.
+
+Desarrollado con Python y PyQt6, ofrece una interfaz moderna con efectos glassmorphism, autenticación multi-nivel, y gestión completa de clientes, cuotas y reportes financieros.
 
 ## Características Principales
+
+### Autenticación y Seguridad
+- Sistema de login con encriptación bcrypt
+- 4 niveles de roles: Superadmin, Admin, Operador, Solo Lectura
+- Gestión de usuarios con control de permisos
+- Auditoría completa de acciones del sistema
+- Protección contra ataques de fuerza bruta
+- Sesiones basadas en tokens seguros
+
+### Dashboard Inteligente
+- Métricas en tiempo real del estado del negocio
+- Total de clientes activos, en mora y al día
+- Recaudado del mes actual y año en curso
+- Visualización profesional con tarjetas informativas
+- Footer con información de versión y timestamp
+
+### Gestión de Clientes
+- CRUD completo con validación de datos
+- Búsqueda en tiempo real por nombre o documento
+- Validación de documentos únicos
+- Configuración personalizada de día de cobro (1-31)
+- Valor de cuota mensual configurable
+- Estados: activo/inactivo sin eliminación física
+
+### Control de Cuotas Mensuales
+- Grid visual organizado por año y mes
+- Sistema de estados avanzado:
+  - **Pago**: Cuota completamente pagada
+  - **Impago**: Sin pago registrado (genera mora)
+  - **Con Deuda**: Pago parcial o deuda heredada
+  - **Pendiente**: Aún no vencido
+- Seguimiento de deuda acumulada entre meses
+- Registro automático de fecha de inicio de mora
+- Soporte para pagos parciales y abonos
+- Dialog detallado con historial completo
+
+### Registro de Pagos
+- Múltiples métodos de pago configurables
+- Prevención automática de pagos duplicados
+- Historial completo por cliente
+- Asociación inteligente al mes correspondiente
+- Gestión de pagos parciales
+
+### Reportes y Estadísticas
+- Filtrado por año y mes específico
+- Estadísticas detalladas:
+  - Total de cuotas registradas
+  - Cantidad de pagos completados
+  - Cantidad sin pagar (mora)
+  - Cantidad con deuda parcial
+- Desglose por método de pago
+- Visualización con tarjetas profesionales
+
+### Configuración Avanzada
+- Gestión de métodos de pago personalizados
+- Configuración de años de facturación
+- Sistema de temas (claro/oscuro) con persistencia
+- Modo pantalla completa configurable
+- Respaldo manual de base de datos
+- Limpieza de pagos duplicados
+- Gestión de usuarios (solo superadmin)
+
+## Tecnologías Utilizadas
+
+### Frontend
+- **PyQt6 6.7.1**: Framework GUI multiplataforma moderno
+- **QSS (Qt Style Sheets)**: Sistema de estilos CSS para interfaces
+- **Glassmorphism**: Efectos de cristal esmerilado y transparencias
+- **SVG Icons**: Iconografía escalable y profesional
+
+### Backend
+- **Python 3.9+**: Lenguaje de programación principal
+- **SQLite 3**: Base de datos embebida de alto rendimiento
+- **bcrypt**: Encriptación de contraseñas con salt aleatorio
+
+### Arquitectura
+- **Patrón MVC**: Modelo-Vista-Controlador para separación de responsabilidades
+- **Singleton Pattern**: Gestión única de conexiones de base de datos
+- **Active Record**: Modelos con métodos CRUD integrados
+- **Observer Pattern**: Sistema de eventos reactivos
+
+### Herramientas de Desarrollo
+- **PyInstaller**: Compilación a ejecutables standalone
+- **Git**: Control de versiones
+- **Type Hints**: Anotaciones de tipos para mejor mantenimiento
 
 ### Dashboard Inteligente
 - Métricas clave del negocio en tiempo real
@@ -28,13 +116,13 @@
 - Estados: activo/inactivo
 - Valor de cuota mensual configurable
 
-###  Control de Cuotas Mensuales
+### Control de Cuotas Mensuales
 - Grid visual de meses organizados por año
 - Sistema de estados avanzado:
-  -  **Pago**: Cuota completamente pagada
-  -  **Impago**: Sin pago registrado (genera mora)
-  -  **Con Deuda**: Pago parcial o deuda heredada
-  -  **Pendiente**: Aún no vencido
+  - Pago: Cuota completamente pagada
+  - Impago: Sin pago registrado (genera mora)
+  - Con Deuda: Pago parcial o deuda heredada
+  - Pendiente: Aún no vencido
 - Seguimiento de deuda acumulada entre meses
 - Registro de fecha de inicio de mora
 - Soporte para pagos parciales
@@ -103,257 +191,110 @@ GesMonth/
         └── main.qss           # Estilos CSS (Glassmorphismo)
 ```
 
-## Instalación Rápida
+## Historial de Versiones
+
+### v2.1.0 - 26 de diciembre de 2025
+- **Licencia Source Available (SAL)**: Nueva licencia para uso personal/educativo
+- **Sistema de datos persistente**: Bases de datos en carpeta `.data/` junto al ejecutable
+- **Organización de scripts**: Todos los scripts en carpeta `scripts/` centralizada
+- **Versionado dinámico**: Plantillas con reemplazo automático de versión
+- **Persistencia de configuración**: Tema y pantalla completa se guardan entre sesiones
+- **Toggle switches modernos**: Controles animados reemplazan dropdowns tradicionales
+- **Splash screen inteligente**: Adaptación responsiva según modo de pantalla
+- **Mejoras de interfaz**: Login minimalista, iconografía SVG mejorada
+- **Sincronización de temas**: Integración completa entre componentes
+
+### v2.0.0 - Noviembre 2025
+- **Sistema de autenticación**: Login seguro con bcrypt
+- **4 niveles de roles**: Superadmin, Admin, Operador, Solo Lectura
+- **Gestión de usuarios**: Panel exclusivo para superadmin
+- **Sistema de auditoría**: Registro completo de acciones
+- **Protección anti-fuerza bruta**: Bloqueo tras intentos fallidos
+- **Sesiones seguras**: Tokens únicos y expiración automática
+
+### v1.0.1 - Octubre 2025
+- **Dashboard con métricas**: Visualización de estadísticas clave
+- **Gestión de clientes**: CRUD completo con validaciones
+- **Control de cuotas**: Grid visual con estados avanzados
+- **Sistema de pagos**: Registro con prevención de duplicados
+- **Reportes**: Filtrado por período y método de pago
+- **Configuración**: Panel de ajustes y mantenimiento
+- **Base de datos optimizada**: Índices y consultas preparadas
+- **Interfaz glassmorphism**: Tema oscuro moderno
+
+## Instalación
 
 ### Windows
 
-1. Ejecutar `install.bat` para crear el entorno virtual e instalar dependencias
-2. Ejecutar `run.bat` para iniciar la aplicación
+1. Descargar `GesMonth-v2.1.0-Windows.zip`
+2. Descomprimir el archivo ZIP
+3. Entrar a la carpeta `GesMonth/`
+4. Ejecutar `GesMonth.exe`
 
-### Linux / Mac
+### Linux
 
-1. Ejecutar `./install.sh` para crear el entorno virtual e instalar dependencias
-2. Ejecutar `./run.sh` para iniciar la aplicación
+1. Descargar `GesMonth-v2.1.0-Linux.tar.gz`
+2. Descomprimir: `tar -xzf GesMonth-v2.1.0-Linux.tar.gz`
+3. Entrar a la carpeta: `cd GesMonth-v2.1.0-Linux/GesMonth`
+4. Ejecutar: `./GesMonth`
 
-### Instalación Manual
+**Nota**: El ejecutable necesita estar junto a las carpetas `assets/` y `.data/` para funcionar correctamente. No mover archivos fuera de su ubicación original.
 
-#### Requisitos Previos
-- Python 3.8 o superior
-- pip (gestor de paquetes de Python)
+**Credenciales por defecto**:
+```
+Usuario: admin
+Contraseña: admin123
+```
+*Cambiar después del primer inicio. Ver [docs/SISTEMA-AUTENTICACION.md](docs/SISTEMA-AUTENTICACION.md) para detalles.*
 
-#### Pasos
+## Arquitectura del Sistema
 
-1. **Clonar o descargar el proyecto**
-```bash
-cd GesMonth
+GesMonth utiliza una arquitectura limpia basada en el patrón MVC (Modelo-Vista-Controlador):
+
+### Estructura de Carpetas
+
+```
+GesMonth/
+├── database/          # Modelos y conexiones de base de datos
+├── ui/               # Interfaces gráficas (vistas)
+├── controllers/      # Lógica de negocio
+├── utils/            # Funciones auxiliares
+├── assets/           # Recursos estáticos (iconos, estilos)
+├── scripts/          # Scripts de automatización
+└── .data/            # Datos persistentes (bases de datos)
 ```
 
-2. **Crear entorno virtual (recomendado)**
+### Bases de Datos
 
-En Windows:
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
+El sistema utiliza dos bases de datos SQLite separadas:
 
-En Linux/Mac:
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
+**gesmonth.db** - Datos del negocio:
+- clientes: Información de clientes
+- cuotas_mensuales: Registro de cuotas por período
+- pagos: Historial de pagos realizados
+- metodos_pago: Métodos de pago configurables
+- configuracion: Ajustes del sistema
 
-3. **Instalar dependencias**
-```bash
-pip install -r requirements.txt
-```
+**users.db** - Autenticación y seguridad:
+- usuarios: Cuentas de usuario con roles
+- sesiones: Tokens de sesión activos
+- auditoria: Registro de acciones del sistema
 
-4. **Ejecutar la aplicación**
+Ver documentación completa en [docs/DESARROLLO.md](docs/DESARROLLO.md)
 
-Windows:
-```bash
-python main.py
-```
+## Documentación
 
-Linux/Mac:
-```bash
-python3 main.py
-```
-
-## Compilación a Ejecutable
+### Para Usuarios
+- [Guía de Usuario](docs/README-user.md): Manual de uso completo
+- [Sistema de Autenticación](docs/SISTEMA-AUTENTICACION.md): Gestión de usuarios y permisos
+- [Distribución](docs/DISTRIBUCION.md): Instrucciones de instalación
 
 ### Para Desarrolladores
+- [Guía de Desarrollo](docs/DESARROLLO.md): Arquitectura y flujo de trabajo
+- [Compilación](docs/BUILD.md): Crear ejecutables standalone
+- [README Desarrollador](docs/README-dev.md): Configuración del entorno
 
-Si deseas distribuir GesMonth como un ejecutable standalone (sin necesidad de instalar Python):
-
-#### Windows
-
-```bash
-build.bat
-```
-
-El ejecutable estará en: `dist\GesMonth.exe`
-
-#### Linux/Mac
-
-```bash
-./build.sh
-```
-
-El ejecutable estará en: `dist/GesMonth`
-
-### Distribución
-
-Para distribuir a usuarios finales:
-
-1. Copia toda la carpeta `dist` (no solo el .exe)
-2. Incluye el archivo `LEER_PRIMERO.txt` con instrucciones
-3. Comprime como: `GesMonth-v1.0.0-Windows.zip`
-
-**Nota**: El ejecutable debe estar junto a la carpeta `assets` para funcionar correctamente.
-
-**Guía completa de compilación**: Ver [BUILD.md](BUILD.md)
-
-## Guía de Uso
-
-### 1. Dashboard
-- **Métricas en tiempo real**: Total clientes, clientes en mora, clientes al día
-- **Totales del mes**: Visualiza el recaudado del mes actual con nombre del mes
-- **Totales del año**: Seguimiento del recaudado anual
-- **Footer informativo**: Versión y descripción de la aplicación
-
-### 2. Gestión de Clientes
-- **Agregar**: Registra nuevos clientes con nombre, documento, teléfono, valor de cuota y día de cobro
-- **Editar**: Modifica información de clientes existentes
-- **Eliminar**: Elimina clientes (también elimina sus pagos y cuotas asociadas)
-- **Buscar**: Filtra por nombre o documento en tiempo real
-- **Estado**: Activa o desactiva clientes sin eliminarlos
-
-### 3. Control de Cuotas
-- **Vista mensual**: Grid de 12 meses por cada año configurado
-- **Estados visuales**:
-  - Verde: Pagado completamente
-  - Rojo: Impago (genera mora)
-  - Amarillo: Con deuda (parcial o heredada)
-  - Gris: Pendiente (no vencido)
-- **Acciones rápidas**: Click en cualquier mes para registrar pago o impago
-- **Pagos parciales**: Registra abonos menores al valor total
-- **Detalles**: Visualiza historial completo de cada cuota
-
-### 4. Reportes
-- **Filtrado mensual**: Selecciona año y mes específico para ver estadísticas
-- **Métricas de cuotas**:
-  - Total de cuotas registradas
-  - Cantidad total en pagos
-  - Cantidad sin pagar
-  - Cantidad con deuda acumulada
-- **Por método de pago**: Desglose de pagos por efectivo, transferencia, etc.
-
-### 5. Configuración
-- **Métodos de pago**: Agrega, edita o elimina métodos personalizados
-- **Años de facturación**: Define qué años aparecen en el control de cuotas
-- **Mantenimiento**:
-  - Crear respaldo de base de datos
-  - Limpiar pagos duplicados
-- **Sistema**:
-  - Reiniciar aplicación
-  - Modo pantalla completa
-  - Salir de la aplicación
-
-## Base de Datos
-
-SQLite con 5 tablas principales y índices optimizados:
-
-### Tabla: clientes
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INTEGER | ID único (autoincremental) |
-| nombre | TEXT | Nombre del cliente |
-| documento | TEXT | Documento de identidad (único) |
-| telefono | TEXT | Número de teléfono |
-| estado | TEXT | Estado (activo/inactivo) |
-| valor_cuota | REAL | Monto de la cuota mensual |
-| dia_cobro | INTEGER | Día del mes para cobro (1-31) |
-
-### Tabla: cuotas_mensuales
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INTEGER | ID único |
-| cliente_id | INTEGER | ID del cliente (FK) |
-| año | INTEGER | Año de la cuota |
-| mes | INTEGER | Mes de la cuota (1-12) |
-| monto | REAL | Monto de la cuota |
-| estado | TEXT | pagado/impago/con_deuda/pendiente |
-| metodo_pago | TEXT | Método usado (si aplica) |
-| fecha_pago | DATE | Fecha del último pago |
-| deuda_acumulada | REAL | Deuda pendiente |
-| fecha_inicio_mora | DATE | Inicio de la mora |
-
-### Tabla: pagos
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INTEGER | ID único |
-| cliente_id | INTEGER | ID del cliente (FK) |
-| fecha_pago | DATE | Fecha en que se realizó el pago |
-| mes_correspondiente | TEXT | Mes al que corresponde (YYYY-MM) |
-| monto | REAL | Monto del pago |
-
-### Tabla: metodos_pago
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INTEGER | ID único |
-| nombre | TEXT | Nombre del método (único) |
-| activo | INTEGER | 1=activo, 0=inactivo |
-
-### Tabla: configuracion
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| clave | TEXT | Nombre de la configuración (PK) |
-| valor | TEXT | Valor de la configuración |
-
-### Índices Optimizados
-- `idx_clientes_estado`: Consultas por estado de cliente
-- `idx_clientes_documento`: Búsqueda por documento
-- `idx_pagos_cliente`: Historial de pagos por cliente
-- `idx_pagos_mes`: Consultas mensuales
-- `idx_cuotas_cliente`: Cuotas por cliente
-- `idx_cuotas_año_mes`: Búsqueda por período
-- `idx_cuotas_estado`: Filtrado por estado
-
-## Diseño y Personalización
-
-### Interfaz de Usuario
-- **Tema oscuro moderno** con degradados azules
-- **Glassmorphismo**: Efectos de cristal esmerilado
-- **Sidebar de navegación** intuitivo con 5 secciones
-- **Tarjetas de información** con bordes sutiles y transparencias
-- **Colores semánticos**: Verde (éxito), Rojo (error), Amarillo (advertencia), Azul (información)
-- **Typography responsiva** con jerarquía visual clara
-- **Timestamp en tiempo real** en el footer
-- **Sin emojis** en la interfaz para mantener profesionalismo
-
-### Personalizar Estilos
-
-Los estilos se encuentran en `assets/styles/main.qss`. Puedes modificar:
-
-```css
-/* Cambiar color primario */
-#sidebarHeader {
-    color: #60a5fa;  /* Azul principal */
-}
-
-/* Modificar tarjetas */
-QFrame {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(71, 85, 105, 0.5);
-    border-radius: 12px;
-}
-
-/* Ajustar fuentes */
-QLabel {
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    font-size: 14px;
-}
-```
-
-## Características Técnicas
-
-### Arquitectura
-- **Patrón MVC**: Separación clara de responsabilidades
-- **Active Record simplificado**: Métodos estáticos en modelos
-- **Row Factory**: Acceso a datos tipo diccionario
-- **Programación Orientada a Objetos**: Código modular y reutilizable
-
-### Optimizaciones
-- **Índices de base de datos**: Consultas 10x más rápidas
-- **Prevención de duplicados**: Validación en tiempo real (ventana de 5 segundos)
-- **Eliminación en cascada**: Integridad referencial automática
-- **Consultas preparadas**: Prevención de inyección SQL
-
-### Validaciones
-- **Documentos únicos**: No permite clientes con mismo documento
-- **Montos positivos**: Validación de valores mayores a 0
-- **Fechas válidas**: Verificación de rangos de fechas
-- **Estados consistentes**: Transiciones de estado controladas
+## Solución de Problemas
 
 ## Dependencias
 
@@ -372,25 +313,25 @@ pip install -r requirements.txt
 
 ## Solución de Problemas
 
-### La aplicación no inicia
-- Verifica que Python 3.8+ esté instalado: `python --version`
-- Asegúrate de haber activado el entorno virtual
-- Instala las dependencias: `pip install -r requirements.txt`
-- Revisa la consola para ver mensajes de error específicos
+### La aplicación no inicia (Windows)
+- Verifica que todas las carpetas estén presentes: `GesMonth.exe`, `assets/`, `_internal/`
+- Ejecuta desde línea de comandos para ver errores: `cmd` > navega a la carpeta > `GesMonth.exe`
+- Revisa que no haya antivirus bloqueando el ejecutable
 
-### Error "ModuleNotFoundError: No module named 'PyQt6'"
-- El entorno virtual no está activado o las dependencias no están instaladas
-- Solución: Activa el venv y ejecuta `pip install -r requirements.txt`
-
-### La base de datos no se crea
-- Verifica permisos de escritura en la carpeta del proyecto
-- La base de datos `gesmonth.db` se crea automáticamente en la primera ejecución
-- Si hay problemas, elimina `gesmonth.db` y reinicia la aplicación
+### La aplicación no inicia (Linux)
+- Verifica permisos de ejecución: `chmod +x GesMonth`
+- Ejecuta desde terminal para ver errores: `./GesMonth`
+- Instala librerías Qt6 si es necesario: `sudo apt install qt6-base-dev`
 
 ### Los estilos no se cargan correctamente
-- Verifica que exista el archivo `assets/styles/main.qss`
-- Revisa la consola para mensajes de error al cargar estilos
-- El archivo debe estar en la ruta correcta relativa al `main.py`
+- Verifica que la carpeta `assets/` esté junto al ejecutable
+- No muevas archivos fuera de su ubicación original
+- La aplicación necesita acceso de lectura a `assets/styles/`
+
+### La base de datos no funciona
+- Verifica que la carpeta `.data/` tenga permisos de escritura
+- Las bases de datos se crean automáticamente en `.data/gesmonth.db` y `.data/users.db`
+- Si hay problemas, elimina la carpeta `.data/` y reinicia la aplicación
 
 ### Los pagos aparecen duplicados
 - Ve a Configuración > Mantenimiento > Limpiar Pagos Duplicados
@@ -403,30 +344,37 @@ pip install -r requirements.txt
 
 ## Seguridad
 
-- **Consultas preparadas**: Prevención de inyección SQL
-- **Validación de entrada**: Todos los formularios validan datos
-- **Sanitización**: Los datos se limpian antes de insertar en BD
-- **Sin credenciales**: No se almacenan contraseñas (aplicación local)
-- **Respaldos manuales**: El usuario controla cuándo y dónde respaldar
-
-## Roadmap (Futuras Mejoras)
-
-- [ ] Exportación de reportes a Excel
-- [ ] Gráficos estadísticos con matplotlib
-- [ ] Recordatorios automáticos de cobro
-- [ ] Envío de notificaciones por email/WhatsApp
-- [ ] Generación de recibos de pago en PDF
-- [ ] Multi-idioma (Español/Inglés)
-- [ ] Modo claro/oscuro configurable
-- [ ] Sistema de usuarios y permisos
-- [ ] Backup automático programado
-- [ ] Dashboard con gráficos interactivos
-
-## Licencia
-
-Este proyecto es de código licenciado para uso privado.
+- Consultas preparadas: Prevención de inyección SQL
+- Validación de entrada: Todos los formularios validan datos
+- Sanitización: Los datos se limpian antes de insertar en BD
+- Contraseñas encriptadas: bcrypt con salt aleatorio
+- Sistema de bloqueo: Protección contra ataques de fuerza bruta
+- Sesiones seguras: Tokens únicos por sesión de usuario
 
 ## Desarrollo
+
+### Para Desarrolladores
+
+Si deseas modificar el código fuente:
+
+#### Requisitos
+- Python 3.8 o superior
+- pip (gestor de paquetes)
+
+#### Pasos
+
+1. Clonar el repositorio
+2. Crear entorno virtual:
+   - Windows: `python -m venv venv && venv\Scripts\activate`
+   - Linux/Mac: `python3 -m venv venv && source venv/bin/activate`
+3. Instalar dependencias: `pip install -r requirements.txt`
+4. Ejecutar: `python main.py`
+
+#### Compilar ejecutable
+- Windows: `scripts\build.bat`
+- Linux/Mac: `./scripts/build.sh`
+
+Ver documentación completa en [docs/BUILD.md](docs/BUILD.md)
 
 ### Tecnologías Utilizadas
 - **Python 3.8+**: Lenguaje de programación
@@ -449,75 +397,67 @@ Este proyecto es de código licenciado para uso privado.
    - Crea la clase del modelo en `database/models.py`
    - Implementa métodos CRUD estáticos
 
-2. **Nueva vista**:
-   - Crea un archivo en `ui/` (ej: `nueva_view.py`)
-   - Hereda de `QWidget` e implementa `_init_ui()`
-   - Agrégala al `QStackedWidget` en `main_window.py`
-   - Añade el botón de navegación en el sidebar
 
-3. **Nuevo controlador**:
-   - Crea un archivo en `controllers/` (ej: `nuevo_controller.py`)
-   - Implementa la lógica de negocio como métodos estáticos
-   - Importa y usa desde las vistas correspondientes
+### Cliente en mora no se marca correctamente
+- La mora se determina por el último registro del cliente
+- Si el último mes registrado es "impago", el cliente está en mora
+- Los meses sin registrar no cuentan como mora
 
-### Convenciones de Código
+## Licencia
 
-```python
-# Nombres de clases: PascalCase
-class ClienteController:
-    pass
+Este proyecto está bajo la **Source Available License (SAL)**.
 
-# Nombres de métodos/funciones: snake_case
-def crear_cliente(nombre: str) -> int:
-    pass
+### Permisos:
+- Ver y estudiar el código fuente
+- Usar para fines personales o educativos
+- Modificar para uso personal o interno
+- Crear trabajos derivados para uso personal
 
-# Constantes: UPPER_SNAKE_CASE
-MAX_RETRIES = 3
+### Restricciones:
+- No redistribuir sin permiso explícito
+- No uso comercial sin permiso
+- No usar en servicios SaaS sin autorización
+- No distribuir trabajos derivados sin permiso
 
-# Variables privadas: prefijo con _
-def _metodo_privado(self):
-    pass
-```
+Para uso comercial o redistribución, contacta: dilansg@gmail.com
 
-### Contribuciones
+Ver archivo [LICENSE](LICENSE) para más detalles.
 
-Las contribuciones son bienvenidas. Para contribuir:
+## Contribuciones
 
-1. **Fork** el repositorio
-2. Crea una **rama** para tu feature: `git checkout -b feature/nueva-caracteristica`
-3. **Commit** tus cambios: `git commit -am 'Agrega nueva característica'`
-4. **Push** a la rama: `git push origin feature/nueva-caracteristica`
-5. Abre un **Pull Request**
+Las contribuciones son bienvenidas siguiendo las directrices del proyecto:
 
-### Guidelines para Pull Requests
-- Describe claramente qué cambia el PR
-- Incluye capturas de pantalla para cambios visuales
-- Asegura que no hay errores de sintaxis
-- Mantén el estilo de código existente
-- Actualiza la documentación si es necesario
+1. Fork el repositorio
+2. Crea una rama para tu feature: `git checkout -b feature/nueva-caracteristica`
+3. Commit tus cambios: `git commit -am 'Agrega nueva característica'`
+4. Push a la rama: `git push origin feature/nueva-caracteristica`
+5. Abre un Pull Request
 
-## Soporte y Contacto
+Ver [docs/DESARROLLO.md](docs/DESARROLLO.md) para guía completa de contribución.
 
-- **Issues**: Reporta bugs o sugiere mejoras abriendo un issue
-- **Documentación**: Consulta la carpeta `docs/` para más detalles
-- **Preguntas**: Abre una discusión en el repositorio
+## Soporte
 
-## Agradecimientos
+- **Issues**: Reporta bugs o sugiere mejoras en [GitHub Issues](../../issues)
+- **Documentación**: Consulta la carpeta `docs/` para guías detalladas
+- **Email**: dilansag20@gmail.com
 
-- **PyQt6**: Por framework GUI
-- **Python Community**: Por las herramientas y librerías
-- **Claude Sonnet 4.5**: Por diseño UI/UX
+## Créditos
+
+- **PyQt6**: Framework GUI multiplataforma
+- **Python Community**: Herramientas y librerías
+- **SQLite**: Base de datos embebida
+- **bcrypt**: Encriptación de contraseñas
 
 ---
 
 <div align="center">
 
-**GesMonth v1.0.1**
+**GesMonth v2.1.0**
 
 Sistema profesional de gestión de pagos y cuotas mensuales
 
-Desarrollado por Dilan Acuña
+Desarrollado por Dilan Acuña | Licencia: Source Available (SAL)
 
-[📖 Documentación](docs/) • [🐛 Reportar Bug](../../issues) • [💡 Sugerir Feature](../../issues)
+[Documentación](docs/) | [Reportar Bug](../../issues) | [Sugerir Feature](../../issues)
 
 </div>

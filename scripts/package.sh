@@ -35,22 +35,25 @@ if [ -d "GesMonth-v${VERSION}-Linux/GesMonth/_internal/assets" ]; then
     mv "GesMonth-v${VERSION}-Linux/GesMonth/_internal/assets" "GesMonth-v${VERSION}-Linux/GesMonth/"
 fi
 
-# Copiar documentación para usuarios
-cp LEER_PRIMERO-DISTRIBUCION.txt "GesMonth-v${VERSION}-Linux/README.txt"
+# Copiar documentación para usuarios con reemplazo de versión
+echo "Generando README con versión ${VERSION}..."
+sed "s/{{VERSION}}/${VERSION}/g" LEER_PRIMERO-DISTRIBUCION.txt > "GesMonth-v${VERSION}-Linux/README.txt"
 cp VERSION "GesMonth-v${VERSION}-Linux/GesMonth/"
 
-# Crear archivo de licencia simple
-cat > "GesMonth-v${VERSION}-Linux/LICENSE.txt" << EOF
-GesMonth v${VERSION}
-
-Este software es de código licenciado para uso personal y comercial bajo los términos de la licencia MIT.
-
-Desarrollado por Dilan Acuña
-Diciembre 2025
-EOF
+# Copiar licencia
+cp LICENSE "GesMonth-v${VERSION}-Linux/LICENSE.txt"
 
 # Dar permisos de ejecución
 chmod +x "GesMonth-v${VERSION}-Linux/GesMonth/GesMonth"
+
+# Crear carpeta .data con archivos .db placeholder vacíos
+echo "Creando estructura de datos..."
+mkdir -p "GesMonth-v${VERSION}-Linux/GesMonth/.data"
+touch "GesMonth-v${VERSION}-Linux/GesMonth/.data/gesmonth.db"
+touch "GesMonth-v${VERSION}-Linux/GesMonth/.data/users.db"
+# Permisos de solo lectura (la app los eliminará y creará nuevos al iniciar)
+chmod 444 "GesMonth-v${VERSION}-Linux/GesMonth/.data/gesmonth.db"
+chmod 444 "GesMonth-v${VERSION}-Linux/GesMonth/.data/users.db"
 
 # Crear archivo tar.gz
 echo "Comprimiendo..."
@@ -77,6 +80,3 @@ else
 fi
 
 echo "Carpeta temporal: GesMonth-v${VERSION}-Linux/"
-
-echo "Carpeta temporal: GesMonth-v1.0.0-Linux/"
-echo ""
