@@ -208,20 +208,20 @@ Compatibilidad Mejorada con Windows
 - Toggle switches modernos
 - Splash screen inteligente
 
-**v2.0.0 (25 dic 2024):**
+**v2.0.0 (25 dic 2025):**
 - Sistema de autenticación (bcrypt)
 - 4 roles de usuario
 - Gestión de usuarios y auditoría
 - Protección anti-fuerza bruta
 - Sistema de temas claro/oscuro
 
-**v1.0.1 (23 dic 2024):**
+**v1.0.1 (23 dic 2025):**
 - Ejecutable standalone con PyInstaller
 - Scripts de compilación y empaquetado
 - Optimización de assets y rutas
 - GitHub Actions para builds automáticos
 
-**v1.0.0 (23 dic 2024):**
+**v1.0.0 (23 dic 2025):**
 - Release inicial
 - Dashboard con métricas clave
 - Gestión completa de clientes (CRUD)
