@@ -296,7 +296,7 @@ class HomeView(QWidget):
         try:
             import os
             version_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'VERSION')
-            with open(version_file, 'r') as f:
+            with open(version_file, 'r', encoding='utf-8') as f:
                 version_number = f.read().strip()
         except:
             version_number = "1.0.1"
