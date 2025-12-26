@@ -2,6 +2,15 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [2.1.1] - 2025-12-26
+
+### Añadido
+- **Compatibilidad Mejorada con Windows**: Soporte completo para sistemas Windows con diferentes configuraciones regionales
+- Lectura de archivos con encoding UTF-8 explícito en todas las operaciones
+- Compatibilidad con sistemas que usan codepage 1252, 1250 y otras variantes regionales
+- Gestión robusta de archivos SVG en entornos Windows
+- Lectura consistente del archivo VERSION independientemente del sistema operativo
+
 ## [2.1.0] - 2025-12-26
 
 ### Añadido

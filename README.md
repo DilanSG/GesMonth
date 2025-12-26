@@ -1,6 +1,6 @@
 # GesMonth - Sistema de Gestión de Pagos Mensuales
 
-![Version](https://img.shields.io/badge/Version-2.1.0-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-2.1.1-brightgreen.svg)
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![PyQt6](https://img.shields.io/badge/PyQt6-6.7.1-green.svg)
 ![SQLite](https://img.shields.io/badge/SQLite-3-orange.svg)
@@ -11,6 +11,8 @@
 **GesMonth** es un sistema profesional de escritorio para la gestión de pagos y cuotas mensuales. Diseñado para pequeños negocios, academias, centros de formación y cualquier organización que requiera control de pagos recurrentes de manera eficiente y segura.
 
 Desarrollado con Python y PyQt6, ofrece una interfaz moderna con efectos glassmorphism, autenticación multi-nivel, y gestión completa de clientes, cuotas y reportes financieros.
+
+> **Novedad v2.1.1:** Compatibilidad mejorada con Windows. Soporte completo para todas las configuraciones regionales de Windows (codepage 1252, 1250, etc.). Funcionamiento garantizado en cualquier versión de Windows sin importar el idioma del sistema.
 
 ## Características Principales
 

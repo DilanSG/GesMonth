@@ -230,7 +230,7 @@ class MainWindow(QMainWindow):
             # Cargar y aplicar icono SVG
             icon_path = get_resource_path(os.path.join("assets", "icons", icon_file))
             if os.path.exists(icon_path):
-                with open(icon_path, 'r') as f:
+                with open(icon_path, 'r', encoding='utf-8') as f:
                     svg_content = f.read()
                     # Aplicar color según tema
                     if is_dark:
@@ -270,7 +270,7 @@ class MainWindow(QMainWindow):
         # Cargar SVG de configuración según el tema
         config_svg_path = get_resource_path(os.path.join("assets", "icons", "settings.svg"))
         if os.path.exists(config_svg_path):
-            with open(config_svg_path, 'r') as f:
+            with open(config_svg_path, 'r', encoding='utf-8') as f:
                 svg_content = f.read()
                 # Color gris según tema
                 if is_dark:
@@ -312,7 +312,7 @@ class MainWindow(QMainWindow):
         # Cargar SVG de cerrar sesión según el tema
         restart_svg_path = get_resource_path(os.path.join("assets", "icons", "logout-session.svg"))
         if os.path.exists(restart_svg_path):
-            with open(restart_svg_path, 'r') as f:
+            with open(restart_svg_path, 'r', encoding='utf-8') as f:
                 svg_content = f.read()
                 # Color azul según tema
                 if is_dark:
@@ -352,7 +352,7 @@ class MainWindow(QMainWindow):
         # Cargar SVG de cerrar programa según el tema
         logout_svg_path = get_resource_path(os.path.join("assets", "icons", "power-off.svg"))
         if os.path.exists(logout_svg_path):
-            with open(logout_svg_path, 'r') as f:
+            with open(logout_svg_path, 'r', encoding='utf-8') as f:
                 svg_content = f.read()
                 # Color rojo según tema
                 if is_dark:
@@ -478,7 +478,7 @@ class MainWindow(QMainWindow):
             version_path = get_resource_path('VERSION')
             
             if os.path.exists(version_path):
-                with open(version_path, 'r') as f:
+                with open(version_path, 'r', encoding='utf-8') as f:
                     version = f.read().strip()
                     self.version_label.setText(f"v{version}")
             else:
