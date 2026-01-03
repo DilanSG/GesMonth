@@ -2,6 +2,125 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [2.2.0] - 2025-01-03
+
+### Añadido
+
+#### Sistema de Logs Completo y Mejorado
+- **Tabla `logs_sistema` simplificada**: 6 columnas esenciales (id, usuario_id, usuario_nombre, fecha_hora, accion, detalles)
+- **Modelo LogSistema**: CRUD completo y optimizado en `database/models.py`
+- **LogController**: Controlador dedicado con API simplificada para registro, consulta y exportación
+- **Registro automático exhaustivo** en todas las operaciones críticas:
+  - **Pagos**: Registrar, eliminar (con detalles del monto)
+  - **Clientes**: Crear, editar (muestra campos modificados), eliminar
+  - **Cuotas**: Eliminar registros (diferencia PAGADO/IMPAGO/PARCIAL con montos específicos)
+  - **Métodos de pago**: Crear, editar (muestra cambio: anterior → nuevo), eliminar
+  - **Usuarios**: Crear, editar (muestra campos actualizados), cambiar contraseña, activar/desactivar
+- **Mensajes descriptivos en español**: Cada log usa lenguaje natural y claro para usuarios finales
+
+#### Vista de Historial de Cambios (Superadmin)
+- **Nueva pestaña en Configuración**: "Historial de Cambios" exclusiva para superadmin
+- **Tabla interactiva** con todos los logs del sistema:
+  - Columnas: Fecha y Hora, Usuario, Acción, Detalles, ID
+  - Ordenados del más reciente al más antiguo
+  - Últimos 1000 registros visibles
+- **Colores por tipo de acción**:
+  - Verde: Crear/Registrar
+  - Rojo: Eliminar
+  - Azul: Editar/Actualizar/Cambiar
+  - Amarillo: Impago
+- **Word wrap automático**: Detalles largos se expanden en múltiples líneas sin cortarse
+- **Botón de actualizar**: Refresca los datos en tiempo real
+- **Sin límite de texto**: Todos los detalles visibles sin "..." de truncamiento
+
+#### Interfaz de Descarga de Logs Mejorada
+- **Botón "Descargar Logs"** en Configuración → General → Mantenimiento
+- **Exportación a CSV optimizada**: 
+  - Formato compatible con Excel, LibreOffice y Google Sheets
+  - Encoding UTF-8 con BOM para correcta visualización de acentos
+  - 6 columnas: ID, Usuario ID, Usuario, Fecha y Hora, Acción, Detalles
+- **Nombre automático con timestamp**: `logs_gesmonth_YYYYMMDD_HHMMSS.csv`
+- **Estadísticas en exportación**: Muestra total de registros exportados
+- **Diálogo de ubicación**: Permite elegir dónde guardar el archivo
+
+#### Detalles Mejorados de Logs
+Los mensajes de log ahora son descriptivos y específicos por tipo de acción:
+
+**Clientes:**
+- Crear: "Se registró un nuevo cliente con los siguientes datos: Nombre: [nombre], CC: [doc]"
+- Editar: "Datos de cliente actualizados a: Nombre: [nuevo], CC: [nuevo], Cuota: $[nuevo]"
+- Eliminar: "Se eliminó el cliente: [nombre], CC: [doc]"
+
+**Métodos de Pago:**
+- Crear: "Nuevo método de pago creado: [nombre]"
+- Editar: "Método de pago anterior: [viejo], Método de pago nuevo: [nuevo]"
+- Eliminar: "Método de pago eliminado: [nombre]"
+
+**Usuarios:**
+- Crear: "Se creó un nuevo usuario: [username], Nombre: [nombre], Rol: [rol]"
+- Editar: "Datos de usuario actualizados a: Nombre: [nuevo], Rol: [nuevo]"
+- Cambiar contraseña: "Se cambió la contraseña del usuario: [username]" (sin mostrar contraseña)
+- Activar/Desactivar: "Usuario [username] activado/desactivado"
+
+**Registros de Cuotas:**
+- Eliminar PAGADO: "Se eliminó un registro PAGADO: Cliente: [nombre], Mes: [mes año], Monto: $[X], Método: [método]"
+- Eliminar IMPAGO: "Se eliminó un registro IMPAGO: Cliente: [nombre], Mes: [mes año], Cuota: $[X]"
+- Eliminar PARCIAL: "Se eliminó un registro PARCIAL: Cliente: [nombre], Mes: [mes año], Cuota: $[X], Deuda pendiente: $[Y]"
+
+#### Optimización de Base de Datos
+- **Índices optimizados** para consultas ultra rápidas:
+  - `idx_logs_usuario`: Búsqueda por usuario
+  - `idx_logs_fecha`: Búsqueda por rango de fechas
+- **API simplificada**: Solo 4 parámetros (usuario_id, usuario_nombre, accion, detalles)
+- **Métodos de filtrado mejorados**: Por acción, usuario, rango de fechas
+- **Límite de consultas configurables**: Control de memoria con límite opcional
+
+#### Testing y Validación
+- **Script completo de pruebas**: `scripts/test_logs.py` con 6 tests
+- **Verificaciones automáticas**:
+  - Existencia y estructura de tabla
+  - Creación de logs
+  - Consulta y filtrado
+  - Exportación a CSV
+  - Estadísticas del sistema
+- **Salida visual mejorada**: Formato con cajas y colores para fácil lectura
+- **Script wrapper**: `scripts/test_logs.sh` para ejecución con entorno virtual
+
+#### Documentación Completa
+- **Comentarios en imports**: Explicación de cada módulo importado y su uso
+- **Docstrings detallados**: Funciones complejas documentadas con:
+  - Descripción del propósito
+  - Algoritmos paso a paso
+  - Ejemplos de uso
+  - Advertencias y consideraciones
+- **Comentarios en funciones críticas**:
+  - Patrón Singleton en DatabaseConnection
+  - Sistema de bloqueo por intentos fallidos en autenticación
+  - Hashing con bcrypt y validaciones de seguridad
+  - Lógica de pagos parciales y deuda acumulada
+  - Toggle Switch animado con QPropertyAnimation
+  - Renderizado SVG dinámico según tema
+
+### Mejorado
+- **Controladores completamente actualizados**:
+  - ClienteController: Inyección de log_controller y usuario_actual
+  - PagoController: Preparado para logs (por implementar en futuras versiones)
+  - ConfigController: Logging en métodos de pago
+- **Inyección de dependencias en vistas**:
+  - CuotasView recibe usuario_actual para logs en eliminaciones
+  - ClientesView configurada con log_controller en MainWindow
+  - DetallesCuotaDialog recibe usuario_actual para logs
+- **Interfaz más robusta**: Word wrap y ajuste automático de altura en tablas
+- **Código más mantenible**: Comentarios exhaustivos en funciones complejas
+- **Sistema de auditoría integral**: Complementa auditoría de usuarios con logs de negocio
+
+### Técnico
+- **Arquitectura mejorada**: Separación clara entre auditoría de usuarios y logs de negocio
+- **Rendimiento optimizado**: Índices en columnas frecuentemente consultadas
+- **Seguridad reforzada**: Logs inmutables, no se pierden al eliminar usuarios
+- **Escalabilidad**: Sistema preparado para millones de registros con paginación
+- **Internacionalización**: Todos los mensajes en español claro y profesional
+
 ## [2.1.1] - 2025-12-26
 
 ### Añadido
@@ -147,7 +266,7 @@ controllers/theme_controller.py  # Integración con ConfigController
 
 **Sistema de Login**
 - Autenticación segura con contraseñas encriptadas usando bcrypt
-- Prevención de ataques de fuerza bruta (bloqueo tras 5 intentos fallidos)
+- Prevención de ataques de fuerza bruta (bloqueo tras 10 intentos fallidos)
 - Desbloqueo automático después de 15 minutos
 - Validación de credenciales en tiempo real
 

@@ -71,28 +71,37 @@ REQUISITOS DEL SISTEMA
 PRIMEROS PASOS
 ═══════════════════════════════════════════════════════════════════
 
-1. Al iniciar por primera vez, GesMonth creará automáticamente una
-   base de datos SQLite en la misma carpeta del ejecutable.
+1. Al iniciar por primera vez, se mostrará la pantalla de login.
+   Credenciales por defecto:
+   Usuario: admin
+   Contraseña: admin123
+   (IMPORTANTE: Cambiar después del primer ingreso)
 
-2. El Dashboard mostrará estadísticas iniciales (todo en 0).
+2. GesMonth creará automáticamente las bases de datos SQLite en la
+   carpeta .data/ junto al ejecutable.
 
 3. Ve a "Clientes" para agregar tus primeros clientes.
 
-4. Luego ve a "Cuotas" para registrar pagos mensuales.
+4. Ve a Configuracion de pagos y crea metodos de pagos personalizados.
 
-5. Usa "Reportes" para exportar información a Excel.
+5. Usa "Cuotas" para registrar pagos mensuales.
 
 ═══════════════════════════════════════════════════════════════════
 CARACTERÍSTICAS PRINCIPALES
 ═══════════════════════════════════════════════════════════════════
 
+- Sistema de autenticación seguro con 4 niveles de roles
 - Dashboard con estadísticas en tiempo real
 - Gestión completa de clientes (CRUD)
-- Registro de pagos mensuales
-- Control de cuotas por año/mes
-- Reportes exportables a Excel
-- Interfaz moderna con efectos de cristal (glassmorphism)
-- Base de datos SQLite integrada
+- Registro de pagos mensuales con múltiples métodos
+- Control de cuotas por año/mes con estados avanzados
+- Sistema de logs completo para auditoría total
+- Historial de cambios interactivo (solo superadmin)
+- Exportación de logs a CSV
+- Gestión de usuarios con permisos personalizados
+- Temas claro/oscuro con persistencia
+- Interfaz moderna con efectos glassmorphism
+- Bases de datos SQLite seguras y optimizadas
 - Búsqueda y filtrado avanzado
 
 ═══════════════════════════════════════════════════════════════════
