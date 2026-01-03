@@ -15,6 +15,14 @@ INSTALACIÓN RÁPIDA
 
 3. Haz doble clic en GesMonth.exe
 
+4. Si Windows SmartScreen bloquea la aplicación:
+   • Haz clic en "Más información"
+   • Luego en "Ejecutar de todas formas"
+   • Esto es normal para aplicaciones no firmadas digitalmente
+   • Todo el código fuente está disponible en GitHub para
+     verificación y confianza en la seguridad de la aplicación:
+     https://github.com/DIlanSG/GesMonth
+
 ¡Eso es todo! La aplicación iniciará automáticamente.
 
 ═══════════════════════════════════════════════════════════════════
@@ -42,26 +50,29 @@ REQUISITOS DEL SISTEMA
 PRIMEROS PASOS
 ═══════════════════════════════════════════════════════════════════
 
-1. Al iniciar por primera vez, GesMonth creará automáticamente una
-   base de datos SQLite en la misma carpeta del ejecutable.
+1. Al iniciar por primera vez, se mostrará la pantalla de login.
+   Credenciales por defecto:
+   Usuario: admin
+   Contraseña: admin123
+   (IMPORTANTE: Cambiar después del primer ingreso)
 
-2. El Dashboard mostrará estadísticas iniciales (todo en 0).
+2. GesMonth creará automáticamente las bases de datos SQLite en la
+   carpeta .data/ junto al ejecutable.
 
-3. Ve a "Clientes" para agregar tus primeros clientes.
+3. El Dashboard mostrará estadísticas en tiempo real.
 
-4. Luego ve a "Cuotas" para registrar pagos mensuales.
+4. Ve a "Clientes" para agregar tus primeros clientes.
 
-5. Usa "Reportes" para exportar información a Excel.
+5. Usa "Cuotas" para registrar pagos mensuales.
+
+6. Consulta "Reportes" para ver estadísticas mensuales.
+
+7. (Solo Superadmin) Ve a "Configuración" > "Historial de Cambios"
+   para ver todos los logs del sistema.
 
 ═══════════════════════════════════════════════════════════════════
 SOLUCIÓN DE PROBLEMAS
 ═══════════════════════════════════════════════════════════════════
-
-PROBLEMA: Windows SmartScreen bloquea la aplicación
-SOLUCIÓN: 
-  • Haz clic en "Más información"
-  • Luego en "Ejecutar de todas formas"
-  • Esto es normal para aplicaciones no firmadas digitalmente
 
 PROBLEMA: Antivirus marca el ejecutable como sospechoso
 SOLUCIÓN: 
@@ -92,27 +103,35 @@ CREAR ACCESO DIRECTO EN EL ESCRITORIO
 CARACTERÍSTICAS PRINCIPALES
 ═══════════════════════════════════════════════════════════════════
 
+- Sistema de autenticación seguro con 4 niveles de roles
 - Dashboard con estadísticas en tiempo real
 - Gestión completa de clientes (CRUD)
-- Registro de pagos mensuales
-- Control de cuotas por año/mes
-- Reportes exportables a Excel
-- Interfaz moderna con efectos de cristal (glassmorphism)
-- Base de datos SQLite integrada
+- Registro de pagos mensuales con múltiples métodos
+- Control de cuotas por año/mes con estados avanzados
+- Sistema de logs completo para auditoría total
+- Historial de cambios interactivo (solo superadmin)
+- Exportación de logs a CSV
+- Gestión de usuarios con permisos personalizados
+- Temas claro/oscuro con persistencia
+- Interfaz moderna con efectos glassmorphism
+- Bases de datos SQLite seguras y optimizadas
 - Búsqueda y filtrado avanzado
 
 ═══════════════════════════════════════════════════════════════════
-UBICACIÓN DE LA BASE DE DATOS
+UBICACIÓN DE LAS BASES DE DATOS
 ═══════════════════════════════════════════════════════════════════
 
-La base de datos (gesmonth.db) se crea automáticamente en la 
-carpeta .data .
+Las bases de datos se crean automáticamente en la carpeta .data/:
+  • gesmonth.db - Datos del negocio (clientes, pagos, cuotas)
+  • users.db - Usuarios, sesiones y logs del sistema
 
 Para hacer respaldo:
-  • Copia el archivo gesmonth.db a otro lugar seguro
+  • Copia toda la carpeta .data/ a otro lugar seguro
+  • O usa la opción de respaldo desde Configuración > Mantenimiento
+  • Para exportar logs: Configuración > Mantenimiento > Descargar Logs
 
 Para restaurar:
-  • Reemplaza gesmonth.db con tu copia de respaldo
+  • Reemplaza gesmonth.db y/o users.db con tu copia de respaldo
 
 
 Esta accion también se puede hacer con los usuarios, si quieres 

@@ -1,6 +1,6 @@
 # GesMonth - Sistema de Gestión de Pagos Mensuales
 
-![Version](https://img.shields.io/badge/Version-2.1.1-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-2.2.0-brightgreen.svg)
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![PyQt6](https://img.shields.io/badge/PyQt6-6.7.1-green.svg)
 ![SQLite](https://img.shields.io/badge/SQLite-3-orange.svg)
@@ -10,19 +10,63 @@
 
 **GesMonth** es un sistema profesional de escritorio para la gestión de pagos y cuotas mensuales. Diseñado para pequeños negocios, academias, centros de formación y cualquier organización que requiera control de pagos recurrentes de manera eficiente y segura.
 
-Desarrollado con Python y PyQt6, ofrece una interfaz moderna con efectos glassmorphism, autenticación multi-nivel, y gestión completa de clientes, cuotas y reportes financieros.
+Desarrollado con Python y PyQt6, ofrece una interfaz moderna con efectos glassmorphism, autenticación multi-nivel, gestión completa de clientes, cuotas, reportes financieros y **sistema de logs integral para auditoría completa**.
 
-> **Novedad v2.1.1:** Compatibilidad mejorada con Windows. Soporte completo para todas las configuraciones regionales de Windows (codepage 1252, 1250, etc.). Funcionamiento garantizado en cualquier versión de Windows sin importar el idioma del sistema.
+> **Novedad v2.2.0:** Sistema de logs completo y mejorado. Ahora con **Historial de Cambios** (pestaña exclusiva para superadmin), registro automático exhaustivo de todas las operaciones críticas, exportación a CSV, mensajes descriptivos en español y tabla interactiva con colores por tipo de acción. Auditoría total de pagos, clientes, usuarios, métodos de pago y cuotas.
 
 ## Características Principales
+
+### Sistema de Logs y Auditoría Integral (NUEVO v2.2.0)
+- **Registro automático exhaustivo**: Cada operación crítica genera un log detallado
+- **Historial de Cambios Interactivo**:
+  - Pestaña exclusiva para superadmin en Configuración
+  - Visualización de últimos 1000 logs en tabla ordenable
+  - Colores por tipo de acción:
+    - Verde: Crear/Registrar
+    - Rojo: Eliminar
+    - Azul: Editar/Actualizar/Cambiar
+    - Amarillo: Impago
+  - Word wrap automático sin truncar detalles
+  - Botón de actualizar en tiempo real
+  - Scroll vertical para navegación completa
+- **Exportación Profesional**:
+  - Descarga todos los logs en formato CSV
+  - Compatible con Excel, LibreOffice y Google Sheets
+  - Nombre automático con timestamp: `logs_gesmonth_YYYYMMDD_HHMMSS.csv`
+  - Encoding UTF-8 con BOM para correcta visualización de acentos
+  - 6 columnas: ID, Usuario ID, Usuario, Fecha y Hora, Acción, Detalles
+- **Mensajes Descriptivos en Español**: 
+  - Cada log explica claramente qué se hizo, quién lo hizo y cuándo
+  - Ejemplos:
+    - "Se registró un nuevo cliente con los siguientes datos: Nombre: Juan Pérez, CC: 12345678"
+    - "Se eliminó un registro PAGADO: Cliente: Ana López, Mes: enero 2025, Monto: $50000, Método: Efectivo"
+    - "Método de pago anterior: Nequi, Método de pago nuevo: Daviplata"
+- **Trazabilidad Completa**:
+  - **Pagos**: Registrar (monto, método), eliminar (con detalles del monto eliminado)
+  - **Clientes**: Crear (todos los datos), editar (campos modificados), eliminar
+  - **Cuotas**: Eliminar registros diferenciando PAGADO/IMPAGO/PARCIAL con montos específicos
+  - **Métodos de pago**: Crear, editar (muestra cambio: anterior → nuevo), eliminar
+  - **Usuarios**: Crear, editar (muestra campos actualizados), cambiar contraseña, activar/desactivar
+- **Optimización de Base de Datos**:
+  - Tabla `logs_sistema` simplificada: 6 columnas esenciales
+  - Índices en usuario_id y fecha_hora para consultas ultra-rápidas
+  - Modelo LogSistema con API simplificada
+  - Métodos de filtrado por acción, usuario y rango de fechas
+- **Seguridad y Persistencia**:
+  - Logs inmutables: No se pueden editar ni borrar desde la UI
+  - Independientes de usuarios: Se mantienen aunque usuario sea eliminado
+  - Timestamp preciso hasta segundos
+  - Protección contra pérdida de información
 
 ### Autenticación y Seguridad
 - Sistema de login con encriptación bcrypt
 - 4 niveles de roles: Superadmin, Admin, Operador, Solo Lectura
 - Gestión de usuarios con control de permisos
 - Auditoría completa de acciones del sistema
-- Protección contra ataques de fuerza bruta
+- **Sistema de logs integral** para trazabilidad total de operaciones críticas
+- Protección contra ataques de fuerza bruta (bloqueo temporal tras 10 intentos fallidos)
 - Sesiones basadas en tokens seguros
+- **Historial de Cambios** visible solo para superadmin
 
 ### Dashboard Inteligente
 - Métricas en tiempo real del estado del negocio
@@ -38,18 +82,7 @@ Desarrollado con Python y PyQt6, ofrece una interfaz moderna con efectos glassmo
 - Configuración personalizada de día de cobro (1-31)
 - Valor de cuota mensual configurable
 - Estados: activo/inactivo sin eliminación física
-
-### Control de Cuotas Mensuales
-- Grid visual organizado por año y mes
-- Sistema de estados avanzado:
-  - **Pago**: Cuota completamente pagada
-  - **Impago**: Sin pago registrado (genera mora)
-  - **Con Deuda**: Pago parcial o deuda heredada
-  - **Pendiente**: Aún no vencido
-- Seguimiento de deuda acumulada entre meses
-- Registro automático de fecha de inicio de mora
-- Soporte para pagos parciales y abonos
-- Dialog detallado con historial completo
+- Cada creación, edición o eliminación queda registrada con detalles completos en el sistema de registro(logs) - Diferencia entre registros PAGADO, IMPAGO y PARCIAL con montos específicos
 
 ### Registro de Pagos
 - Múltiples métodos de pago configurables
@@ -57,6 +90,7 @@ Desarrollado con Python y PyQt6, ofrece una interfaz moderna con efectos glassmo
 - Historial completo por cliente
 - Asociación inteligente al mes correspondiente
 - Gestión de pagos parciales
+- Registro de eliminación de pagos con monto y método de pago
 
 ### Reportes y Estadísticas
 - Filtrado por año y mes específico
@@ -69,13 +103,15 @@ Desarrollado con Python y PyQt6, ofrece una interfaz moderna con efectos glassmo
 - Visualización con tarjetas profesionales
 
 ### Configuración Avanzada
-- Gestión de métodos de pago personalizados
+- Gestión de métodos de pago personalizados con logs de cambios
 - Configuración de años de facturación
 - Sistema de temas (claro/oscuro) con persistencia
 - Modo pantalla completa configurable
 - Respaldo manual de base de datos
 - Limpieza de pagos duplicados
-- Gestión de usuarios (solo superadmin)
+- Gestión de usuarios (solo superadmin) con logs de operaciones
+- **Mantenimiento**: Botón "Descargar Logs" para exportar historial completo a CSV
+- **Historial de Cambios**: Nueva pestaña exclusiva para superadmin con visualización interactiva de logs
 
 ## Tecnologías Utilizadas
 
@@ -193,24 +229,34 @@ GesMonth/
         └── main.qss           # Estilos CSS (Glassmorphismo)
 ```
 
-### Historial de Versiones
-**v2.1.1 (26 dic 2025):**
-Compatibilidad Mejorada con Windows
-- Soporte universal para Windows (7/8/10/11)
-- Encoding UTF-8 explícito en todas las operaciones de archivo
-- Compatible con todos los codepages de Windows (CP-1252, CP-1250, etc.)
-- Funcionamiento garantizado independientemente del idioma del sistema
-- Gestión robusta de archivos SVG y recursos
+## Historial de Versiones
 
-**v2.1.0 (26 dic 2025):**
-- Licencia Source Available (SAL)
-- Sistema de datos persistente (.data/)
-- Versionado dinámico
-- Persistencia de tema y pantalla completa
-- Toggle switches modernos
-- Splash screen inteligente
+### v2.2.0 - 3 de enero de 2026
+- **Sistema de Logs Completo**: Registro exhaustivo de todas las operaciones críticas
+- **Historial de Cambios**: Pestaña exclusiva para superadmin con visualización interactiva
+- **Exportación de Logs**: Descarga de historial completo en formato CSV
+- **Mensajes Descriptivos**: Logs en español claro y detallado
+- **Auditoría Total**: Trazabilidad completa de pagos, clientes, usuarios y cuotas
+- **Optimización de BD**: Índices mejorados para consultas ultra-rápidas
+- **Testing Completo**: Scripts de verificación automatizados
 
-**v2.0.0 (25 dic 2025):**
+### v2.1.1 - 26 de diciembre de 2025
+- **Compatibilidad Mejorada con Windows**: Soporte universal para Windows 7/8/10/11
+- **Encoding UTF-8 explícito**: Compatible con todos los codepages de Windows
+- **Gestión robusta de archivos SVG**: Funcionamiento garantizado independientemente del idioma del sistema
+
+### v2.1.0 - 26 de diciembre de 2025
+- **Licencia Source Available (SAL)**: Nueva licencia para uso personal/educativo
+- **Sistema de datos persistente**: Bases de datos en carpeta `.data/` junto al ejecutable
+- **Organización de scripts**: Todos los scripts en carpeta `scripts/` centralizada
+- **Versionado dinámico**: Plantillas con reemplazo automático de versión
+- **Persistencia de configuración**: Tema y pantalla completa se guardan entre sesiones
+- **Toggle switches modernos**: Controles animados reemplazan dropdowns tradicionales
+- **Splash screen inteligente**: Adaptación responsiva según modo de pantalla
+- **Mejoras de interfaz**: Login minimalista, iconografía SVG mejorada
+- **Sincronización de temas**: Integración completa entre componentes
+
+### v2.0.0 - 25 de diciembre de 2025
 - Sistema de autenticación (bcrypt)
 - 4 roles de usuario
 - Gestión de usuarios y auditoría
@@ -238,16 +284,16 @@ Compatibilidad Mejorada con Windows
 
 ### Windows
 
-1. Descargar `GesMonth-v2.1.0-Windows.zip`
+1. Descargar `GesMonth-v2.2.0-Windows.zip`
 2. Descomprimir el archivo ZIP
 3. Entrar a la carpeta `GesMonth/`
 4. Ejecutar `GesMonth.exe`
 
 ### Linux
 
-1. Descargar `GesMonth-v2.1.0-Linux.tar.gz`
-2. Descomprimir: `tar -xzf GesMonth-v2.1.0-Linux.tar.gz`
-3. Entrar a la carpeta: `cd GesMonth-v2.1.0-Linux/GesMonth`
+1. Descargar `GesMonth-v2.2.0-Linux.tar.gz`
+2. Descomprimir: `tar -xzf GesMonth-v2.2.0-Linux.tar.gz`
+3. Entrar a la carpeta: `cd GesMonth-v2.2.0-Linux/GesMonth`
 4. Ejecutar: `./GesMonth`
 
 **Nota**: El ejecutable necesita estar junto a las carpetas `assets/` y `.data/` para funcionar correctamente. No mover archivos fuera de su ubicación original.
@@ -464,7 +510,7 @@ Ver [docs/DESARROLLO.md](docs/DESARROLLO.md) para guía completa de contribució
 
 <div align="center">
 
-**GesMonth v2.1.0**
+**GesMonth v2.2.0**
 
 Sistema profesional de gestión de pagos y cuotas mensuales
 
