@@ -2,11 +2,20 @@
 Controlador para gestión de temas de la aplicación
 """
 
-import os
-from typing import Optional
-from database.connection import DatabaseConnection
-from controllers.config_controller import ConfigController
-from utils import get_resource_path
+# OS: Operaciones con rutas de archivos de estilos
+import os  # os: construcción de rutas para archivos .qss
+
+# Typing: Type hints para valores opcionales
+from typing import Optional  # Optional: indica que un valor puede ser None
+
+# Database: Conexión a la base de datos
+from database.connection import DatabaseConnection  # DatabaseConnection: acceso a preferencias guardadas
+
+# Controllers: Controlador de configuración
+from controllers.config_controller import ConfigController  # ConfigController: lee/escribe configuración del tema
+
+# Utils: Utilidades para recursos
+from utils import get_resource_path  # get_resource_path: rutas correctas de archivos de estilos
 
 
 class ThemeController:

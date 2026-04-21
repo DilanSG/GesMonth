@@ -2,11 +2,20 @@
 Gestión de conexión a la base de datos SQLite
 """
 
-import sqlite3
-import os
-from typing import Optional
-from pathlib import Path
-from utils import get_data_path
+# SQLite3: Base de datos embebida
+import sqlite3  # sqlite3: motor de base de datos SQL ligero
+
+# OS: Operaciones con el sistema de archivos
+import os  # os: verificación y creación de directorios
+
+# Typing: Type hints para valores opcionales
+from typing import Optional  # Optional: indica que un valor puede ser None
+
+# Pathlib: Manejo moderno de rutas
+from pathlib import Path  # Path: construcción y manipulación de rutas
+
+# Utils: Utilidades de rutas
+from utils import get_data_path  # get_data_path: ruta del directorio de datos
 
 
 class DatabaseConnection:
@@ -17,12 +26,47 @@ class DatabaseConnection:
     _db_path: Optional[str] = None
     
     def __new__(cls):
+        """
+        Implementa el patrón Singleton para garantizar una única instancia de conexión.
+        
+        El patrón Singleton asegura que:
+        - Solo exista una conexión a la BD en toda la aplicación
+        - Se eviten múltiples conexiones que consuman recursos
+        - Todas las partes del código compartan la misma instancia
+        
+        Funcionamiento:
+        1. Verifica si ya existe una instancia (_instance es None)
+        2. Si no existe, crea una nueva usando super().__new__()
+        3. Si existe, retorna la instancia existente
+        
+        Returns:
+            La única instancia de DatabaseConnection
+        """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
     
     def __init__(self):
-        """Inicializa la conexión a la base de datos"""
+        """
+        Inicializa la conexión a la base de datos SQLite.
+        
+        Proceso de inicialización:
+        1. Verifica que no exista una conexión previa (protección singleton)
+        2. Construye la ruta del archivo .db en el directorio .data
+        3. Establece conexión con check_same_thread=False para uso multihilo
+        4. Activa PRAGMA foreign_keys para integridad referencial
+        5. Configura row_factory para acceder a columnas por nombre
+        6. Crea las tablas si no existen
+        
+        PRAGMA foreign_keys:
+        - SQLite desactiva claves foráneas por defecto
+        - Este comando las activa para mantener integridad de datos
+        - Ejemplo: Si eliminas un cliente, se eliminan sus pagos (CASCADE)
+        
+        row_factory = sqlite3.Row:
+        - Permite acceder a columnas como row['nombre'] en vez de row[0]
+        - Hace el código más legible y menos propenso a errores
+        """
         if self._connection is None:
             # Base de datos en carpeta .data
             self._db_path = get_data_path('gesmonth.db')
@@ -119,6 +163,18 @@ class DatabaseConnection:
             )
         ''')
         
+        # Tabla de logs de sistema
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS logs_sistema (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER,
+                usuario_nombre TEXT NOT NULL,
+                fecha_hora TIMESTAMP NOT NULL,
+                accion TEXT NOT NULL,
+                detalles TEXT
+            )
+        ''')
+        
         # Insertar años por defecto si no existen
         cursor.execute('''
             INSERT OR IGNORE INTO configuracion (clave, valor)
@@ -134,6 +190,8 @@ class DatabaseConnection:
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_cuotas_cliente ON cuotas_mensuales(cliente_id)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_cuotas_año_mes ON cuotas_mensuales(año, mes)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_cuotas_estado ON cuotas_mensuales(estado)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_logs_usuario ON logs_sistema(usuario_id)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_logs_fecha ON logs_sistema(fecha_hora)')
         
         # Migración: Agregar columna color a metodos_pago si no existe
         cursor.execute("PRAGMA table_info(metodos_pago)")

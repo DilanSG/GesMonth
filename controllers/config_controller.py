@@ -2,14 +2,21 @@
 Controlador para configuración general de la aplicación.
 """
 
-from __future__ import annotations
+# Future: Compatibilidad con anotaciones de tipo modernas
+from __future__ import annotations  # annotations: permite usar tipos de la propia clase en hints
 
-import os
-import shutil
-from datetime import datetime
-from typing import List
+# OS: Operaciones con el sistema de archivos y rutas
+import os  # os: manejo de rutas y directorios
+import shutil  # shutil: operaciones avanzadas de archivos (copiar, mover)
 
-from database.connection import DatabaseConnection
+# Datetime: Manejo de fechas y tiempos
+from datetime import datetime  # datetime: timestamps para configuraciones
+
+# Typing: Type hints para estructuras de datos
+from typing import List  # List: listas tipadas de años configurados
+
+# Database: Conexión a la base de datos
+from database.connection import DatabaseConnection  # DatabaseConnection: acceso a configuración persistente
 
 
 class ConfigController:
@@ -17,6 +24,16 @@ class ConfigController:
 
     def __init__(self) -> None:
         self.db = DatabaseConnection()
+        self.log_controller = None  # Se inyectará desde la UI
+        self.usuario_actual = None
+    
+    def set_log_controller(self, log_controller):
+        """Configura el controlador de logs"""
+        self.log_controller = log_controller
+    
+    def set_usuario_actual(self, usuario):
+        """Configura el usuario actual"""
+        self.usuario_actual = usuario
 
     def get_billing_years(self) -> List[int]:
         """Obtiene los años de facturación configurados.
@@ -133,6 +150,57 @@ class ConfigController:
                 """,
                 ("true" if enabled else "false",),
             )
+            self.db.get_connection().commit()
+            return True
+        except Exception:
+            return False
+    
+    def get_remembered_user(self) -> str:
+        """Obtiene el usuario recordado"""
+        try:
+            cursor = self.db.get_connection().cursor()
+            cursor.execute("SELECT valor FROM configuracion WHERE clave = 'remembered_user'")
+            row = cursor.fetchone()
+            if row and row["valor"]:
+                return row["valor"]
+        except Exception:
+            pass
+        return ""
+    
+    def set_remembered_user(self, username: str) -> bool:
+        """
+        Guarda el usuario a recordar
+        
+        Args:
+            username: Nombre de usuario a recordar
+            
+        Returns:
+            True si se guardó correctamente
+        """
+        try:
+            cursor = self.db.get_connection().cursor()
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO configuracion (clave, valor)
+                VALUES ('remembered_user', ?)
+                """,
+                (username,),
+            )
+            self.db.get_connection().commit()
+            return True
+        except Exception:
+            return False
+    
+    def clear_remembered_user(self) -> bool:
+        """
+        Elimina el usuario recordado
+        
+        Returns:
+            True si se eliminó correctamente
+        """
+        try:
+            cursor = self.db.get_connection().cursor()
+            cursor.execute("DELETE FROM configuracion WHERE clave = 'remembered_user'")
             self.db.get_connection().commit()
             return True
         except Exception:

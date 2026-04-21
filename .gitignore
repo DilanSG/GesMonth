@@ -28,6 +28,7 @@ gesmonth.db
 .idea/
 *.swp
 *.swo
+.github/copilot-instructions.md
 
 # Sistema
 .DS_Store

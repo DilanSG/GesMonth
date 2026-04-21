@@ -9,6 +9,7 @@ import sys
 import math
 import random
 from utils import get_resource_path
+from .responsive import UIScale
 
 
 class SplashScreen(QWidget):
@@ -28,15 +29,15 @@ class SplashScreen(QWidget):
     def _init_lava_bubbles(self):
         """Inicializa las burbujas tipo lámpara de lava"""
         self.bubbles = []
-        # Crear 8-12 burbujas con posiciones y velocidades aleatorias
-        num_bubbles = random.randint(8, 12)
+        # Crear 20-30 burbujas con posiciones y velocidades aleatorias
+        num_bubbles = random.randint(20, 30)
         for _ in range(num_bubbles):
             bubble = {
-                'x': random.uniform(0.1, 0.9),  # Posición X (0-1)
-                'y': random.uniform(0.1, 0.9),  # Posición Y (0-1)
-                'radius': random.uniform(60, 140),  # Radio de la burbuja
-                'speed_x': random.uniform(-0.3, 0.3),  # Velocidad horizontal
-                'speed_y': random.uniform(-0.2, 0.2),  # Velocidad vertical
+                'x': random.uniform(0.0, 1.0),  # Posición X (0-1) - cubrir toda la pantalla
+                'y': random.uniform(0.0, 1.0),  # Posición Y (0-1) - cubrir toda la pantalla
+                'radius': random.uniform(110, 180),  # Radio de la burbuja (más uniforme)
+                'speed_x': random.uniform(-0.5, 0.5),  # Velocidad horizontal (aumentada)
+                'speed_y': random.uniform(-0.4, 0.4),  # Velocidad vertical (aumentada)
                 'phase': random.uniform(0, 2 * math.pi)  # Fase de oscilación
             }
             self.bubbles.append(bubble)
@@ -164,7 +165,7 @@ class SplashScreen(QWidget):
             self._update_logo_transform()
         else:
             # Fallback al texto si no hay logo
-            self.logo_label.setText("💰")
+            self.logo_label.setText("LOGO")
             fallback_size = self.logo_size // 2
             self.logo_label.setStyleSheet(f"font-size: {fallback_size}px;")
         

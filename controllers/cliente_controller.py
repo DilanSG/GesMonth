@@ -2,12 +2,27 @@
 Controlador para la lógica de negocio de Clientes
 """
 
-from database.models import Cliente
-from typing import Optional
+# Database: Modelo de datos de clientes
+from database.models import Cliente  # Cliente: CRUD de clientes y validaciones
+
+# Typing: Type hints para parámetros opcionales
+from typing import Optional  # Optional: indica que un valor puede ser None
 
 
 class ClienteController:
     """Controlador para gestionar la lógica de clientes"""
+    
+    def __init__(self):
+        self.log_controller = None  # Se inyectará desde la UI
+        self.usuario_actual = None
+    
+    def set_log_controller(self, log_controller):
+        """Configura el controlador de logs"""
+        self.log_controller = log_controller
+    
+    def set_usuario_actual(self, usuario):
+        """Configura el usuario actual"""
+        self.usuario_actual = usuario
     
     def crear_cliente(self, nombre: str, documento: str, 
                      telefono: str = "", valor_cuota: float = 0.0, 
@@ -50,6 +65,15 @@ class ClienteController:
                 dia_cobro=dia_cobro
             )
             
+            # Registrar log
+            if cliente_id > 0 and self.log_controller and self.usuario_actual:
+                self.log_controller.registrar_log(
+                    usuario_id=self.usuario_actual.id if hasattr(self.usuario_actual, 'id') else None,
+                    usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo if hasattr(self.usuario_actual, 'nombre_completo') else "Usuario",
+                    accion='Crear Cliente',
+                    detalles=f"Se registró un nuevo cliente con los siguientes datos: Nombre: {nombre}, CC: {documento} (para más detalles ver en la interfaz)"
+                )
+            
             return cliente_id > 0
         
         except Exception as e:
@@ -78,6 +102,9 @@ class ClienteController:
             True si se actualizó exitosamente, False en caso contrario
         """
         try:
+            # Obtener datos anteriores para el log
+            cliente_anterior = Cliente.obtener_por_id(cliente_id)
+            
             # Validaciones
             if not nombre or not nombre.strip():
                 return False
@@ -92,7 +119,7 @@ class ClienteController:
                 dia_cobro = 5  # Valor por defecto si está fuera de rango
             
             # Actualizar
-            return Cliente.actualizar(
+            resultado = Cliente.actualizar(
                 cliente_id=cliente_id,
                 nombre=nombre.strip(),
                 documento=documento.strip(),
@@ -101,6 +128,37 @@ class ClienteController:
                 estado=estado,
                 dia_cobro=dia_cobro
             )
+            
+            # Registrar log
+            if resultado and self.log_controller and self.usuario_actual:
+                cambios = []
+                if cliente_anterior:
+                    if cliente_anterior.nombre != nombre:
+                        cambios.append(f"Nombre: {nombre}")
+                    if cliente_anterior.documento != documento:
+                        cambios.append(f"CC: {documento}")
+                    if cliente_anterior.telefono != telefono:
+                        cambios.append(f"Teléfono: {telefono}")
+                    if cliente_anterior.valor_cuota != valor_cuota:
+                        cambios.append(f"Cuota: ${valor_cuota:,.2f}")
+                    if cliente_anterior.estado != estado:
+                        cambios.append(f"Estado: {estado}")
+                    if cliente_anterior.dia_cobro != dia_cobro:
+                        cambios.append(f"Día de cobro: {dia_cobro}")
+                
+                if cambios:
+                    detalles = f"Datos de cliente actualizados a: {', '.join(cambios)}"
+                else:
+                    detalles = f"Cliente {nombre} actualizado"
+                
+                self.log_controller.registrar_log(
+                    usuario_id=self.usuario_actual.id if hasattr(self.usuario_actual, 'id') else None,
+                    usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo if hasattr(self.usuario_actual, 'nombre_completo') else "Usuario",
+                    accion='Editar Cliente',
+                    detalles=detalles
+                )
+            
+            return resultado
         
         except Exception as e:
             error_msg = str(e)
@@ -121,7 +179,26 @@ class ClienteController:
             True si se eliminó exitosamente, False en caso contrario
         """
         try:
-            return Cliente.eliminar(cliente_id)
+            # Obtener info del cliente antes de eliminarlo
+            cliente = Cliente.obtener_por_id(cliente_id)
+            
+            resultado = Cliente.eliminar(cliente_id)
+            
+            # Registrar log
+            if resultado and self.log_controller and self.usuario_actual:
+                if cliente:
+                    detalles = f"Se eliminó el cliente: {cliente.nombre}, CC: {cliente.documento}"
+                else:
+                    detalles = "Cliente eliminado"
+                
+                self.log_controller.registrar_log(
+                    usuario_id=self.usuario_actual.id if hasattr(self.usuario_actual, 'id') else None,
+                    usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo if hasattr(self.usuario_actual, 'nombre_completo') else "Usuario",
+                    accion='Eliminar Cliente',
+                    detalles=detalles
+                )
+            
+            return resultado
         except Exception as e:
             print(f"Error al eliminar cliente: {e}")
             return False

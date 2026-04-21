@@ -1,11 +1,21 @@
 """
 Modelos para usuarios, sesiones y auditoría
 """
-from datetime import datetime, timedelta
-from typing import Optional, List
-import bcrypt
-import secrets
-from database.user_connection import UserDatabaseConnection
+
+# Datetime: Manejo de fechas y tiempos
+from datetime import datetime, timedelta  # datetime: fechas actuales, timedelta: cálculos de duración de sesiones
+
+# Typing: Type hints para estructuras de datos
+from typing import Optional, List, Tuple  # Optional: valores opcionales, List: listas tipadas, Tuple: tuplas tipadas
+
+# Bcrypt: Hashing seguro de contraseñas
+import bcrypt  # bcrypt: algoritmo de hashing para almacenar contraseñas de forma segura
+
+# Secrets: Generación de tokens seguros
+import secrets  # secrets: generación criptográficamente segura de tokens de sesión
+
+# Database: Conexión a la base de datos de usuarios
+from database.user_connection import UserDatabaseConnection  # UserDatabaseConnection: acceso a BD de usuarios y sesiones
 
 
 class Usuario:
@@ -25,38 +35,56 @@ class Usuario:
         self.ultimo_acceso = ultimo_acceso
     
     @staticmethod
-    def autenticar(username: str, password: str) -> Optional['Usuario']:
-        """Autentica un usuario y retorna el objeto Usuario si es válido"""
+    def autenticar(username: str, password: str) -> Tuple[Optional['Usuario'], str, int]:
+        """
+        Autentica un usuario y retorna información detallada del intento.
+        
+        Returns:
+            Tupla con:
+            - Usuario: objeto Usuario si es válido, None si falla
+            - codigo_error: 'success', 'user_not_found', 'wrong_password', 'blocked', 'inactive'
+            - intentos: número de intentos fallidos acumulados
+        """
         db = UserDatabaseConnection()
         conn = db.get_connection()
         cursor = conn.cursor()
         
-        # Buscar usuario
+        # Buscar usuario (incluyendo inactivos para diferenciar errores)
         cursor.execute('''
-            SELECT * FROM usuarios WHERE username = ? AND activo = 1
+            SELECT * FROM usuarios WHERE username = ?
         ''', (username,))
         
         row = cursor.fetchone()
         if not row:
-            return None
+            return None, 'user_not_found', 0
         
-        # Verificar si está bloqueado
+        # Verificar si está activo
+        if not row['activo']:
+            return None, 'inactive', row['intentos_fallidos']
+        
+        # Verificar si está bloqueado por intentos fallidos previos
+        # Sistema de seguridad: después de 10 intentos fallidos, bloquea por 15 minutos
         if row['bloqueado_hasta']:
             bloqueado_hasta = datetime.fromisoformat(row['bloqueado_hasta'])
+            # Comparar fecha actual con fecha de desbloqueo
             if datetime.now() < bloqueado_hasta:
-                return None
+                return None, 'blocked', row['intentos_fallidos']  # Aún está bloqueado, denegar acceso
         
-        # Verificar contraseña
+        # Verificar contraseña usando bcrypt
+        # bcrypt.checkpw compara la contraseña en texto plano con el hash almacenado
+        # Es seguro porque bcrypt incluye salt único en cada hash
         if not bcrypt.checkpw(password.encode('utf-8'), row['password_hash'].encode('utf-8')):
-            # Incrementar intentos fallidos
+            # Contraseña incorrecta: incrementar contador de intentos fallidos
+            nuevos_intentos = row['intentos_fallidos'] + 1
             cursor.execute('''
                 UPDATE usuarios 
-                SET intentos_fallidos = intentos_fallidos + 1
+                SET intentos_fallidos = ?
                 WHERE id = ?
-            ''', (row['id'],))
+            ''', (nuevos_intentos, row['id']))
             
-            # Bloquear si excede 5 intentos
-            if row['intentos_fallidos'] + 1 >= 5:
+            # Bloquear usuario si excede 10 intentos fallidos
+            # Previene ataques de fuerza bruta
+            if nuevos_intentos >= 10:
                 bloqueado_hasta = datetime.now() + timedelta(minutes=15)
                 cursor.execute('''
                     UPDATE usuarios 
@@ -65,9 +93,12 @@ class Usuario:
                 ''', (bloqueado_hasta.isoformat(), row['id']))
             
             conn.commit()
-            return None
+            return None, 'wrong_password', nuevos_intentos  # Contraseña incorrecta, denegar acceso
         
-        # Resetear intentos fallidos y actualizar último acceso
+        # Autenticación exitosa: resetear contadores de seguridad
+        # - intentos_fallidos a 0
+        # - bloqueado_hasta a NULL (desbloquear)
+        # - Actualizar ultimo_acceso para auditoría
         cursor.execute('''
             UPDATE usuarios 
             SET intentos_fallidos = 0, 
@@ -77,7 +108,7 @@ class Usuario:
         ''', (row['id'],))
         conn.commit()
         
-        return Usuario(
+        usuario = Usuario(
             id=row['id'],
             username=row['username'],
             nombre_completo=row['nombre_completo'],
@@ -88,11 +119,47 @@ class Usuario:
             fecha_creacion=row['fecha_creacion'],
             ultimo_acceso=row['ultimo_acceso']
         )
+        
+        return usuario, 'success', 0
     
     @staticmethod
     def crear(username: str, password: str, nombre_completo: str, rol: str,
               creado_por_usuario_id: int) -> 'Usuario':
-        """Crea un nuevo usuario"""
+        """
+        Crea un nuevo usuario con contraseña hasheada de forma segura.
+        
+        Seguridad de contraseñas con bcrypt:
+        1. bcrypt.gensalt() genera un "salt" aleatorio único
+        2. bcrypt.hashpw() combina password + salt y aplica hashing
+        3. El resultado es un hash de 60 caracteres que incluye:
+           - Algoritmo usado ($2b$)
+           - Factor de costo (número de rondas de hashing)
+           - Salt (22 caracteres)
+           - Hash final (31 caracteres)
+        
+        Ventajas de bcrypt:
+        - Cada hash es único aunque la contraseña sea igual (por el salt)
+        - Resistente a ataques de fuerza bruta (es computacionalmente costoso)
+        - El salt se almacena en el mismo hash (no necesita columna aparte)
+        
+        Validaciones de seguridad:
+        - Verifica que el hash generado tiene el formato correcto ($2b$...)
+        - Verifica que el hash tiene exactamente 60 caracteres
+        - Comprueba que el hash funciona antes de guardarlo
+        
+        Args:
+            username: Nombre de usuario único
+            password: Contraseña en texto plano (será hasheada)
+            nombre_completo: Nombre completo del usuario
+            rol: Rol del usuario (superadmin, admin, operador, solo_lectura)
+            creado_por_usuario_id: ID del usuario que crea este registro
+        
+        Returns:
+            Objeto Usuario recién creado
+        
+        Raises:
+            ValueError: Si el hash generado es inválido o no se puede verificar
+        """
         db = UserDatabaseConnection()
         conn = db.get_connection()
         cursor = conn.cursor()

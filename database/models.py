@@ -2,9 +2,14 @@
 Modelos de datos para Clientes, Pagos, Cuotas y Métodos de Pago
 """
 
-from datetime import datetime
-from typing import List, Optional, Dict, Any
-from .connection import DatabaseConnection
+# Datetime: Manejo de fechas y tiempos para registros
+from datetime import datetime  # datetime: timestamps de creación y modificación
+
+# Typing: Type hints para estructuras de datos complejas
+from typing import List, Optional, Dict, Any  # List: listas, Optional: valores opcionales, Dict: diccionarios, Any: cualquier tipo
+
+# Database: Conexión a la base de datos
+from .connection import DatabaseConnection  # DatabaseConnection: acceso a la base de datos SQLite
 
 
 class Cliente:
@@ -231,7 +236,31 @@ class Pago:
     
     @staticmethod
     def eliminar_duplicados() -> int:
-        """Elimina pagos duplicados manteniendo solo el primero de cada grupo"""
+        """
+        Elimina pagos duplicados manteniendo solo el primero de cada grupo.
+        
+        Lógica de eliminación:
+        - Considera duplicados: mismo cliente_id, mes_correspondiente y monto
+        - Mantiene el registro con el ID más bajo (el más antiguo)
+        - Elimina el resto de registros duplicados
+        
+        Funcionamiento de la consulta SQL:
+        1. Subconsulta: SELECT MIN(id) FROM pagos GROUP BY ...
+           - Agrupa pagos por cliente, mes y monto
+           - Para cada grupo, obtiene el ID mánimo (más antiguo)
+        2. Consulta principal: DELETE FROM pagos WHERE id NOT IN (...)
+           - Elimina todos los IDs que NO estén en la lista de IDs mínimos
+           - Resultado: solo quedan los registros más antiguos de cada grupo
+        
+        Ejemplo:
+        Si existen 3 pagos idénticos con IDs 10, 15, 20
+        - MIN(id) retorna 10
+        - Se eliminan los IDs 15 y 20
+        - Solo permanece el ID 10
+        
+        Returns:
+            Número de registros duplicados eliminados
+        """
         db = DatabaseConnection()
         conn = db.get_connection()
         cursor = conn.cursor()
@@ -397,7 +426,44 @@ class CuotaMensual:
     def registrar_pago(cliente_id: int, año: int, mes: int, monto: float, metodo_pago: str, 
                        monto_pagado: Optional[float] = None, deuda_previa: Optional[float] = None,
                        fecha_inicio_mora: Optional[str] = None) -> int:
-        """Registra el pago de una cuota (total o parcial)"""
+        """
+        Registra el pago de una cuota (total o parcial) con cálculo de deuda.
+        
+        Esta función maneja toda la lógica de pagos incluyendo:
+        - Pagos completos (liquidan toda la deuda)
+        - Pagos parciales (dejan deuda pendiente)
+        - Acumulación de deudas previas
+        - Generación automática de fechas de mora
+        
+        Proceso de cálculo:
+        1. Recuperar día de cobro del cliente (default: 5)
+        2. Buscar deuda acumulada previa de este mes (si existe)
+        3. Calcular deuda total = monto de cuota + deuda previa
+        4. Determinar si el pago es completo o parcial:
+           - Completo: monto_pagado >= deuda_total → estado 'pagado', deuda = 0
+           - Parcial: monto_pagado < deuda_total → estado 'con_deuda', deuda > 0
+        5. Generar fecha_inicio_mora si no existe (para cálculos de mora)
+        
+        Ejemplo de uso:
+        - Cliente tiene cuota de $100 del mes actual
+        - Tiene deuda previa de $50 de meses anteriores
+        - Deuda total = $150
+        - Si paga $100: queda deuda de $50 (pago parcial)
+        - Si paga $150: queda deuda de $0 (pago completo)
+        
+        Args:
+            cliente_id: ID del cliente que realiza el pago
+            año: Año de la cuota (ej: 2025)
+            mes: Mes de la cuota (1-12)
+            monto: Monto base de la cuota mensual
+            metodo_pago: Método usado (Efectivo, Transferencia, etc)
+            monto_pagado: Cantidad efectivamente pagada (None = pago completo)
+            deuda_previa: Deuda acumulada anterior (None = buscar en BD)
+            fecha_inicio_mora: Fecha desde que empezó la mora (None = generar)
+        
+        Returns:
+            ID del registro de cuota creado/actualizado
+        """
         db = DatabaseConnection()
         conn = db.get_connection()
         cursor = conn.cursor()
@@ -747,3 +813,187 @@ class CuotaMensual:
         print("=" * 50)
         
         return resultado
+
+
+class LogSistema:
+    """Modelo para gestionar los logs del sistema"""
+    
+    def __init__(self, id: Optional[int] = None, usuario_id: Optional[int] = None, 
+                 usuario_nombre: str = "", fecha_hora: str = "", accion: str = "",
+                 detalles: str = ""):
+        self.id = id
+        self.usuario_id = usuario_id
+        self.usuario_nombre = usuario_nombre
+        self.fecha_hora = fecha_hora
+        self.accion = accion
+        self.detalles = detalles
+    
+    @staticmethod
+    def registrar(usuario_id: Optional[int], usuario_nombre: str, accion: str, 
+                  detalles: str = "") -> int:
+        """
+        Registra un log en el sistema
+        
+        Args:
+            usuario_id: ID del usuario (puede ser None si fue eliminado)
+            usuario_nombre: Nombre del usuario que realiza la acción
+            accion: Acción realizada (crear, editar, eliminar, etc.)
+            detalles: Detalles adicionales de la acción
+        
+        Returns:
+            ID del log creado
+        """
+        db = DatabaseConnection()
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        
+        fecha_hora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        cursor.execute('''
+            INSERT INTO logs_sistema (usuario_id, usuario_nombre, fecha_hora, accion, detalles)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (usuario_id, usuario_nombre, fecha_hora, accion, detalles))
+        
+        conn.commit()
+        return cursor.lastrowid
+    
+    @staticmethod
+    def obtener_todos(limite: int = 1000) -> List['LogSistema']:
+        """
+        Obtiene todos los logs del sistema
+        
+        Args:
+            limite: Cantidad máxima de logs a obtener (por defecto 1000)
+        
+        Returns:
+            Lista de logs ordenados por fecha descendente
+        """
+        db = DatabaseConnection()
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT * FROM logs_sistema 
+            ORDER BY fecha_hora DESC 
+            LIMIT ?
+        ''', (limite,))
+        
+        rows = cursor.fetchall()
+        
+        return [LogSistema(
+            id=row['id'],
+            usuario_id=row['usuario_id'],
+            usuario_nombre=row['usuario_nombre'],
+            fecha_hora=row['fecha_hora'],
+            accion=row['accion'],
+            detalles=row['detalles']
+        ) for row in rows]
+    
+    @staticmethod
+    def obtener_por_accion(accion: str, limite: int = 500) -> List['LogSistema']:
+        """Obtiene logs filtrados por acción"""
+        db = DatabaseConnection()
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT * FROM logs_sistema 
+            WHERE accion = ?
+            ORDER BY fecha_hora DESC 
+            LIMIT ?
+        ''', (accion, limite))
+        
+        rows = cursor.fetchall()
+        
+        return [LogSistema(
+            id=row['id'],
+            usuario_id=row['usuario_id'],
+            usuario_nombre=row['usuario_nombre'],
+            fecha_hora=row['fecha_hora'],
+            accion=row['accion'],
+            detalles=row['detalles']
+        ) for row in rows]
+    
+    @staticmethod
+    def obtener_por_usuario(usuario_id: int, limite: int = 500) -> List['LogSistema']:
+        """Obtiene logs filtrados por usuario"""
+        db = DatabaseConnection()
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT * FROM logs_sistema 
+            WHERE usuario_id = ?
+            ORDER BY fecha_hora DESC 
+            LIMIT ?
+        ''', (usuario_id, limite))
+        
+        rows = cursor.fetchall()
+        
+        return [LogSistema(
+            id=row['id'],
+            usuario_id=row['usuario_id'],
+            usuario_nombre=row['usuario_nombre'],
+            fecha_hora=row['fecha_hora'],
+            accion=row['accion'],
+            detalles=row['detalles']
+        ) for row in rows]
+    
+    @staticmethod
+    def obtener_por_fecha(fecha_inicio: str, fecha_fin: str, limite: int = 1000) -> List['LogSistema']:
+        """
+        Obtiene logs filtrados por rango de fechas
+        
+        Args:
+            fecha_inicio: Fecha inicio (YYYY-MM-DD)
+            fecha_fin: Fecha fin (YYYY-MM-DD)
+            limite: Cantidad máxima de logs
+        
+        Returns:
+            Lista de logs en el rango de fechas
+        """
+        db = DatabaseConnection()
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT * FROM logs_sistema 
+            WHERE DATE(fecha_hora) BETWEEN ? AND ?
+            ORDER BY fecha_hora DESC 
+            LIMIT ?
+        ''', (fecha_inicio, fecha_fin, limite))
+        
+        rows = cursor.fetchall()
+        
+        return [LogSistema(
+            id=row['id'],
+            usuario_id=row['usuario_id'],
+            usuario_nombre=row['usuario_nombre'],
+            fecha_hora=row['fecha_hora'],
+            accion=row['accion'],
+            detalles=row['detalles']
+        ) for row in rows]
+    
+    @staticmethod
+    def eliminar_antiguos(dias: int = 365) -> int:
+        """
+        Elimina logs más antiguos que X días
+        
+        Args:
+            dias: Cantidad de días a mantener (por defecto 365)
+        
+        Returns:
+            Cantidad de logs eliminados
+        """
+        db = DatabaseConnection()
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            DELETE FROM logs_sistema 
+            WHERE fecha_hora < datetime('now', '-' || ? || ' days')
+        ''', (dias,))
+        
+        conn.commit()
+        return cursor.rowcount
+

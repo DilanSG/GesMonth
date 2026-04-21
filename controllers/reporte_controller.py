@@ -13,59 +13,91 @@ class ReporteController:
     
     def exportar_clientes(self, file_path: str) -> bool:
         """
-        Exporta la lista de clientes a Excel con formato mejorado
+        Exporta la lista de clientes a Excel con formato profesional.
+        
+        Utiliza pandas y openpyxl para crear un archivo Excel formateado:
+        - Convierte datos de BD a DataFrame de pandas
+        - Aplica formato a columnas (anchos personalizados)
+        - Ajusta altura de filas para mejor legibilidad
+        - Formatea encabezados en negrita y más altos
+        
+        Proceso de exportación:
+        1. Obtener todos los clientes de la BD
+        2. Transformar objetos Cliente a diccionarios
+        3. Crear DataFrame de pandas con los datos
+        4. Escribir a Excel usando ExcelWriter (motor openpyxl)
+        5. Acceder al worksheet para aplicar formato visual
+        6. Ajustar anchos de columnas según contenido esperado
+        7. Ajustar alturas de filas (25px encabezado, 20px datos)
+        8. Aplicar negrita al encabezado
+        
+        Ventajas de usar pandas + openpyxl:
+        - pandas: manejo eficiente de datos tabulares
+        - openpyxl: control fino del formato Excel
+        - Archivos compatibles con Excel, LibreOffice, Google Sheets
         
         Args:
-            file_path: Ruta del archivo a guardar
+            file_path: Ruta completa donde guardar el archivo .xlsx
         
         Returns:
-            True si se exportó exitosamente, False en caso contrario
+            True si la exportación fue exitosa
+            False si ocurrió algún error (permisos, disco lleno, etc)
+        
+        Ejemplo:
+        >>> controller.exportar_clientes('/home/user/clientes.xlsx')
+        True
         """
         try:
             clientes = Cliente.obtener_todos()
             
-            # Convertir a DataFrame
+            # Convertir objetos Cliente a diccionarios para pandas
+            # Compresión de lista: transforma cada cliente en un dict con campos específicos
             data = [{
                 'ID': c.id,
                 'Nombre': c.nombre,
                 'Documento': c.documento,
-                'Teléfono': c.telefono or '',
+                'Teléfono': c.telefono or '',  # or '': manejar None como cadena vacía
                 'Cuota Mensual': c.valor_cuota,
                 'Día de Cobro': c.dia_cobro,
                 'Estado': c.estado
             } for c in clientes]
             
+            # DataFrame: estructura de datos tabular de pandas (similar a tabla SQL)
             df = pd.DataFrame(data)
             
-            # Crear writer con formato mejorado
+            # Crear writer con formato mejorado usando openpyxl como motor
+            # Context manager (with): garantiza cierre correcto del archivo
             with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+                # Escribir DataFrame a una hoja llamada 'Clientes'
                 df.to_excel(writer, index=False, sheet_name='Clientes')
                 
-                # Obtener worksheet para ajustar formato
+                # Obtener worksheet (hoja) para ajustar formato visual
+                # openpyxl permite manipular el Excel a bajo nivel
                 worksheet = writer.sheets['Clientes']
                 
-                # Ajustar ancho de columnas
+                # Ajustar ancho de columnas en puntos
+                # Columnas más anchas para campos con más texto
                 column_widths = {
-                    'A': 8,   # ID
-                    'B': 35,  # Nombre
-                    'C': 18,  # Documento
-                    'D': 15,  # Teléfono
-                    'E': 15,  # Cuota Mensual
-                    'F': 15,  # Día de Cobro
-                    'G': 12   # Estado
+                    'A': 8,   # ID (números cortos)
+                    'B': 35,  # Nombre (texto largo)
+                    'C': 18,  # Documento (11-13 dígitos)
+                    'D': 15,  # Teléfono (10 dígitos)
+                    'E': 15,  # Cuota Mensual (números con formato)
+                    'F': 15,  # Día de Cobro (1-28)
+                    'G': 12   # Estado (activo/inactivo)
                 }
                 
                 for column, width in column_widths.items():
                     worksheet.column_dimensions[column].width = width
                 
-                # Ajustar altura de filas
+                # Ajustar altura de todas las filas de datos a 20 puntos
                 for row in worksheet.iter_rows(min_row=1, max_row=worksheet.max_row):
                     worksheet.row_dimensions[row[0].row].height = 20
                 
-                # Hacer la fila de encabezado más alta y en negrita
+                # Hacer la fila de encabezado más alta (25pt) y en negrita
                 worksheet.row_dimensions[1].height = 25
-                for cell in worksheet[1]:
-                    cell.font = cell.font.copy(bold=True)
+                for cell in worksheet[1]:  # worksheet[1] = primera fila
+                    cell.font = cell.font.copy(bold=True)  # Clonar fuente y aplicar negrita
             
             return True
         
