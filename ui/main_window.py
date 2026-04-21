@@ -2,21 +2,43 @@
 Ventana principal de la aplicación con navegación lateral
 """
 
-import os
+# OS: Operaciones con rutas de archivos
+import os  # os: construcción de rutas para iconos y recursos
+
+# PyQt6 Widgets: Componentes gráficos de la interfaz
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QStackedWidget, QLabel, QFrame, QApplication)
+# QMainWindow: ventana principal, QWidget: widget base, QVBoxLayout/QHBoxLayout: layouts verticales/horizontales
+# QPushButton: botones, QStackedWidget: pila de vistas, QLabel: etiquetas de texto
+# QFrame: marco contenedor, QApplication: aplicación Qt
+
+# PyQt6 Core: Funcionalidades centrales de Qt
 from PyQt6.QtCore import Qt, QSize, QTimer, QDateTime, QLocale
+# Qt: constantes globales, QSize: tamaños, QTimer: temporizadores
+# QDateTime: fecha/hora, QLocale: localización
+
+# PyQt6 GUI: Elementos gráficos y renderizado
 from PyQt6.QtGui import QIcon, QPixmap, QPainter
-from PyQt6.QtSvg import QSvgRenderer
-from utils import get_resource_path
+# QIcon: iconos, QPixmap: imágenes, QPainter: dibujado personalizado
+
+# PyQt6 SVG: Renderizado de archivos SVG
+from PyQt6.QtSvg import QSvgRenderer  # QSvgRenderer: carga y renderiza imágenes SVG
+
+# Utils: Utilidades de rutas
+from utils import get_resource_path  # get_resource_path: rutas correctas de recursos
+
+# Responsive: Sistema de escalado y espaciado adaptable
+from .responsive import UIScale, Sp, expanding
 
 
-from .home_view import HomeView
-from .clientes_view import ClientesView
+# Views: Vistas de la aplicación
+from .home_view import HomeView  # HomeView: vista de inicio/dashboard
+from .clientes_view import ClientesView  # ClientesView: gestión de clientes
 from .cuotas_view import CuotasView
 from .reportes_view import ReportesView
 from .configuracion_view import ConfiguracionView
 from controllers.theme_controller import ThemeController
+from controllers.log_controller import LogController
 
 
 class MainWindow(QMainWindow):
@@ -29,7 +51,10 @@ class MainWindow(QMainWindow):
         self.theme_controller = ThemeController()
         
         self.setWindowTitle("GesMonth - Gestión de Pagos Mensuales")
-        self.setMinimumSize(1200, 700)
+        self.setMinimumSize(UIScale.px(960), UIScale.px(640))
+
+        # Estado del sidebar para comportamiento responsive
+        self._sidebar_compact = False
         
         # Guardar tema actual (sin aplicar todavía)
         self.current_theme = self.theme_controller.get_current_theme()
@@ -45,8 +70,8 @@ class MainWindow(QMainWindow):
         
         # Layout principal horizontal
         main_layout = QHBoxLayout(central_widget)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        main_layout.setSpacing(UIScale.px(0))
         
         # Crear sidebar
         self.sidebar = self._create_sidebar()
@@ -55,8 +80,8 @@ class MainWindow(QMainWindow):
         # Crear contenedor para el área de contenido con timestamp
         content_container = QWidget()
         content_layout = QVBoxLayout(content_container)
-        content_layout.setContentsMargins(0, 0, 0, 0)
-        content_layout.setSpacing(0)
+        content_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        content_layout.setSpacing(UIScale.px(0))
         
         # Crear área de contenido con vistas
         self.stacked_widget = QStackedWidget()
@@ -64,7 +89,7 @@ class MainWindow(QMainWindow):
         
         # Footer con timestamp y versión
         footer_layout = QHBoxLayout()
-        footer_layout.setContentsMargins(10, 5, 10, 5)
+        footer_layout.setContentsMargins(UIScale.px(10), UIScale.px(5), UIScale.px(10), UIScale.px(5))
         
         # Timestamp centrado
         self.timestamp_label = QLabel()
@@ -85,21 +110,30 @@ class MainWindow(QMainWindow):
         
         main_layout.addWidget(content_container)
         
-        # Cargar y mostrar versión
+        # Cargar y mostrar versión desde archivo VERSION
         self._load_version()
         
-        # Configurar timer para actualizar timestamp
-        self._update_timestamp()
-        self.timer = QTimer()
-        self.timer.timeout.connect(self._update_timestamp)
-        self.timer.start(1000)  # Actualizar cada segundo
+        # Configurar timer para actualizar timestamp en tiempo real
+        # El timestamp se muestra en el footer y se actualiza cada segundo
+        self._update_timestamp()  # Primera actualización inmediata
+        self.timer = QTimer()  # Timer de Qt para ejecución periódica
+        self.timer.timeout.connect(self._update_timestamp)  # Conectar señal timeout a método
+        self.timer.start(1000)  # Disparar cada 1000ms (1 segundo)
         
-        # Agregar vistas
-        self.home_view = HomeView()
-        self.cuotas_view = CuotasView()
-        self.clientes_view = ClientesView()
-        self.reportes_view = ReportesView()
-        self.configuracion_view = ConfiguracionView(usuario)  # Pasar usuario
+        # Instanciar todas las vistas de la aplicación
+        # Patrón: cada vista es un QWidget que maneja una sección específica
+        self.home_view = HomeView()  # Dashboard con estadísticas
+        self.cuotas_view = CuotasView(usuario_actual=usuario)  # Control de cuotas mensuales
+        self.clientes_view = ClientesView()  # CRUD de clientes
+        self.reportes_view = ReportesView()  # Generación de reportes
+        self.configuracion_view = ConfiguracionView(usuario)  # Configuración y administración
+        
+        # Configurar sistema de logs para la vista de clientes
+        # Inyección de dependencias: log_controller y usuario_actual
+        # Esto permite que el controlador de clientes registre acciones en el log
+        log_controller = LogController()
+        self.clientes_view.controller.set_log_controller(log_controller)
+        self.clientes_view.controller.set_usuario_actual(usuario)
         
         self.stacked_widget.addWidget(self.home_view)
         self.stacked_widget.addWidget(self.cuotas_view)
@@ -113,26 +147,28 @@ class MainWindow(QMainWindow):
         # Aplicar tema DESPUÉS de crear todos los widgets
         self.apply_theme(self.current_theme)
         
-        # Aplicar configuración de pantalla completa guardada
-        if self.theme_controller.config_controller.get_fullscreen():
-            self.showFullScreen()
-        else:
-            self.showNormal()
+        # Aplicar configuración de pantalla completa guardada con delay
+        # para asegurar que la ventana esté completamente inicializada
+        saved_fullscreen = self.theme_controller.config_controller.get_fullscreen()
+        if saved_fullscreen:
+            QTimer.singleShot(300, self.showFullScreen)
+    
+
     
     def _create_sidebar(self) -> QWidget:
         """Crea el sidebar de navegación"""
         sidebar = QFrame()
         sidebar.setObjectName("sidebar")
-        sidebar.setFixedWidth(250)
+        sidebar.setFixedWidth(UIScale.sidebar_width())
         
         layout = QVBoxLayout(sidebar)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        layout.setSpacing(UIScale.px(0))
         
         # Información del usuario en la parte superior
         user_frame = QFrame()
         user_frame.setObjectName("userInfoFrame")
-        user_frame.setMinimumHeight(110)
+        user_frame.setMinimumHeight(UIScale.px(110))
         
         # Detectar tema actual
         is_dark = self.current_theme == "dark"
@@ -160,8 +196,8 @@ class MainWindow(QMainWindow):
             """)
         
         user_layout = QVBoxLayout(user_frame)
-        user_layout.setContentsMargins(20, 25, 20, 25)
-        user_layout.setSpacing(5)
+        user_layout.setContentsMargins(UIScale.px(20), UIScale.px(25), UIScale.px(20), UIScale.px(25))
+        user_layout.setSpacing(UIScale.px(5))
         user_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         # Texto "Bienvenido"
@@ -208,6 +244,7 @@ class MainWindow(QMainWindow):
         user_layout.addWidget(user_name_label)
         
         layout.addWidget(user_frame)
+        self._user_frame = user_frame  # referencia para colapso del sidebar
         
         # Botones de navegación
         self.nav_buttons = []
@@ -218,13 +255,15 @@ class MainWindow(QMainWindow):
             ("Clientes", 2, "clientes.svg"),
             ("Reportes", 3, "reportes.svg")
         ]
+        self._nav_items = nav_items  # referencia para colapso del sidebar
         
         for text, index, icon_file in nav_items:
             btn = QPushButton(f"  {text}")  # Espacio para el icono
             btn.setObjectName("navButton")
-            btn.setMinimumHeight(70)
+            btn.setMinimumHeight(UIScale.px(70))
             btn.setStyleSheet("font-size: 18px; text-align: left; padding-left: 20px;")
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setToolTip(text)  # visible en modo compacto (solo iconos)
             btn.clicked.connect(lambda checked, idx=index: self._change_view(idx))
             
             # Cargar y aplicar icono SVG
@@ -254,146 +293,169 @@ class MainWindow(QMainWindow):
         # Espacio flexible
         layout.addStretch()
         
-        # Botones inferiores con iconos (Configuración, Cerrar Sesión, Cerrar Programa)
-        bottom_buttons_layout = QHBoxLayout()
-        bottom_buttons_layout.setContentsMargins(10, 10, 10, 20)
-        bottom_buttons_layout.setSpacing(8)
-        
-        # Botón de Configuración (icono engranaje)
-        config_btn = QPushButton()
-        config_btn.setObjectName("configIconButton")
-        config_btn.setFixedSize(48, 48)
-        config_btn.setToolTip("Configuración")
-        config_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        config_btn.clicked.connect(lambda: self._change_view(4))
-        
-        # Cargar SVG de configuración según el tema
-        config_svg_path = get_resource_path(os.path.join("assets", "icons", "settings.svg"))
-        if os.path.exists(config_svg_path):
-            with open(config_svg_path, 'r', encoding='utf-8') as f:
-                svg_content = f.read()
-                # Color gris según tema
-                if is_dark:
-                    svg_content = svg_content.replace('stroke="currentColor"', 'stroke="#94a3b8"')
-                    svg_content = svg_content.replace('fill="#000000"', 'fill="#94a3b8"')
-                else:
-                    svg_content = svg_content.replace('stroke="currentColor"', 'stroke="#64748b"')
-                    svg_content = svg_content.replace('fill="#000000"', 'fill="#64748b"')
-                
-                pixmap = QPixmap(32, 32)
-                pixmap.fill(Qt.GlobalColor.transparent)
-                painter = QPainter(pixmap)
-                renderer = QSvgRenderer(svg_content.encode())
-                renderer.render(painter)
-                painter.end()
-                
-                config_btn.setIcon(QIcon(pixmap))
-                config_btn.setIconSize(QSize(28, 28))
-        
-        config_btn.setStyleSheet("""
-            QPushButton {
-                background: transparent;
-                border: none;
-                border-radius: 24px;
-            }
-            QPushButton:hover {
-                background: rgba(100, 116, 139, 0.15);
-            }
-        """)
-        
-        # Botón de Cerrar Sesión (icono)
-        restart_btn = QPushButton()
-        restart_btn.setObjectName("restartIconButton")
-        restart_btn.setFixedSize(48, 48)
-        restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        restart_btn.setToolTip("Cerrar sesión")
-        restart_btn.clicked.connect(self._reiniciar_app)
-        
-        # Cargar SVG de cerrar sesión según el tema
-        restart_svg_path = get_resource_path(os.path.join("assets", "icons", "logout-session.svg"))
-        if os.path.exists(restart_svg_path):
-            with open(restart_svg_path, 'r', encoding='utf-8') as f:
-                svg_content = f.read()
-                # Color azul según tema
-                if is_dark:
-                    svg_content = svg_content.replace('stroke="currentColor"', 'stroke="#60a5fa"')
-                else:
-                    svg_content = svg_content.replace('stroke="currentColor"', 'stroke="#3b82f6"')
-                
-                pixmap = QPixmap(32, 32)
-                pixmap.fill(Qt.GlobalColor.transparent)
-                painter = QPainter(pixmap)
-                renderer = QSvgRenderer(svg_content.encode())
-                renderer.render(painter)
-                painter.end()
-                
-                restart_btn.setIcon(QIcon(pixmap))
-                restart_btn.setIconSize(QSize(28, 28))
-        
-        restart_btn.setStyleSheet("""
-            QPushButton {
-                background: transparent;
-                border: none;
-                border-radius: 24px;
-            }
-            QPushButton:hover {
-                background: rgba(59, 130, 246, 0.2);
-            }
-        """)
-        
-        # Botón de Cerrar Programa (icono)
-        logout_btn = QPushButton()
-        logout_btn.setObjectName("logoutIconButton")
-        logout_btn.setFixedSize(48, 48)
-        logout_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        logout_btn.setToolTip("Cerrar programa")
-        logout_btn.clicked.connect(self._logout)
-        
-        # Cargar SVG de cerrar programa según el tema
-        logout_svg_path = get_resource_path(os.path.join("assets", "icons", "power-off.svg"))
-        if os.path.exists(logout_svg_path):
-            with open(logout_svg_path, 'r', encoding='utf-8') as f:
-                svg_content = f.read()
-                # Color rojo según tema
-                if is_dark:
-                    svg_content = svg_content.replace('stroke="currentColor"', 'stroke="#f87171"')
-                else:
-                    svg_content = svg_content.replace('stroke="currentColor"', 'stroke="#dc2626"')
-                
-                pixmap = QPixmap(32, 32)
-                pixmap.fill(Qt.GlobalColor.transparent)
-                painter = QPainter(pixmap)
-                renderer = QSvgRenderer(svg_content.encode())
-                renderer.render(painter)
-                painter.end()
-                
-                logout_btn.setIcon(QIcon(pixmap))
-                logout_btn.setIconSize(QSize(28, 28))
-        
-        logout_btn.setStyleSheet("""
-            QPushButton {
-                background: transparent;
-                border: none;
-                border-radius: 24px;
-            }
-            QPushButton:hover {
-                background: rgba(220, 38, 38, 0.2);
-            }
-        """)
-        
-        bottom_buttons_layout.addWidget(config_btn)
-        bottom_buttons_layout.addStretch()
-        bottom_buttons_layout.addWidget(restart_btn)
-        bottom_buttons_layout.addStretch()
-        bottom_buttons_layout.addWidget(logout_btn)
-        
-        layout.addLayout(bottom_buttons_layout)
+        # ── Botones inferiores — modo expandido (HBox) ─────────────────────
+        # En modo compacto se oculta este widget y se muestra _bottom_compact.
+        self._bottom_full = QWidget()
+        full_bl = QHBoxLayout(self._bottom_full)
+        full_bl.setContentsMargins(UIScale.px(10), UIScale.px(5), UIScale.px(10), UIScale.px(20))
+        full_bl.setSpacing(UIScale.px(8))
+
+        cfg_f = self._make_action_btn(
+            "configIconButton", "settings.svg",
+            "#94a3b8" if is_dark else "#64748b",
+            lambda: self._change_view(4), "Configuración",
+            "rgba(100, 116, 139, 0.15)"
+        )
+        rst_f = self._make_action_btn(
+            "restartIconButton", "logout-session.svg",
+            "#60a5fa" if is_dark else "#3b82f6",
+            self._reiniciar_app, "Cerrar sesión",
+            "rgba(59, 130, 246, 0.2)"
+        )
+        lgt_f = self._make_action_btn(
+            "logoutIconButton", "power-off.svg",
+            "#f87171" if is_dark else "#dc2626",
+            self._logout, "Cerrar programa",
+            "rgba(220, 38, 38, 0.2)"
+        )
+        full_bl.addWidget(cfg_f)
+        full_bl.addStretch()
+        full_bl.addWidget(rst_f)
+        full_bl.addStretch()
+        full_bl.addWidget(lgt_f)
+
+        # ── Botones inferiores — modo compacto (VBox, solo iconos) ──────────
+        self._bottom_compact = QWidget()
+        compact_bl = QVBoxLayout(self._bottom_compact)
+        compact_bl.setContentsMargins(UIScale.px(8), UIScale.px(5), UIScale.px(8), UIScale.px(20))
+        compact_bl.setSpacing(UIScale.px(6))
+        compact_bl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+        cfg_c = self._make_action_btn(
+            "configIconButton", "settings.svg",
+            "#94a3b8" if is_dark else "#64748b",
+            lambda: self._change_view(4), "Configuración",
+            "rgba(100, 116, 139, 0.15)", size=40
+        )
+        rst_c = self._make_action_btn(
+            "restartIconButton", "logout-session.svg",
+            "#60a5fa" if is_dark else "#3b82f6",
+            self._reiniciar_app, "Cerrar sesión",
+            "rgba(59, 130, 246, 0.2)", size=40
+        )
+        lgt_c = self._make_action_btn(
+            "logoutIconButton", "power-off.svg",
+            "#f87171" if is_dark else "#dc2626",
+            self._logout, "Cerrar programa",
+            "rgba(220, 38, 38, 0.2)", size=40
+        )
+        compact_bl.addWidget(cfg_c)
+        compact_bl.addWidget(rst_c)
+        compact_bl.addWidget(lgt_c)
+        self._bottom_compact.setVisible(False)  # oculto hasta que se colapse
+
+        layout.addWidget(self._bottom_full)
+        layout.addWidget(self._bottom_compact)
         
         # Marcar primer botón como activo
         self.nav_buttons[0].setProperty("active", True)
         
         return sidebar
-    
+
+    def _make_action_btn(
+        self,
+        obj_name: str,
+        icon_file: str,
+        icon_color: str,
+        callback,
+        tooltip: str,
+        hover_color: str = "rgba(100, 116, 139, 0.15)",
+        size: int = 48,
+    ) -> "QPushButton":
+        """
+        Crea un botón de acción del sidebar con icono SVG.
+        Extrae la lógica repetida de carga SVG y estilo.
+        """
+        btn = QPushButton()
+        btn.setObjectName(obj_name)
+        btn.setFixedSize(UIScale.px(size), UIScale.px(size))
+        btn.setToolTip(tooltip)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.clicked.connect(callback)
+
+        svg_path = get_resource_path(os.path.join("assets", "icons", icon_file))
+        if os.path.exists(svg_path):
+            with open(svg_path, 'r', encoding='utf-8') as f:
+                svg_content = f.read()
+            svg_content = svg_content.replace('stroke="currentColor"', f'stroke="{icon_color}"')
+            svg_content = svg_content.replace('fill="#000000"', f'fill="{icon_color}"')
+
+            pixmap = QPixmap(32, 32)
+            pixmap.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(pixmap)
+            renderer = QSvgRenderer(svg_content.encode())
+            renderer.render(painter)
+            painter.end()
+
+            btn.setIcon(QIcon(pixmap))
+            btn.setIconSize(QSize(UIScale.px(24), UIScale.px(24)))
+
+        radius = UIScale.px(size) // 2
+        btn.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent;
+                border: none;
+                border-radius: {radius}px;
+            }}
+            QPushButton:hover {{
+                background: {hover_color};
+            }}
+        """)
+        return btn
+
+    # ── Sidebar responsive ──────────────────────────────────────────────────
+
+    def _update_sidebar_mode(self, compact: bool) -> None:
+        """
+        Alterna entre modo compacto (solo iconos, 64 px) y modo expandido
+        (texto + iconos, 250 px) según el ancho de la ventana.
+
+        Se llama desde resizeEvent; no hace nada si el estado no cambia.
+        """
+        if compact == self._sidebar_compact:
+            return
+        self._sidebar_compact = compact
+
+        if compact:
+            # Reducir ancho y ocultar elementos textuales
+            self.sidebar.setFixedWidth(UIScale.sidebar_compact_width())
+            self._user_frame.setVisible(False)
+            for btn, (text, _, _) in zip(self.nav_buttons, self._nav_items):
+                btn.setText("")
+                btn.setMinimumHeight(UIScale.px(56))
+                btn.setStyleSheet(
+                    "font-size: 18px; text-align: center; padding: 0; padding-top: 4px;"
+                )
+            self._bottom_full.setVisible(False)
+            self._bottom_compact.setVisible(True)
+        else:
+            # Restaurar modo expandido
+            self.sidebar.setFixedWidth(UIScale.sidebar_width())
+            self._user_frame.setVisible(True)
+            for btn, (text, _, _) in zip(self.nav_buttons, self._nav_items):
+                btn.setText(f"  {text}")
+                btn.setMinimumHeight(UIScale.px(70))
+                btn.setStyleSheet(
+                    "font-size: 18px; text-align: left; padding-left: 20px;"
+                )
+            self._bottom_full.setVisible(True)
+            self._bottom_compact.setVisible(False)
+
+    def resizeEvent(self, event) -> None:
+        """Colapsa el sidebar automáticamente en ventanas estrechas (< 960 px)."""
+        super().resizeEvent(event)
+        self._update_sidebar_mode(event.size().width() < UIScale.px(960))
+
     def _reiniciar_app(self):
         """Reinicia la aplicación"""
         import sys
@@ -448,12 +510,17 @@ class MainWindow(QMainWindow):
         elif index == 2:  # Clientes
             self.cuotas_view.refresh_data()
     
+
+    
     def toggle_fullscreen(self, enable: bool):
         """Alterna el modo de pantalla completa"""
         if enable:
             self.showFullScreen()
         else:
+            # En Linux, usar setWindowState para asegurar la salida correcta de fullscreen
+            self.setWindowState(self.windowState() & ~Qt.WindowState.WindowFullScreen)
             self.showNormal()
+            QTimer.singleShot(10, lambda: self.setWindowState(Qt.WindowState.WindowNoState))
     
     def _update_timestamp(self):
         """Actualiza el timestamp con la fecha y hora actual"""

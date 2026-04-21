@@ -2,6 +2,58 @@
 
 Todos los cambios notables de este proyecto serán documentados en este archivo.
 
+## [2.3.0] - 2026-04-20
+
+### Añadido
+
+#### Sistema de UI Responsive y Adaptable a Resoluciones (`ui/responsive.py`)
+- **Nuevo módulo `ui/responsive.py`** como única fuente de verdad para escala y espaciado:
+  - **`UIScale`**: Calcula el factor de escala a partir del DPI lógico de la pantalla primaria (referencia 96 DPI). Se inicializa una sola vez en `main()` con `UIScale.init(app)` antes de crear cualquier widget. Provee `UIScale.px(n)`, `UIScale.sidebar_width()`, `UIScale.sidebar_compact_width()` y `UIScale.initial_window_size()`.
+  - **`Sp`** (Spacing): Constantes de espaciado en grilla de 8 pt (`xs=4, sm=8, md=12, lg=16, xl=24, xxl=32`), escaladas automáticamente con `UIScale`. Eliminan todos los números mágicos de márgenes y espaciados.
+  - **`BaseView`**: Clase base para vistas principales con `header_layout` (título + acciones al extremo derecho) y `content_layout` (expansible, `stretch=1`). Elimina boilerplate repetido entre vistas.
+  - **Helpers de `QSizePolicy`**: `expanding()`, `h_expanding()`, `v_expanding()`, `fixed_size()` para aplicar políticas de expansión de forma legible.
+- **Exportado desde `ui/__init__.py`**: `UIScale`, `Sp`, `BaseView` y los helpers de `QSizePolicy` disponibles desde el paquete `ui`.
+
+#### Soporte DPI y HiDPI
+- `QApplication.setHighDpiScaleFactorRoundingPolicy(PassThrough)` ya existía; ahora se complementa con `UIScale.init(app)` que escala valores que Qt no gestiona automáticamente (anchos fijos del sidebar, tamaños mínimos de ventana, márgenes calculados en runtime).
+- Todos los tamaños fijos de la UI ahora pasan por `UIScale.px()`, garantizando proporciones correctas en pantallas 2K y 4K.
+
+### Cambiado
+
+#### `main.py`
+- `UIScale.init(app)` invocado inmediatamente tras crear `QApplication`, antes de instanciar cualquier vista.
+
+#### `ui/main_window.py`
+- `setMinimumSize` usa `UIScale.px(960)` × `UIScale.px(640)` en lugar de valores hardcodeados.
+- Sidebar construido con `UIScale.sidebar_width()` (250 px base, escalado según DPI).
+- **Sidebar auto-colapsable**: `resizeEvent` detecta ventanas < 960 px de ancho y colapsa el sidebar a 64 px (solo iconos con `toolTip` visible). Al ampliar la ventana se restaura automáticamente el modo expandido con textos.
+- Botones de acción del footer existen en dos widgets alternados: modo HBox (expandido) y modo VBox (compacto), activados por `_update_sidebar_mode()`.
+- Lógica de carga SVG y aplicación de estilos de botones de acción extraída al método privado `_make_action_btn()`, eliminando ~120 líneas duplicadas.
+- Referencias `_user_frame`, `_nav_items`, `_bottom_full`, `_bottom_compact` guardadas como atributos de instancia para el sistema de colapso.
+
+#### `ui/home_view.py`
+- Todos los `setContentsMargins` y `setSpacing` usan `Sp.*()` en lugar de enteros literales.
+- Cards de estadísticas usan `setSizePolicy(expanding())` + `setMinimumHeight(UIScale.px(120))` — crecen con la ventana en lugar de tener altura fija.
+- Tarjeta del mes eliminó `setMaximumHeight(120)`, permitiendo que se expanda verticalmente.
+
+#### `ui/clientes_view.py`
+- Layout principal usa `Sp.xl()` / `Sp.lg()`.
+- Tabla de clientes usa `setSizePolicy(expanding())` — ocupa todo el espacio vertical disponible sin `setMinimumHeight(400)` hardcodeado.
+- `search_input` y todos los campos del formulario `ClienteDialog` usan `UIScale.px(40)` para alturas mínimas.
+- `setMinimumWidth` de diálogos escalado con `UIScale.px()`.
+
+#### Resto de vistas (`cuotas_view.py`, `reportes_view.py`, `configuracion_view.py`, `login_view.py`, `usuarios_management.py`, `detalles_cuota_dialog.py`)
+- Todos los `setContentsMargins(a, b, c, d)` y `setSpacing(n)` con enteros literales convertidos a `UIScale.px(n)` mediante normalización masiva.
+- Todos los `setMinimumWidth(n)`, `setMaximumWidth(n)` y `setMinimumSize(w, h)` con enteros literales convertidos a `UIScale.px(n)`.
+- Cero posiciones absolutas (`setGeometry`, `move`) introducidas.
+
+### Técnico
+- Validación completa: `python -m py_compile` sin errores en los 10 archivos del paquete `ui`.
+- Sin doble-wrapping `UIScale.px(UIScale.px(...))` verificado programáticamente.
+- Sin llamadas a `setGeometry`, `move()` ni `resize()` manual en ninguna vista.
+
+---
+
 ## [2.2.0] - 2025-01-03
 
 ### Añadido

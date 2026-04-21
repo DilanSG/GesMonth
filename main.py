@@ -3,13 +3,26 @@ GesMonth - Sistema de Gestión de Pagos Mensuales
 Punto de entrada de la aplicación
 """
 
-import sys
-import os
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QIcon
-from ui.main_window import MainWindow
-from database.connection import DatabaseConnection
+# Sys: Argumentos de línea de comandos y salida del programa
+import sys  # sys: acceso a argumentos y manejo de salida de la aplicación
+
+# OS: Operaciones con el sistema de archivos
+import os  # os: manejo de rutas y entorno del sistema operativo
+
+# PyQt6 Widgets: Componentes gráficos principales
+from PyQt6.QtWidgets import QApplication  # QApplication: aplicación Qt principal
+
+# PyQt6 Core: Funcionalidades centrales de Qt
+from PyQt6.QtCore import Qt, QTimer  # Qt: constantes globales, QTimer: temporizadores
+
+# PyQt6 GUI: Elementos gráficos
+from PyQt6.QtGui import QIcon  # QIcon: iconos de la aplicación
+
+# UI: Ventana principal de la aplicación
+from ui.main_window import MainWindow  # MainWindow: ventana principal con navegación
+
+# Database: Conexión y creación de base de datos
+from database.connection import DatabaseConnection  # DatabaseConnection: inicialización de BD
 
 
 def main():
@@ -21,6 +34,10 @@ def main():
     
     # Crear aplicación
     app = QApplication(sys.argv)
+
+    # Inicializar sistema de escala responsive (debe hacerse antes de crear widgets)
+    from ui.responsive import UIScale
+    UIScale.init(app)
     app.setApplicationName("GesMonth")
     app.setOrganizationName("GesMonth")
     
@@ -50,9 +67,13 @@ def main():
         print(f"Error al inicializar las bases de datos: {e}")
         return 1
     
+    # Crear log_controller para el sistema
+    from controllers.log_controller import LogController
+    log_controller = LogController()
+    
     # Mostrar pantalla de login
     from ui.login_view import LoginView
-    login_window = LoginView()
+    login_window = LoginView(log_controller=log_controller)
     
     usuario_autenticado = None
     tema_seleccionado = 'light'  # Por defecto tema claro

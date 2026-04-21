@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushBut
                              QComboBox, QMessageBox, QHeaderView, QFrame)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon, QColor, QBrush, QFont
+from .responsive import UIScale
 from database.user_models import Usuario
 
 
@@ -19,14 +20,14 @@ class ConfirmacionDialog(QDialog):
         self.mensaje = mensaje
         self.tipo = tipo  # "success", "error", "warning", "question", "info"
         self.setWindowTitle(titulo)
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(UIScale.px(400))
         self._init_ui()
     
     def _init_ui(self):
         """Inicializa la interfaz del diálogo"""
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(UIScale.px(20))
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
         
         # Detectar tema actual desde la ventana principal - navegar hasta MainWindow
         is_dark = True
@@ -64,10 +65,10 @@ class ConfirmacionDialog(QDialog):
         if self.tipo == "question":
             # Dos botones: Sí y No
             btn_layout = QHBoxLayout()
-            btn_layout.setSpacing(15)
+            btn_layout.setSpacing(UIScale.px(15))
             
             btn_si = QPushButton("Sí")
-            btn_si.setMinimumHeight(40)
+            btn_si.setMinimumHeight(UIScale.px(40))
             btn_si.setCursor(Qt.CursorShape.PointingHandCursor)
             if is_dark:
                 btn_si_style = """
@@ -102,7 +103,7 @@ class ConfirmacionDialog(QDialog):
             btn_layout.addWidget(btn_si)
             
             btn_no = QPushButton("No")
-            btn_no.setMinimumHeight(40)
+            btn_no.setMinimumHeight(UIScale.px(40))
             btn_no.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_no.setStyleSheet("""
                 QPushButton {
@@ -124,7 +125,7 @@ class ConfirmacionDialog(QDialog):
         else:
             # Un solo botón: Aceptar
             btn_aceptar = QPushButton("Aceptar")
-            btn_aceptar.setMinimumHeight(40)
+            btn_aceptar.setMinimumHeight(UIScale.px(40))
             btn_aceptar.setCursor(Qt.CursorShape.PointingHandCursor)
             
             if self.tipo == "success":
@@ -243,7 +244,7 @@ class DialogoCrearUsuario(QDialog):
         self.usuario_actual = usuario_actual
         self.setWindowTitle("Crear Usuario" if not usuario else "Editar Usuario")
         self.setModal(True)
-        self.setMinimumWidth(450)
+        self.setMinimumWidth(UIScale.px(450))
         self._init_ui()
         
         if usuario:
@@ -251,8 +252,8 @@ class DialogoCrearUsuario(QDialog):
     
     def _init_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(15)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(UIScale.px(15))
+        layout.setContentsMargins(UIScale.px(20), UIScale.px(20), UIScale.px(20), UIScale.px(20))
         
         # Aplicar estilo del tema al diálogo
         from PyQt6.QtWidgets import QApplication
@@ -262,7 +263,7 @@ class DialogoCrearUsuario(QDialog):
         layout.addWidget(QLabel("Usuario:"))
         self.txt_username = QLineEdit()
         self.txt_username.setPlaceholderText("Nombre de usuario (login)")
-        self.txt_username.setMinimumHeight(35)
+        self.txt_username.setMinimumHeight(UIScale.px(35))
         if self.usuario:
             self.txt_username.setEnabled(False)  # No editable al editar
         layout.addWidget(self.txt_username)
@@ -271,7 +272,7 @@ class DialogoCrearUsuario(QDialog):
         layout.addWidget(QLabel("Nombre Completo:"))
         self.txt_nombre = QLineEdit()
         self.txt_nombre.setPlaceholderText("Nombre completo del usuario")
-        self.txt_nombre.setMinimumHeight(35)
+        self.txt_nombre.setMinimumHeight(UIScale.px(35))
         layout.addWidget(self.txt_nombre)
         
         # Contraseña (solo al crear)
@@ -280,14 +281,14 @@ class DialogoCrearUsuario(QDialog):
             self.txt_password = QLineEdit()
             self.txt_password.setPlaceholderText("Contraseña inicial")
             self.txt_password.setEchoMode(QLineEdit.EchoMode.Password)
-            self.txt_password.setMinimumHeight(35)
+            self.txt_password.setMinimumHeight(UIScale.px(35))
             layout.addWidget(self.txt_password)
         
         # Rol
         layout.addWidget(QLabel("Rol:"))
         self.combo_rol = QComboBox()
         self.combo_rol.addItems(["admin", "operador", "solo_lectura"])
-        self.combo_rol.setMinimumHeight(35)
+        self.combo_rol.setMinimumHeight(UIScale.px(35))
         layout.addWidget(self.combo_rol)
         
         # Nota informativa
@@ -312,7 +313,7 @@ class DialogoCrearUsuario(QDialog):
         btn_layout.addStretch()
         
         btn_cancelar = QPushButton("Cancelar")
-        btn_cancelar.setMinimumSize(100, 35)
+        btn_cancelar.setMinimumSize(UIScale.px(100), UIScale.px(35))
         btn_cancelar.setStyleSheet("""
             QPushButton {
                 background: rgba(71, 85, 105, 0.25);
@@ -331,7 +332,7 @@ class DialogoCrearUsuario(QDialog):
         btn_layout.addWidget(btn_cancelar)
         
         btn_guardar = QPushButton("Guardar")
-        btn_guardar.setMinimumSize(100, 35)
+        btn_guardar.setMinimumSize(UIScale.px(100), UIScale.px(35))
         if is_dark:
             btn_guardar_style = """
                 QPushButton {
@@ -410,6 +411,17 @@ class DialogoCrearUsuario(QDialog):
                 )
                 
                 if nuevo_usuario:
+                    # Registrar log
+                    if self.usuario_actual:
+                        from controllers.log_controller import LogController
+                        log_ctrl = LogController()
+                        log_ctrl.registrar_log(
+                            usuario_id=self.usuario_actual.id,
+                            usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo,
+                            accion='Crear Usuario',
+                            detalles=f"Se creó un nuevo usuario: {username}, Nombre: {nombre}, Rol: {rol}"
+                        )
+                    
                     dialog = ConfirmacionDialog(self, "Éxito", "Usuario creado correctamente", tipo="success")
                     dialog.exec()
                 else:
@@ -422,6 +434,8 @@ class DialogoCrearUsuario(QDialog):
                 return
         else:
             # Actualizar existente
+            usuario_anterior = Usuario.obtener_por_id(self.usuario.id)
+            
             exito = Usuario.actualizar(
                 self.usuario.id,
                 nombre_completo=nombre,
@@ -433,6 +447,29 @@ class DialogoCrearUsuario(QDialog):
                 dialog = ConfirmacionDialog(self, "Error", "No se pudo actualizar el usuario", tipo="error")
                 dialog.exec()
                 return
+            
+            # Registrar log
+            if exito and self.usuario_actual:
+                from controllers.log_controller import LogController
+                log_ctrl = LogController()
+                cambios = []
+                if usuario_anterior:
+                    if usuario_anterior.nombre_completo != nombre:
+                        cambios.append(f"Nombre: {nombre}")
+                    if usuario_anterior.rol != rol:
+                        cambios.append(f"Rol: {rol}")
+                
+                if cambios:
+                    detalles = f"Datos de usuario actualizados a: {', '.join(cambios)}"
+                else:
+                    detalles = f"Usuario {username} actualizado"
+                
+                log_ctrl.registrar_log(
+                    usuario_id=self.usuario_actual.id,
+                    usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo,
+                    accion='Editar Usuario',
+                    detalles=detalles
+                )
                 
             dialog = ConfirmacionDialog(self, "Éxito", "Usuario actualizado correctamente", tipo="success")
             dialog.exec()
@@ -443,18 +480,19 @@ class DialogoCrearUsuario(QDialog):
 class DialogoCambiarPassword(QDialog):
     """Diálogo para cambiar contraseña de usuario"""
     
-    def __init__(self, usuario, parent=None):
+    def __init__(self, usuario, usuario_actual=None, parent=None):
         super().__init__(parent)
         self.usuario = usuario
+        self.usuario_actual = usuario_actual
         self.setWindowTitle(f"Cambiar Contraseña - {usuario.username}")
         self.setModal(True)
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(UIScale.px(400))
         self._init_ui()
     
     def _init_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(15)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(UIScale.px(15))
+        layout.setContentsMargins(UIScale.px(20), UIScale.px(20), UIScale.px(20), UIScale.px(20))
         
         # Aplicar estilo del tema al diálogo
         from PyQt6.QtWidgets import QApplication
@@ -465,7 +503,7 @@ class DialogoCambiarPassword(QDialog):
         self.txt_password = QLineEdit()
         self.txt_password.setEchoMode(QLineEdit.EchoMode.Password)
         self.txt_password.setPlaceholderText("Mínimo 6 caracteres")
-        self.txt_password.setMinimumHeight(35)
+        self.txt_password.setMinimumHeight(UIScale.px(35))
         layout.addWidget(self.txt_password)
         
         # Confirmar contraseña
@@ -473,7 +511,7 @@ class DialogoCambiarPassword(QDialog):
         self.txt_confirmar = QLineEdit()
         self.txt_confirmar.setEchoMode(QLineEdit.EchoMode.Password)
         self.txt_confirmar.setPlaceholderText("Repetir contraseña")
-        self.txt_confirmar.setMinimumHeight(35)
+        self.txt_confirmar.setMinimumHeight(UIScale.px(35))
         layout.addWidget(self.txt_confirmar)
         
         # Detectar tema actual para los botones
@@ -492,7 +530,7 @@ class DialogoCambiarPassword(QDialog):
         btn_layout.addStretch()
         
         btn_cancelar = QPushButton("Cancelar")
-        btn_cancelar.setMinimumSize(100, 35)
+        btn_cancelar.setMinimumSize(UIScale.px(100), UIScale.px(35))
         btn_cancelar.setStyleSheet("""
             QPushButton {
                 background: rgba(71, 85, 105, 0.25);
@@ -511,7 +549,7 @@ class DialogoCambiarPassword(QDialog):
         btn_layout.addWidget(btn_cancelar)
         
         btn_guardar = QPushButton("Cambiar")
-        btn_guardar.setMinimumSize(100, 35)
+        btn_guardar.setMinimumSize(UIScale.px(100), UIScale.px(35))
         if is_dark:
             btn_guardar_style = """
                 QPushButton {
@@ -564,6 +602,17 @@ class DialogoCambiarPassword(QDialog):
         
         try:
             if Usuario.cambiar_password(self.usuario.id, password):
+                # Registrar log
+                if self.usuario_actual:
+                    from controllers.log_controller import LogController
+                    log_ctrl = LogController()
+                    log_ctrl.registrar_log(
+                        usuario_id=self.usuario_actual.id,
+                        usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo,
+                        accion='Cambiar Contraseña',
+                        detalles=f"Se cambió la contraseña del usuario: {self.usuario.username}"
+                    )
+                
                 dialog = ConfirmacionDialog(self, "Éxito", "Contraseña cambiada correctamente", tipo="success")
                 dialog.exec()
                 self.accept()
@@ -586,8 +635,8 @@ class UsuariosManagement(QWidget):
     
     def _init_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(UIScale.px(20), UIScale.px(20), UIScale.px(20), UIScale.px(20))
+        layout.setSpacing(UIScale.px(15))
         
         # Header
         header_layout = QHBoxLayout()
@@ -600,7 +649,7 @@ class UsuariosManagement(QWidget):
         
         # Botón crear usuario
         btn_crear = QPushButton("Crear Usuario")
-        btn_crear.setMinimumHeight(40)
+        btn_crear.setMinimumHeight(UIScale.px(40))
         btn_crear.setStyleSheet("""
             QPushButton {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
@@ -707,13 +756,13 @@ class UsuariosManagement(QWidget):
             # Acciones
             actions_widget = QWidget()
             actions_layout = QHBoxLayout(actions_widget)
-            actions_layout.setContentsMargins(5, 5, 5, 5)
-            actions_layout.setSpacing(8)
+            actions_layout.setContentsMargins(UIScale.px(5), UIScale.px(5), UIScale.px(5), UIScale.px(5))
+            actions_layout.setSpacing(UIScale.px(8))
             
             # Botón editar (todos los usuarios pueden editar su info)
             btn_editar = QPushButton("✏️ Editar")
-            btn_editar.setFixedHeight(32)
-            btn_editar.setMinimumWidth(70)
+            btn_editar.setFixedHeight(UIScale.px(32))
+            btn_editar.setMinimumWidth(UIScale.px(70))
             btn_editar.setStyleSheet("""
                 QPushButton {
                     background: rgba(59, 130, 246, 0.2);
@@ -770,8 +819,8 @@ class UsuariosManagement(QWidget):
                         }
                     """
                 btn_toggle = QPushButton(toggle_text)
-                btn_toggle.setFixedHeight(32)
-                btn_toggle.setMinimumWidth(60)
+                btn_toggle.setFixedHeight(UIScale.px(32))
+                btn_toggle.setMinimumWidth(UIScale.px(60))
                 btn_toggle.setStyleSheet(toggle_style)
                 btn_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
                 btn_toggle.clicked.connect(lambda checked, u=usuario: self._toggle_usuario(u))
@@ -779,8 +828,8 @@ class UsuariosManagement(QWidget):
             
             # Botón cambiar contraseña (todos los usuarios)
             btn_password = QPushButton("🔑 Pass")
-            btn_password.setFixedHeight(32)
-            btn_password.setMinimumWidth(65)
+            btn_password.setFixedHeight(UIScale.px(32))
+            btn_password.setMinimumWidth(UIScale.px(65))
             btn_password.setStyleSheet("""
                 QPushButton {
                     background: rgba(139, 92, 246, 0.2);
@@ -811,7 +860,7 @@ class UsuariosManagement(QWidget):
     
     def _editar_usuario(self, usuario):
         """Abre diálogo para editar usuario"""
-        dialogo = DialogoCrearUsuario(usuario=usuario, parent=self)
+        dialogo = DialogoCrearUsuario(usuario=usuario, usuario_actual=self.usuario_actual, parent=self)
         if dialogo.exec() == QDialog.DialogCode.Accepted:
             self._cargar_usuarios()
     
@@ -829,6 +878,18 @@ class UsuariosManagement(QWidget):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             nuevo_estado = not usuario.activo
             if Usuario.actualizar(usuario.id, activo=nuevo_estado):
+                # Registrar log
+                if hasattr(self, 'usuario_actual') and self.usuario_actual:
+                    from controllers.log_controller import LogController
+                    log_ctrl = LogController()
+                    estado_texto = "activado" if nuevo_estado else "desactivado"
+                    log_ctrl.registrar_log(
+                        usuario_id=self.usuario_actual.id,
+                        usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo,
+                        accion='Cambiar Estado de Usuario',
+                        detalles=f"Usuario {usuario.username} {estado_texto}"
+                    )
+                
                 success_dialog = ConfirmacionDialog(self, "Éxito", f"Usuario {accion}do correctamente", tipo="success")
                 success_dialog.exec()
                 self._cargar_usuarios()
@@ -838,5 +899,5 @@ class UsuariosManagement(QWidget):
     
     def _cambiar_password(self, usuario):
         """Abre diálogo para cambiar contraseña"""
-        dialogo = DialogoCambiarPassword(usuario=usuario, parent=self)
+        dialogo = DialogoCambiarPassword(usuario=usuario, usuario_actual=self.usuario_actual, parent=self)
         dialogo.exec()

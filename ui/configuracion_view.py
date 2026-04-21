@@ -3,8 +3,9 @@ Vista de configuración
 """
 
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QTableWidget, QTableWidgetItem, QDialog, QLineEdit, QHeaderView, QTabWidget, QCheckBox, QFrame, QSpinBox, QSizePolicy, QFileDialog, QComboBox, QScrollArea, QColorDialog)
-from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve, pyqtProperty
+from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve, pyqtProperty, QTimer
 from PyQt6.QtGui import QColor, QPainter, QBrush, QPen
+from .responsive import UIScale
 from database.models import MetodoPago
 from controllers.config_controller import ConfigController
 from controllers.reporte_controller import ReporteController
@@ -15,7 +16,7 @@ class ToggleSwitch(QCheckBox):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(60, 30)
+        self.setFixedSize(UIScale.px(60), UIScale.px(30))
         self._circle_position = 3
         self.animation = QPropertyAnimation(self, b"circle_position", self)
         self.animation.setEasingCurve(QEasingCurve.Type.InOutCubic)
@@ -85,13 +86,61 @@ class ConfiguracionView(QWidget):
         self.usuario_actual = usuario
         self.config_controller = ConfigController()
         self.reporte_controller = ReporteController()
+        
+        # Timer para debounce del toggle de fullscreen
+        self._fullscreen_change_timer = QTimer()
+        self._fullscreen_change_timer.setSingleShot(True)
+        self._fullscreen_change_timer.setInterval(100)  # 100ms de delay
+        self._fullscreen_change_timer.timeout.connect(self._apply_fullscreen_change)
+        self._pending_fullscreen_state = None
+        
         self._init_ui()
     
     def showEvent(self, event):
         """Se ejecuta cuando la vista se muestra"""
         super().showEvent(event)
+        
+        # Sincronizar estado de fullscreen con la BD al mostrar la vista
+        main_window = self.window()
+        is_fullscreen = main_window.isFullScreen()
+        saved_fullscreen = self.config_controller.get_fullscreen()
+        
+        # Re-aplicar el estado guardado si hay discrepancia
+        if saved_fullscreen and not is_fullscreen:
+            main_window.showFullScreen()
+        elif not saved_fullscreen and is_fullscreen:
+            main_window.showNormal()
+        
         self._actualizar_estilos_tema()
         self._sincronizar_tema_selector()
+        self._sincronizar_fullscreen_toggle()
+    
+    def _sincronizar_fullscreen_toggle(self):
+        """Sincroniza el toggle de fullscreen con el estado guardado en BD"""
+        if not hasattr(self, 'toggle_fullscreen'):
+            return
+        
+        saved_fullscreen = self.config_controller.get_fullscreen()
+        toggle_checked = self.toggle_fullscreen.isChecked()
+        
+        # Desconectar temporalmente la señal para evitar loops
+        try:
+            self.toggle_fullscreen.stateChanged.disconnect(self._toggle_fullscreen)
+        except:
+            pass
+        
+        # Actualizar si hay diferencia
+        if toggle_checked != saved_fullscreen:
+            self.toggle_fullscreen.setChecked(saved_fullscreen)
+            
+            # Actualizar posición del círculo del toggle
+            correct_position = 33 if saved_fullscreen else 3
+            if hasattr(self.toggle_fullscreen, '_circle_position'):
+                self.toggle_fullscreen._circle_position = correct_position
+            self.toggle_fullscreen.repaint()
+        
+        # Reconectar la señal
+        self.toggle_fullscreen.stateChanged.connect(self._toggle_fullscreen)
     
     def _sincronizar_tema_selector(self):
         """Sincroniza el selector de tema con el tema actual de la aplicación"""
@@ -405,8 +454,8 @@ class ConfiguracionView(QWidget):
         """Inicializa la interfaz"""
         # Layout principal sin padding (el scroll tendrá el padding)
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        main_layout.setSpacing(UIScale.px(0))
         
         # Contenedor con scroll
         scroll = QScrollArea()
@@ -428,12 +477,12 @@ class ConfiguracionView(QWidget):
             }
         """)
         scroll_layout = QVBoxLayout(scroll_widget)
-        scroll_layout.setContentsMargins(30, 30, 30, 30)
-        scroll_layout.setSpacing(20)
+        scroll_layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
+        scroll_layout.setSpacing(UIScale.px(20))
         
         # Header con título
         header_layout = QHBoxLayout()
-        header_layout.setSpacing(15)
+        header_layout.setSpacing(UIScale.px(15))
         
         title = QLabel("Configuración")
         title.setObjectName("pageTitle")
@@ -458,6 +507,11 @@ class ConfiguracionView(QWidget):
             usuarios_tab = self._crear_tab_usuarios()
             tabs.addTab(usuarios_tab, "Gestión de Usuarios")
         
+        # Tab de historial de cambios (para admins y superadmin)
+        if self.usuario_actual and (self.usuario_actual.rol in ['admin', 'superadmin']):
+            historial_tab = self._crear_tab_historial()
+            tabs.addTab(historial_tab, "Historial de Cambios")
+        
         scroll_layout.addWidget(tabs)  
 
         scroll.setWidget(scroll_widget)
@@ -466,8 +520,8 @@ class ConfiguracionView(QWidget):
     def _agregar_seccion_titulo(self, layout: QVBoxLayout, titulo: str, descripcion: str = ""):
         """Agrega un encabezado de sección con título y descripción"""
         section_layout = QVBoxLayout()
-        section_layout.setSpacing(2)
-        section_layout.setContentsMargins(0, 30, 0, 25)
+        section_layout.setSpacing(UIScale.px(2))
+        section_layout.setContentsMargins(UIScale.px(0), UIScale.px(30), UIScale.px(0), UIScale.px(25))
         
         # Título
         title_label = QLabel(titulo)
@@ -504,8 +558,8 @@ class ConfiguracionView(QWidget):
     def _crear_fila_configuracion(self, label: str, descripcion: str = "") -> QVBoxLayout:
         """Crea una fila de configuración con label y descripción"""
         container = QVBoxLayout()
-        container.setSpacing(8)
-        container.setContentsMargins(0, 10, 0, 10)
+        container.setSpacing(UIScale.px(8))
+        container.setContentsMargins(UIScale.px(0), UIScale.px(10), UIScale.px(0), UIScale.px(10))
         
         if label:
             label_widget = QLabel(label)
@@ -522,8 +576,8 @@ class ConfiguracionView(QWidget):
         
         # Crear y almacenar el row horizontal como atributo del container
         row = QHBoxLayout()
-        row.setSpacing(15)
-        row.setContentsMargins(0, 5, 0, 0)
+        row.setSpacing(UIScale.px(15))
+        row.setContentsMargins(UIScale.px(0), UIScale.px(5), UIScale.px(0), UIScale.px(0))
         container.addLayout(row)
         
         # Guardar referencia al row para poder acceder después
@@ -535,8 +589,8 @@ class ConfiguracionView(QWidget):
                                   callback, color_boton: str = "default") -> QVBoxLayout:
         """Crea una acción con título, descripción y botón """
         container = QVBoxLayout()
-        container.setSpacing(2)
-        container.setContentsMargins(0, 0, 0, 0)
+        container.setSpacing(UIScale.px(2))
+        container.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         
         # Título
         title_label = QLabel(titulo)
@@ -560,8 +614,8 @@ class ConfiguracionView(QWidget):
         
         # Botón
         btn = QPushButton(texto_boton)
-        btn.setMinimumHeight(40)
-        btn.setMaximumWidth(200)
+        btn.setMinimumHeight(UIScale.px(40))
+        btn.setMaximumWidth(UIScale.px(200))
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         
         # Detectar tema actual
@@ -799,8 +853,8 @@ class ConfiguracionView(QWidget):
         """Crea el tab de información general"""
         widget = QWidget()
         main_layout = QVBoxLayout(widget)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        main_layout.setSpacing(UIScale.px(0))
         
         # Crear scroll area
         scroll = QScrollArea()
@@ -823,8 +877,8 @@ class ConfiguracionView(QWidget):
             }
         """)
         layout = QVBoxLayout(scroll_widget)
-        layout.setContentsMargins(40, 30, 40, 30)
-        layout.setSpacing(0)
+        layout.setContentsMargins(UIScale.px(40), UIScale.px(30), UIScale.px(40), UIScale.px(30))
+        layout.setSpacing(UIScale.px(0))
         
         # Inicializar listas para referencias
         self.labels_secciones = []
@@ -861,8 +915,8 @@ class ConfiguracionView(QWidget):
         
         # Container para el toggle
         tema_container = QHBoxLayout()
-        tema_container.setContentsMargins(5, 10, 0, 10)
-        tema_container.setSpacing(15)
+        tema_container.setContentsMargins(UIScale.px(5), UIScale.px(10), UIScale.px(0), UIScale.px(10))
+        tema_container.setSpacing(UIScale.px(15))
         
         # Label "Modo Claro"
         label_claro = QLabel("Modo Claro")
@@ -892,56 +946,67 @@ class ConfiguracionView(QWidget):
         layout.addLayout(tema_container)
         layout.addSpacing(20)
         
-        # Checkbox pantalla completa con SVG
-        fullscreen_row = QHBoxLayout()
-        fullscreen_row.setSpacing(15)
-        fullscreen_row.setContentsMargins(5, 10, 0, 10)
+        # Selector de pantalla completa
+        fullscreen_label = QLabel(" Pantalla Completa")
+        fullscreen_label.setStyleSheet("font-size: 15px; font-weight: 700; color: #f1f5f9; margin-top: 10px;")
+        self.labels_texto.append(fullscreen_label)
+        layout.addWidget(fullscreen_label)
         
-        self.checkbox_fullscreen = QCheckBox("Iniciar en pantalla completa")
+        fullscreen_desc = QLabel("Alterna entre modo ventana y pantalla completa")
+        fullscreen_desc.setStyleSheet("""
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 400;
+            padding-left: 10px;
+            margin-bottom: 6px;
+        """)
+        fullscreen_desc.setWordWrap(True)
+        self.labels_acciones_desc.append(fullscreen_desc)
+        layout.addWidget(fullscreen_desc)
+        
+        # Container para el toggle
+        fullscreen_container = QHBoxLayout()
+        fullscreen_container.setContentsMargins(UIScale.px(5), UIScale.px(10), UIScale.px(0), UIScale.px(10))
+        fullscreen_container.setSpacing(UIScale.px(15))
+        
+        # Label "Ventana"
+        label_ventana = QLabel("Ventana")
+        label_ventana.setStyleSheet("font-size: 14px; color: #94a3b8; font-weight: 500;")
+        self.labels_acciones_desc.append(label_ventana)
+        fullscreen_container.addWidget(label_ventana)
+        
+        # Toggle Switch
+        self.toggle_fullscreen = ToggleSwitch()
+        self.toggle_fullscreen.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.toggle_fullscreen.setToolTip("Cambiar entre ventana y pantalla completa")
+        
+        # Bloquear señales durante la inicialización para evitar disparos prematuros
+        self.toggle_fullscreen.blockSignals(True)
+        
         # Cargar configuración guardada
         saved_fullscreen = self.config_controller.get_fullscreen()
-        self.checkbox_fullscreen.setChecked(saved_fullscreen)
-        self.checkbox_fullscreen.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.toggle_fullscreen.setChecked(saved_fullscreen)
         
-        # Obtener ruta del SVG checkmark
-        import sys
-        import os
-        if getattr(sys, 'frozen', False):
-            base_path = os.path.dirname(sys.executable)
-        else:
-            base_path = os.path.dirname(os.path.dirname(__file__))
-        checkmark_path = os.path.join(base_path, 'assets', 'icons', 'checkmark.svg')
+        # Forzar la posición inicial del círculo sin animación
+        initial_position = 33 if saved_fullscreen else 3
+        if hasattr(self.toggle_fullscreen, '_circle_position'):
+            self.toggle_fullscreen._circle_position = initial_position
         
-        # Estilos con checkmark SVG
-        self.checkbox_fullscreen.setStyleSheet(f"""
-            QCheckBox {{
-                font-size: 15px;
-                padding: 8px;
-                spacing: 10px;
-            }}
-            QCheckBox::indicator {{
-                width: 20px;
-                height: 20px;
-                border: 2px solid #475569;
-                border-radius: 4px;
-                background: rgba(30, 41, 59, 0.5);
-            }}
-            QCheckBox::indicator:hover {{
-                border-color: #60a5fa;
-                background: rgba(30, 41, 59, 0.7);
-            }}
-            QCheckBox::indicator:checked {{
-                background: #3b82f6;
-                border-color: #3b82f6;
-                image: url({checkmark_path});
-            }}
-        """)
+        # Desbloquear señales y conectar después de la inicialización
+        self.toggle_fullscreen.blockSignals(False)
+        self.toggle_fullscreen.stateChanged.connect(self._toggle_fullscreen)
         
-        self.checkbox_fullscreen.stateChanged.connect(self._toggle_fullscreen)
-        fullscreen_row.addWidget(self.checkbox_fullscreen)
-        fullscreen_row.addStretch()
+        fullscreen_container.addWidget(self.toggle_fullscreen)
         
-        layout.addLayout(fullscreen_row)
+        # Label "Pantalla Completa"
+        label_fullscreen = QLabel("Pantalla Completa")
+        label_fullscreen.setStyleSheet("font-size: 14px; color: #94a3b8; font-weight: 500;")
+        self.labels_acciones_desc.append(label_fullscreen)
+        fullscreen_container.addWidget(label_fullscreen)
+        
+        fullscreen_container.addStretch()
+        
+        layout.addLayout(fullscreen_container)
         
         # Separador
         self._agregar_separador(layout)
@@ -960,7 +1025,7 @@ class ConfiguracionView(QWidget):
             "Crear Respaldo",
             self._create_backup
         )
-        backup_layout.setContentsMargins(5, 0, 0, 0)
+        backup_layout.setContentsMargins(UIScale.px(5), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         layout.addLayout(backup_layout)
         layout.addSpacing(25)
         
@@ -971,7 +1036,7 @@ class ConfiguracionView(QWidget):
             "Exportar",
             self._export_clientes
         )
-        export_clientes_layout.setContentsMargins(5, 0, 0, 0)
+        export_clientes_layout.setContentsMargins(UIScale.px(5), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         layout.addLayout(export_clientes_layout)
         layout.addSpacing(25)
         
@@ -982,7 +1047,7 @@ class ConfiguracionView(QWidget):
             "Seleccionar Archivo",
             self._import_clientes,
         )
-        import_clientes_layout.setContentsMargins(5, 0, 0, 0)
+        import_clientes_layout.setContentsMargins(UIScale.px(5), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         layout.addLayout(import_clientes_layout)
         layout.addSpacing(25)
         
@@ -993,7 +1058,7 @@ class ConfiguracionView(QWidget):
             "Exportar",
             self._export_pagos
         )
-        export_pagos_layout.setContentsMargins(5, 0, 0, 0)
+        export_pagos_layout.setContentsMargins(UIScale.px(5), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         layout.addLayout(export_pagos_layout)
         layout.addSpacing(25)
         
@@ -1004,30 +1069,20 @@ class ConfiguracionView(QWidget):
             "Exportar",
             self._export_mora
         )
-        export_mora_layout.setContentsMargins(5, 0, 0, 0)
+        export_mora_layout.setContentsMargins(UIScale.px(5), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         layout.addLayout(export_mora_layout)
         layout.addSpacing(25)
         
-        # Separador
-        self._agregar_separador(layout)
-        
-        # ==================== MANTENIMIENTO ====================
-        self._agregar_seccion_titulo(
-            layout,
-            "Mantenimiento",
-            "Herramientas para optimizar y corregir problemas"
+        # Descargar logs del sistema
+        logs_layout = self._crear_accion_con_boton(
+            "Descargar Logs del Sistema",
+            "Exporta el historial de acciones del sistema a un archivo CSV",
+            "Descargar Logs",
+            self._descargar_logs,
+            color_boton="default"
         )
-        
-        # Limpiar duplicados
-        clean_layout = self._crear_accion_con_boton(
-            "Limpiar Pagos Duplicados",
-            "Elimina registros de pagos duplicados en la base de datos",
-            "Ejecutar Limpieza",
-            self._limpiar_duplicados,
-            color_boton="warning"
-        )
-        clean_layout.setContentsMargins(5, 0, 0, 0)
-        layout.addLayout(clean_layout)
+        logs_layout.setContentsMargins(UIScale.px(5), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        layout.addLayout(logs_layout)
         layout.addSpacing(25)
         
         # Separador
@@ -1048,7 +1103,7 @@ class ConfiguracionView(QWidget):
             self._reset_database,
             color_boton="danger"
         )
-        reset_layout.setContentsMargins(5, 0, 0, 0)
+        reset_layout.setContentsMargins(UIScale.px(5), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         layout.addLayout(reset_layout)
         
         # Espacio antes del footer
@@ -1058,7 +1113,7 @@ class ConfiguracionView(QWidget):
         info_layout = QHBoxLayout()
         
         info_content = QVBoxLayout()
-        info_content.setSpacing(6)
+        info_content.setSpacing(UIScale.px(6))
         
         # Diccionario para almacenar las etiquetas del footer
         self.footer_labels = {}
@@ -1079,7 +1134,7 @@ class ConfiguracionView(QWidget):
         
         # Versión y desarrollador en layout horizontal
         details_layout = QHBoxLayout()
-        details_layout.setSpacing(15)
+        details_layout.setSpacing(UIScale.px(15))
         
         # Versión
         try:
@@ -1120,8 +1175,8 @@ class ConfiguracionView(QWidget):
         """Crea el tab de configuración de pagos"""
         widget = QWidget()
         main_layout = QVBoxLayout(widget)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        main_layout.setSpacing(UIScale.px(0))
         
         # Crear scroll area
         scroll = QScrollArea()
@@ -1144,8 +1199,8 @@ class ConfiguracionView(QWidget):
             }
         """)
         layout = QVBoxLayout(scroll_widget)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(25)
+        layout.setContentsMargins(UIScale.px(20), UIScale.px(20), UIScale.px(20), UIScale.px(20))
+        layout.setSpacing(UIScale.px(25))
         
         # ===== SECCION 1: AÑOS DE FACTURACION =====
         anos_title = QLabel("Años de Facturacion")
@@ -1158,7 +1213,7 @@ class ConfiguracionView(QWidget):
         
         # Selector de años
         anos_layout = QHBoxLayout()
-        anos_layout.setSpacing(15)
+        anos_layout.setSpacing(UIScale.px(15))
         
         # Año inicial
         label_inicio = QLabel("Primer Año:")
@@ -1169,8 +1224,8 @@ class ConfiguracionView(QWidget):
         self.spin_ano_inicio.setMinimum(2020)
         self.spin_ano_inicio.setMaximum(2050)
         self.spin_ano_inicio.setValue(2025)
-        self.spin_ano_inicio.setMinimumHeight(40)
-        self.spin_ano_inicio.setMinimumWidth(100)
+        self.spin_ano_inicio.setMinimumHeight(UIScale.px(40))
+        self.spin_ano_inicio.setMinimumWidth(UIScale.px(100))
         self.spin_ano_inicio.setStyleSheet("font-size: 14px; padding: 5px;")
         anos_layout.addWidget(self.spin_ano_inicio)
         
@@ -1183,16 +1238,16 @@ class ConfiguracionView(QWidget):
         self.spin_ano_fin.setMinimum(2020)
         self.spin_ano_fin.setMaximum(2050)
         self.spin_ano_fin.setValue(2026)
-        self.spin_ano_fin.setMinimumHeight(40)
-        self.spin_ano_fin.setMinimumWidth(100)
+        self.spin_ano_fin.setMinimumHeight(UIScale.px(40))
+        self.spin_ano_fin.setMinimumWidth(UIScale.px(100))
         self.spin_ano_fin.setStyleSheet("font-size: 14px; padding: 5px;")
         anos_layout.addWidget(self.spin_ano_fin)
         
         anos_layout.addStretch()
         
         btn_guardar_anos = QPushButton("Guardar Años")
-        btn_guardar_anos.setMinimumHeight(40)
-        btn_guardar_anos.setMinimumWidth(130)
+        btn_guardar_anos.setMinimumHeight(UIScale.px(40))
+        btn_guardar_anos.setMinimumWidth(UIScale.px(130))
         btn_guardar_anos.setCursor(Qt.CursorShape.PointingHandCursor)
         
         # Detectar tema actual
@@ -1269,7 +1324,7 @@ class ConfiguracionView(QWidget):
         layout.addSpacing(20)
         separador = QLabel("")
         separador.setStyleSheet("border-top: 1px solid rgba(148, 163, 184, 0.2);")
-        separador.setMaximumHeight(1)
+        separador.setMaximumHeight(UIScale.px(1))
         layout.addWidget(separador)
         layout.addSpacing(20)
         
@@ -1282,8 +1337,8 @@ class ConfiguracionView(QWidget):
         metodos_header.addStretch()
         
         btn_add = QPushButton("Agregar ")
-        btn_add.setMinimumHeight(40)
-        btn_add.setMaximumWidth(200)
+        btn_add.setMinimumHeight(UIScale.px(40))
+        btn_add.setMaximumWidth(UIScale.px(200))
         btn_add.setCursor(Qt.CursorShape.PointingHandCursor)
         
         # Detectar tema actual
@@ -1358,7 +1413,7 @@ class ConfiguracionView(QWidget):
         self.tabla_metodos.setAlternatingRowColors(True)
         self.tabla_metodos.verticalHeader().setVisible(False)
         self.tabla_metodos.setColumnWidth(1, 90)
-        self.tabla_metodos.setMinimumHeight(300)  # Altura mínima para que se vean varios métodos
+        self.tabla_metodos.setMinimumHeight(UIScale.px(300))  # Altura mínima para que se vean varios métodos
         
         layout.addWidget(self.tabla_metodos)
         
@@ -1378,6 +1433,225 @@ class ConfiguracionView(QWidget):
         """Crea el tab de gestión de usuarios (solo para superadmin)"""
         from .usuarios_management import UsuariosManagement
         return UsuariosManagement(self.usuario_actual)
+    
+    def _crear_tab_historial(self) -> QWidget:
+        """Crea el tab de historial de cambios (para admins y superadmin)"""
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
+        layout.setSpacing(UIScale.px(20))
+        
+        # Título y descripción
+        title = QLabel("Historial de Cambios del Sistema")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #60a5fa;")
+        layout.addWidget(title)
+        
+        desc = QLabel("Registro completo de todas las acciones realizadas en el sistema")
+        desc.setStyleSheet("font-size: 13px; color: #94a3b8;")
+        desc.setWordWrap(True)
+        layout.addWidget(desc)
+        
+        # Barra de botones
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addStretch()
+        
+        # Botón para borrar logs (solo para superadmin)
+        if self.usuario_actual and self.usuario_actual.es_superadmin:
+            btn_borrar = QPushButton(" Borrar Logs")
+            btn_borrar.setMinimumHeight(UIScale.px(35))
+            btn_borrar.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn_borrar.setStyleSheet("""
+                QPushButton {
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                        stop:0 rgba(239, 68, 68, 0.9),
+                        stop:1 rgba(220, 38, 38, 0.9));
+                    border: 1px solid rgba(239, 68, 68, 0.6);
+                    border-radius: 8px;
+                    color: white;
+                    font-size: 13px;
+                    font-weight: bold;
+                    padding: 0 20px;
+                }
+                QPushButton:hover {
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                        stop:0 rgba(239, 68, 68, 1.0),
+                        stop:1 rgba(220, 38, 38, 1.0));
+                }
+            """)
+            btn_borrar.clicked.connect(self._borrar_logs)
+            buttons_layout.addWidget(btn_borrar)
+        
+        # Botón para refrescar
+        btn_refresh = QPushButton(" Actualizar")
+        btn_refresh.setMinimumHeight(UIScale.px(35))
+        btn_refresh.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_refresh.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 rgba(59, 130, 246, 0.9),
+                    stop:1 rgba(37, 99, 235, 0.9));
+                border: 1px solid rgba(59, 130, 246, 0.6);
+                border-radius: 8px;
+                color: white;
+                font-size: 13px;
+                font-weight: bold;
+                padding: 0 20px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 rgba(59, 130, 246, 1.0),
+                    stop:1 rgba(37, 99, 235, 1.0));
+            }
+        """)
+        btn_refresh.clicked.connect(self._cargar_historial)
+        buttons_layout.addWidget(btn_refresh)
+        
+        layout.addLayout(buttons_layout)
+        
+        # Tabla de logs
+        self.tabla_historial = QTableWidget()
+        self.tabla_historial.setColumnCount(5)
+        self.tabla_historial.setHorizontalHeaderLabels(['Fecha y Hora', 'Usuario', 'Acción', 'Detalles', 'ID'])
+        
+        # Configurar ancho de columnas
+        header = self.tabla_historial.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)  # Fecha
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)  # Usuario
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)  # Acción
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)  # Detalles
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)  # ID
+        
+        # Configuración visual
+        self.tabla_historial.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.tabla_historial.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.tabla_historial.setAlternatingRowColors(True)
+        self.tabla_historial.setShowGrid(False)
+        self.tabla_historial.verticalHeader().setVisible(False)
+        self.tabla_historial.setMinimumHeight(UIScale.px(400))
+        
+        # Habilitar word wrap para que el texto se expanda en múltiples líneas
+        self.tabla_historial.setWordWrap(True)
+        self.tabla_historial.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        
+        layout.addWidget(self.tabla_historial)
+        
+        # Cargar datos inicialmente
+        self._cargar_historial()
+        
+        return tab
+    
+    def _cargar_historial(self):
+        """Carga todos los logs en la tabla"""
+        from database.models import LogSistema
+        from controllers.log_controller import LogController
+        
+        log_ctrl = LogController()
+        logs = log_ctrl.obtener_logs(limite=1000)  # Últimos 1000 logs
+        
+        self.tabla_historial.setRowCount(len(logs))
+        
+        for row, log in enumerate(logs):
+            # Fecha y hora
+            fecha_item = QTableWidgetItem(log['fecha_hora'])
+            fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.tabla_historial.setItem(row, 0, fecha_item)
+            
+            # Usuario
+            usuario_item = QTableWidgetItem(log['usuario_nombre'])
+            usuario_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.tabla_historial.setItem(row, 1, usuario_item)
+            
+            # Acción
+            accion_item = QTableWidgetItem(log['accion'])
+            accion_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            
+            # Colorear según tipo de acción
+            if 'Crear' in log['accion'] or 'Registrar' in log['accion']:
+                accion_item.setForeground(QColor(34, 197, 94))  # Verde
+            elif 'Eliminar' in log['accion']:
+                accion_item.setForeground(QColor(239, 68, 68))  # Rojo
+            elif 'Editar' in log['accion'] or 'Actualizar' in log['accion'] or 'Cambiar' in log['accion']:
+                accion_item.setForeground(QColor(59, 130, 246))  # Azul
+            elif 'Impago' in log['accion']:
+                accion_item.setForeground(QColor(234, 179, 8))  # Amarillo
+            
+            self.tabla_historial.setItem(row, 2, accion_item)
+            
+            # Detalles (con word wrap habilitado)
+            detalles_item = QTableWidgetItem(log['detalles'])
+            detalles_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            self.tabla_historial.setItem(row, 3, detalles_item)
+            
+            # ID
+            id_item = QTableWidgetItem(str(log['id']))
+            id_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.tabla_historial.setItem(row, 4, id_item)
+        
+        # Ajustar altura de filas al contenido después de cargar todos los datos
+        self.tabla_historial.resizeRowsToContents()
+    
+    def _borrar_logs(self):
+        """Borra todos los logs del sistema (solo superadmin)"""
+        # Verificar que sea superadmin
+        if not self.usuario_actual or not self.usuario_actual.es_superadmin:
+            dialog = ConfirmacionDialog(
+                self,
+                "Acceso Denegado",
+                "Solo el superadministrador puede borrar logs",
+                tipo="error"
+            )
+            dialog.exec()
+            return
+        
+        # Diálogo de confirmación con advertencia fuerte
+        dialog = ConfirmacionDialog(
+            self,
+            "Confirmar Borrado de Logs",
+            "¿Está seguro de que desea borrar TODOS los logs del sistema?\n\n"
+            "Esta acción es IRREVERSIBLE y eliminará permanentemente:\n\n"
+            "• Todo el historial de acciones\n"
+            "• Registros de cambios de usuarios\n"
+            "• Auditoría del sistema\n\n"
+            "  ADVERTENCIA: Se perderá toda la trazabilidad del sistema",
+            tipo="warning"
+        )
+        
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            try:
+                from controllers.log_controller import LogController
+                
+                log_ctrl = LogController()
+                cantidad_borrada = log_ctrl.borrar_todos_logs()
+                
+                # Registrar la acción de borrado en un nuevo log
+                log_ctrl.registrar_log(
+                    usuario_id=self.usuario_actual.id,
+                    usuario_nombre=self.usuario_actual.nombre_completo,
+                    accion="Borrar Logs del Sistema",
+                    detalles=f"Se eliminaron {cantidad_borrada} registros del historial"
+                )
+                
+                # Recargar la tabla
+                self._cargar_historial()
+                
+                # Mensaje de éxito
+                dialog_success = ConfirmacionDialog(
+                    self,
+                    "Logs Borrados",
+                    f"Se eliminaron exitosamente {cantidad_borrada} registros del historial",
+                    tipo="success"
+                )
+                dialog_success.exec()
+                
+            except Exception as e:
+                # Mensaje de error
+                dialog_error = ConfirmacionDialog(
+                    self,
+                    "Error",
+                    f"No se pudieron borrar los logs: {str(e)}",
+                    tipo="error"
+                )
+                dialog_error.exec()
     
     def _guardar_anos(self):
         """Guarda los años de facturacion"""
@@ -1412,8 +1686,8 @@ class ConfiguracionView(QWidget):
             # Nombre del método con su color
             nombre_widget = QWidget()
             nombre_layout = QHBoxLayout(nombre_widget)
-            nombre_layout.setContentsMargins(8, 4, 8, 4)
-            nombre_layout.setSpacing(10)
+            nombre_layout.setContentsMargins(UIScale.px(8), UIScale.px(4), UIScale.px(8), UIScale.px(4))
+            nombre_layout.setSpacing(UIScale.px(10))
             
             # Nombre del método con color aplicado al texto
             nombre_label = QLabel(metodo.nombre)
@@ -1426,13 +1700,13 @@ class ConfiguracionView(QWidget):
             # Botones de acción con iconos compactos
             actions_widget = QWidget()
             actions_layout = QHBoxLayout(actions_widget)
-            actions_layout.setContentsMargins(0, 0, 0, 0)
-            actions_layout.setSpacing(6)
+            actions_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+            actions_layout.setSpacing(UIScale.px(6))
             actions_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             
             # Botón Editar (icono)
             btn_edit = QPushButton("✏️")
-            btn_edit.setFixedSize(26, 26)
+            btn_edit.setFixedSize(UIScale.px(26), UIScale.px(26))
             btn_edit.setToolTip("Editar método de pago")
             btn_edit.setStyleSheet("""
                 QPushButton {
@@ -1453,7 +1727,7 @@ class ConfiguracionView(QWidget):
             
             # Botón Eliminar (icono)
             btn_delete = QPushButton("🗑️")
-            btn_delete.setFixedSize(26, 26)
+            btn_delete.setFixedSize(UIScale.px(26), UIScale.px(26))
             btn_delete.setToolTip("Eliminar método de pago")
             btn_delete.setStyleSheet("""
                 QPushButton {
@@ -1486,7 +1760,19 @@ class ConfiguracionView(QWidget):
             color = dialog.get_color()
             if nombre:
                 try:
-                    MetodoPago.crear(nombre, color)
+                    metodo_id = MetodoPago.crear(nombre, color)
+                    
+                    # Registrar log
+                    if hasattr(self, 'usuario_actual') and self.usuario_actual:
+                        from controllers.log_controller import LogController
+                        log_ctrl = LogController()
+                        log_ctrl.registrar_log(
+                            usuario_id=self.usuario_actual.id if hasattr(self.usuario_actual, 'id') else None,
+                            usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo if hasattr(self.usuario_actual, 'nombre_completo') else "Usuario",
+                            accion='Crear Método de Pago',
+                            detalles=f'Nuevo método de pago creado llamado {nombre}'
+                        )
+                    
                     dialog_success = ConfirmacionDialog(
                         self,
                         "Éxito",
@@ -1513,6 +1799,23 @@ class ConfiguracionView(QWidget):
             if nombre:
                 try:
                     MetodoPago.actualizar(metodo.id, nombre, True, color)
+                    
+                    # Registrar log
+                    if hasattr(self, 'usuario_actual') and self.usuario_actual:
+                        from controllers.log_controller import LogController
+                        log_ctrl = LogController()
+                        
+                        # Solo registrar si cambió el nombre
+                        if metodo.nombre != nombre:
+                            detalles = f'Método de pago anterior: {metodo.nombre} | Método de pago nuevo: {nombre}'
+                            
+                            log_ctrl.registrar_log(
+                                usuario_id=self.usuario_actual.id if hasattr(self.usuario_actual, 'id') else None,
+                                usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo if hasattr(self.usuario_actual, 'nombre_completo') else "Usuario",
+                                accion='Editar Método de Pago',
+                                detalles=detalles
+                            )
+                    
                     dialog_success = ConfirmacionDialog(
                         self,
                         "Éxito",
@@ -1532,6 +1835,19 @@ class ConfiguracionView(QWidget):
     
     def _eliminar_metodo_pago(self, metodo_id: int):
         """Elimina un método de pago"""
+        # Obtener info del método antes de eliminar
+        metodo_info = None
+        try:
+            from database.connection import DatabaseConnection
+            db = DatabaseConnection()
+            cursor = db.get_connection().cursor()
+            cursor.execute('SELECT nombre, color FROM metodos_pago WHERE id = ?', (metodo_id,))
+            row = cursor.fetchone()
+            if row:
+                metodo_info = {'nombre': row['nombre'], 'color': row['color']}
+        except:
+            pass
+        
         dialog = ConfirmacionDialog(
             self,
             "Confirmar eliminación",
@@ -1542,6 +1858,20 @@ class ConfiguracionView(QWidget):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             try:
                 MetodoPago.eliminar(metodo_id)
+                
+                # Registrar log
+                if hasattr(self, 'usuario_actual') and self.usuario_actual:
+                    from controllers.log_controller import LogController
+                    log_ctrl = LogController()
+                    detalles = f'Método de pago eliminado: {metodo_info["nombre"]}' if metodo_info else "Método de pago eliminado"
+                    
+                    log_ctrl.registrar_log(
+                        usuario_id=self.usuario_actual.id if hasattr(self.usuario_actual, 'id') else None,
+                        usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo if hasattr(self.usuario_actual, 'nombre_completo') else "Usuario",
+                        accion='Eliminar Método de Pago',
+                        detalles=detalles
+                    )
+                
                 dialog_success = ConfirmacionDialog(
                     self,
                     "Éxito",
@@ -1560,15 +1890,29 @@ class ConfiguracionView(QWidget):
                 dialog_error.exec()
     
     def _toggle_fullscreen(self, state):
-        """Alterna el modo de pantalla completa"""
+        """Alterna el modo de pantalla completa (con debounce)"""
+        self._pending_fullscreen_state = bool(state)
+        
+        # Reiniciar timer: espera 100ms antes de aplicar el cambio
+        # Esto evita múltiples eventos rápidos del toggle
+        self._fullscreen_change_timer.stop()
+        self._fullscreen_change_timer.start()
+    
+    def _apply_fullscreen_change(self):
+        """Aplica el cambio de fullscreen después del debounce"""
+        if self._pending_fullscreen_state is None:
+            return
+        
+        is_enabled = self._pending_fullscreen_state
         main_window = self.window()
-        is_enabled = state == Qt.CheckState.Checked.value
         
-        # Guardar configuración
-        self.config_controller.set_fullscreen(is_enabled)
-        
+        # Cambiar el estado de la ventana
         if hasattr(main_window, 'toggle_fullscreen'):
             main_window.toggle_fullscreen(is_enabled)
+        
+        # Guardar en BD
+        self.config_controller.set_fullscreen(is_enabled)
+        self._pending_fullscreen_state = None
     
     def _cambiar_tema(self, tema_texto: str):
         """Cambia el tema de la aplicación"""
@@ -1742,34 +2086,68 @@ class ConfiguracionView(QWidget):
                 )
                 dialog.exec()
     
-    def _limpiar_duplicados(self):
-        """Limpia pagos duplicados de la base de datos"""
-        dialog = ConfirmacionDialog(
+    def _descargar_logs(self):
+        """Descarga los logs del sistema a un archivo CSV"""
+        from PyQt6.QtWidgets import QFileDialog
+        from controllers.log_controller import LogController
+        from datetime import datetime
+        import os
+        
+        # Determinar carpeta por defecto
+        try:
+            from utils import get_data_path
+            default_dir = os.path.dirname(get_data_path(''))
+        except:
+            default_dir = os.path.expanduser("~")
+        
+        # Nombre de archivo con fecha y hora
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        default_filename = f"logs_gesmonth_{timestamp}.csv"
+        default_path = os.path.join(default_dir, default_filename)
+        
+        # Diálogo para guardar archivo
+        file_path, _ = QFileDialog.getSaveFileName(
             self,
-            "Limpiar Pagos Duplicados",
-            "Esta acción eliminará los pagos duplicados manteniendo solo el primer registro de cada grupo.\n\n"
-            "¿Desea continuar?",
-            tipo="question"
+            "Guardar Logs del Sistema",
+            default_path,
+            "Archivos CSV (*.csv);;Todos los archivos (*.*)"
         )
         
-        if dialog.exec() == QDialog.DialogCode.Accepted:
+        if file_path:
             try:
-                from database.models import Pago
-                eliminados = Pago.eliminar_duplicados()
+                log_controller = LogController()
                 
-                dialog_success = ConfirmacionDialog(
-                    self,
-                    "Éxito",
-                    f"Se eliminaron {eliminados} pagos duplicados.\n\n"
-                    "Actualice la vista de reportes para ver los cambios.",
-                    tipo="success"
-                )
-                dialog_success.exec()
+                # Exportar todos los logs
+                exito = log_controller.exportar_logs_csv(file_path)
+                
+                if exito:
+                    # Obtener estadísticas
+                    stats = log_controller.obtener_estadisticas()
+                    total_logs = stats.get('total_logs', 0)
+                    
+                    dialog_success = ConfirmacionDialog(
+                        self,
+                        "Éxito",
+                        f"Logs exportados correctamente.\n\n"
+                        f"Total de registros: {total_logs}\n"
+                        f"Archivo guardado en:\n{file_path}",
+                        tipo="success"
+                    )
+                    dialog_success.exec()
+                else:
+                    dialog_error = ConfirmacionDialog(
+                        self,
+                        "Error",
+                        "No se pudieron exportar los logs.\n"
+                        "Es posible que no haya registros disponibles.",
+                        tipo="error"
+                    )
+                    dialog_error.exec()
             except Exception as e:
                 dialog_error = ConfirmacionDialog(
                     self,
                     "Error",
-                    f"No se pudieron eliminar los duplicados:\n{str(e)}",
+                    f"Error al exportar logs:\n{str(e)}",
                     tipo="error"
                 )
                 dialog_error.exec()
@@ -1878,7 +2256,8 @@ class ConfiguracionView(QWidget):
                 os.execl(sys.executable, sys.executable, *sys.argv)
                 
             except Exception as e:
-                dialog_error = ConfirmacionDialog(
+                dialog
+                _error = ConfirmacionDialog(
                     self,
                     "Error Crítico",
                     f"Error al reiniciar la base de datos:\n{str(e)}",
@@ -1896,14 +2275,14 @@ class ConfirmacionDialog(QDialog):
         self.mensaje = mensaje
         self.tipo = tipo  # "success", "error", "warning", "question", "info"
         self.setWindowTitle(titulo)
-        self.setMinimumWidth(450)
+        self.setMinimumWidth(UIScale.px(450))
         self._init_ui()
     
     def _init_ui(self):
         """Inicializa la interfaz del diálogo"""
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(UIScale.px(20))
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
         
         # Detectar tema actual desde la ventana principal
         main_window = self.parent()
@@ -1948,10 +2327,10 @@ class ConfirmacionDialog(QDialog):
         if self.tipo == "question":
             # Dos botones: Sí y No
             btn_layout = QHBoxLayout()
-            btn_layout.setSpacing(15)
+            btn_layout.setSpacing(UIScale.px(15))
             
             btn_si = QPushButton("Sí")
-            btn_si.setMinimumHeight(40)
+            btn_si.setMinimumHeight(UIScale.px(40))
             btn_si.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_si.setStyleSheet("""
                 QPushButton {
@@ -1970,7 +2349,7 @@ class ConfirmacionDialog(QDialog):
             btn_layout.addWidget(btn_si)
             
             btn_no = QPushButton("No")
-            btn_no.setMinimumHeight(40)
+            btn_no.setMinimumHeight(UIScale.px(40))
             btn_no.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_no.setStyleSheet("""
                 QPushButton {
@@ -1992,7 +2371,7 @@ class ConfirmacionDialog(QDialog):
         else:
             # Un solo botón: Aceptar
             btn_aceptar = QPushButton("Aceptar")
-            btn_aceptar.setMinimumHeight(40)
+            btn_aceptar.setMinimumHeight(UIScale.px(40))
             btn_aceptar.setCursor(Qt.CursorShape.PointingHandCursor)
             
             if self.tipo == "success":
@@ -2065,14 +2444,14 @@ class MetodoPagoDialog(QDialog):
         self.metodo = metodo
         self.color_seleccionado = metodo.color if metodo else "#3b82f6"
         self.setWindowTitle("Editar Método de Pago" if metodo else "Agregar Método de Pago")
-        self.setMinimumWidth(450)
+        self.setMinimumWidth(UIScale.px(450))
         self._init_ui()
     
     def _init_ui(self):
         """Inicializa la interfaz del diálogo"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
+        layout.setSpacing(UIScale.px(20))
         
         # Detectar tema actual desde la ventana principal
         main_window = self.parent()
@@ -2093,7 +2472,7 @@ class MetodoPagoDialog(QDialog):
         
         layout.addSpacing(10)
         
-        # Campo nombre con diseño mejorado
+        # Campo nombre
         label = QLabel("Nombre del Método:")
         if self.is_dark:
             label.setStyleSheet("font-size: 14px; color: #94a3b8; font-weight: 500; margin-bottom: 5px;")
@@ -2103,7 +2482,7 @@ class MetodoPagoDialog(QDialog):
         
         self.input_nombre = QLineEdit()
         self.input_nombre.setPlaceholderText("Ej: Efectivo, Transferencia, Tarjeta...")
-        self.input_nombre.setMinimumHeight(40)
+        self.input_nombre.setMinimumHeight(UIScale.px(40))
         
         if self.metodo:
             self.input_nombre.setText(self.metodo.nombre)
@@ -2121,11 +2500,11 @@ class MetodoPagoDialog(QDialog):
         layout.addWidget(color_label)
         
         color_row = QHBoxLayout()
-        color_row.setSpacing(12)
+        color_row.setSpacing(UIScale.px(12))
         
         # Botón para seleccionar color
         self.btn_color = QPushButton("Seleccionar Color")
-        self.btn_color.setMinimumHeight(40)
+        self.btn_color.setMinimumHeight(UIScale.px(40))
         self.btn_color.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_color.clicked.connect(self._seleccionar_color)
         self._actualizar_boton_color()
@@ -2134,7 +2513,7 @@ class MetodoPagoDialog(QDialog):
         
         # Vista previa del color
         self.color_preview = QFrame()
-        self.color_preview.setFixedSize(40, 40)
+        self.color_preview.setFixedSize(UIScale.px(40), UIScale.px(40))
         self.color_preview.setStyleSheet(f"""
             QFrame {{
                 background-color: {self.color_seleccionado};
@@ -2150,10 +2529,10 @@ class MetodoPagoDialog(QDialog):
         
         # Botones con diseño mejorado
         buttons_layout = QHBoxLayout()
-        buttons_layout.setSpacing(15)
+        buttons_layout.setSpacing(UIScale.px(15))
         
         btn_cancel = QPushButton("Cancelar")
-        btn_cancel.setMinimumHeight(45)
+        btn_cancel.setMinimumHeight(UIScale.px(45))
         btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_cancel.setStyleSheet("""
             QPushButton {
@@ -2171,7 +2550,7 @@ class MetodoPagoDialog(QDialog):
         btn_cancel.clicked.connect(self.reject)
         
         btn_save = QPushButton("Guardar")
-        btn_save.setMinimumHeight(45)
+        btn_save.setMinimumHeight(UIScale.px(45))
         btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_save.setStyleSheet("""
             QPushButton {

@@ -2,19 +2,37 @@
 Vista de control de cuotas mensuales - Todos los clientes
 """
 
+# PyQt6 Widgets: Componentes gráficos de la interfaz
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QComboBox, QMessageBox, QDialog, QFormLayout, QLineEdit, QGridLayout, QScrollArea, QFrame,QCheckBox, QDoubleSpinBox)
-from PyQt6.QtCore import Qt, QSize, QDateTime
-from PyQt6.QtGui import QIcon, QFont, QPalette, QColor
-from database.models import Cliente, CuotaMensual, MetodoPago, Pago
-from controllers.config_controller import ConfigController
-from ui.detalles_cuota_dialog import DetallesCuotaDialog
+# QWidget: widget base, Layouts: organización de elementos, QLabel: etiquetas, QPushButton: botones
+# QComboBox: listas desplegables, QMessageBox: mensajes, QDialog: diálogos, QScrollArea: área desplazable
+# QFrame: marcos, QCheckBox: casillas, QDoubleSpinBox: selector numérico decimal
+
+# PyQt6 Core: Funcionalidades centrales de Qt
+from PyQt6.QtCore import Qt, QSize, QDateTime  # Qt: constantes, QSize: tamaños, QDateTime: fecha/hora
+
+# PyQt6 GUI: Elementos gráficos
+from PyQt6.QtGui import QIcon, QFont, QPalette, QColor  # QIcon: iconos, QFont: fuentes, QPalette: paletas, QColor: colores
+
+# Responsive: escalado DPI de tamaños fijos
+from .responsive import UIScale
+
+# Database: Modelos de datos
+from database.models import Cliente, CuotaMensual, MetodoPago, Pago  # Cliente: clientes, CuotaMensual: cuotas, MetodoPago: métodos de pago, Pago: pagos
+
+# Controllers: Lógica de negocio
+from controllers.config_controller import ConfigController  # ConfigController: configuración de años de facturación
+
+# UI: Diálogos personalizados
+from ui.detalles_cuota_dialog import DetallesCuotaDialog  # DetallesCuotaDialog: diálogo con detalles de cuota
 
 
 class CuotasView(QWidget):
     """Vista para control de cuotas mensuales - Muestra todos los clientes"""
     
-    def __init__(self):
+    def __init__(self, usuario_actual=None):
         super().__init__()
+        self.usuario_actual = usuario_actual
         self.config_controller = ConfigController()
         self.clientes_filtrados = []
         self._init_ui()
@@ -22,12 +40,12 @@ class CuotasView(QWidget):
     def _init_ui(self):
         """Inicializa la interfaz"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
+        layout.setSpacing(UIScale.px(20))
         
         # Header: Título y barra de búsqueda
         header_layout = QVBoxLayout()
-        header_layout.setSpacing(15)
+        header_layout.setSpacing(UIScale.px(15))
         
         # Título
         title = QLabel("Control de Cuotas Mensuales")
@@ -39,7 +57,7 @@ class CuotasView(QWidget):
         search_layout = QHBoxLayout()
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("🔍 Buscar cliente por nombre o documento...")
-        self.search_input.setMinimumHeight(45)
+        self.search_input.setMinimumHeight(UIScale.px(45))
         self.search_input.textChanged.connect(self._filtrar_clientes)
         search_layout.addWidget(self.search_input)
         
@@ -54,8 +72,8 @@ class CuotasView(QWidget):
         self.clientes_container = QWidget()
         self.clientes_container.setStyleSheet("QWidget { background: transparent; }")
         self.clientes_layout = QVBoxLayout(self.clientes_container)
-        self.clientes_layout.setSpacing(20)
-        self.clientes_layout.setContentsMargins(0, 0, 0, 0)
+        self.clientes_layout.setSpacing(UIScale.px(20))
+        self.clientes_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         
         scroll.setWidget(self.clientes_container)
         layout.addWidget(scroll)
@@ -173,7 +191,7 @@ class CuotasView(QWidget):
             color_cuota_text = "#2563eb"
         
         layout = QVBoxLayout(tarjeta)
-        layout.setSpacing(15)
+        layout.setSpacing(UIScale.px(15))
         
         # Header con info del cliente
         header = QHBoxLayout()
@@ -208,7 +226,7 @@ class CuotasView(QWidget):
         
         # Grids de años configurados
         años_layout = QVBoxLayout()
-        años_layout.setSpacing(20)
+        años_layout.setSpacing(UIScale.px(20))
         
         años_configurados = self._obtener_años_configurados()
         for año in años_configurados:
@@ -229,7 +247,7 @@ class CuotasView(QWidget):
         
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.setSpacing(12)
+        layout.setSpacing(UIScale.px(12))
         
         # Header del año
         header = QLabel(f"{año}")
@@ -257,7 +275,7 @@ class CuotasView(QWidget):
         
         # Grid de meses
         grid = QGridLayout()
-        grid.setSpacing(8)
+        grid.setSpacing(UIScale.px(8))
         
         meses = [
             "Enero", "Febrero", "Marzo", "Abril",
@@ -284,8 +302,8 @@ class CuotasView(QWidget):
             is_dark = main_window.current_theme == 'dark'
         
         frame = QFrame()
-        frame.setMinimumSize(140, 110)
-        frame.setMaximumSize(180, 130)
+        frame.setMinimumSize(UIScale.px(140), UIScale.px(110))
+        frame.setMaximumSize(UIScale.px(180), UIScale.px(130))
         frame.setCursor(Qt.CursorShape.PointingHandCursor)
         
         # Obtener fecha actual del sistema
@@ -509,8 +527,8 @@ class CuotasView(QWidget):
         """)
         
         layout = QVBoxLayout(frame)
-        layout.setContentsMargins(8, 6, 8, 6)
-        layout.setSpacing(2)
+        layout.setContentsMargins(UIScale.px(8), UIScale.px(6), UIScale.px(8), UIScale.px(6))
+        layout.setSpacing(UIScale.px(2))
         
         # Nombre del mes
         label_mes = QLabel(nombre_mes[:3].upper())
@@ -564,7 +582,7 @@ class CuotasView(QWidget):
         """Maneja el click en una celda de mes"""
         if cuota:
             # Si ya tiene cuota, mostrar diálogo detallado
-            dialog = DetallesCuotaDialog(self, cliente, año, mes, cuota)
+            dialog = DetallesCuotaDialog(self, cliente, año, mes, cuota, usuario_actual=self.usuario_actual)
             if dialog.exec() == QDialog.DialogCode.Accepted:
                 self._mostrar_clientes()
         else:
@@ -588,14 +606,14 @@ class RegistroCuotaDialog(QDialog):
         self.es_mes_futuro = (año > hoy.date().year()) or (año == hoy.date().year() and mes > hoy.date().month())
         
         self.setWindowTitle(f"Registrar Cuota - {cliente.nombre}")
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(UIScale.px(400))
         self._init_ui()
     
     def _init_ui(self):
         """Inicializa la interfaz del diálogo"""
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(UIScale.px(20))
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
         
         # Detectar tema actual desde la ventana principal
         main_window = self.parent()
@@ -659,7 +677,7 @@ class RegistroCuotaDialog(QDialog):
         # Opción de pago parcial - SIEMPRE mostrar para permitir pagos parciales
         parcial_container = QFrame()
         parcial_layout = QHBoxLayout(parcial_container)
-        parcial_layout.setContentsMargins(0, 0, 0, 0)
+        parcial_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         
         self.check_pago_parcial = QCheckBox("Pago Parcial")
         if self.is_dark:
@@ -675,7 +693,7 @@ class RegistroCuotaDialog(QDialog):
         self.spin_monto_parcial.setValue(deuda_total)
         self.spin_monto_parcial.setDecimals(0)
         self.spin_monto_parcial.setEnabled(False)
-        self.spin_monto_parcial.setMinimumHeight(35)
+        self.spin_monto_parcial.setMinimumHeight(UIScale.px(35))
         self.spin_monto_parcial.setStyleSheet("font-size: 14px;")
         self.spin_monto_parcial.setStepType(QDoubleSpinBox.StepType.AdaptiveDecimalStepType)
         self.spin_monto_parcial.lineEdit().selectAll()  # Seleccionar todo al inicio
@@ -692,7 +710,7 @@ class RegistroCuotaDialog(QDialog):
         
         # Botones de acción
         btn_layout = QHBoxLayout()
-        btn_layout.setSpacing(15)
+        btn_layout.setSpacing(UIScale.px(15))
         
         # Detectar tema para botones
         main_window = self.parent()
@@ -703,7 +721,7 @@ class RegistroCuotaDialog(QDialog):
             is_dark = main_window.current_theme == 'dark'
         
         btn_pago = QPushButton("Registrar Pago")
-        btn_pago.setMinimumHeight(40)
+        btn_pago.setMinimumHeight(UIScale.px(40))
         btn_pago.setCursor(Qt.CursorShape.PointingHandCursor)
         if is_dark:
             btn_pago_style = """
@@ -737,7 +755,7 @@ class RegistroCuotaDialog(QDialog):
         btn_pago.clicked.connect(self._registrar_pago)
         
         btn_impago = QPushButton("Registrar Impago")
-        btn_impago.setMinimumHeight(40)
+        btn_impago.setMinimumHeight(UIScale.px(40))
         btn_impago.setCursor(Qt.CursorShape.PointingHandCursor)
         if is_dark:
             btn_impago_style = """
@@ -777,7 +795,7 @@ class RegistroCuotaDialog(QDialog):
     def _agregar_linea_info(self, layout: QVBoxLayout, label: str, valor: str, destacado: bool = False):
         """Agrega una línea de información al layout"""
         linea_layout = QHBoxLayout()
-        linea_layout.setContentsMargins(0, 0, 0, 0)
+        linea_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         
         label_widget = QLabel(label)
         if self.is_dark:
@@ -923,15 +941,19 @@ class RegistroCuotaDialog(QDialog):
         """Registra el impago de la cuota"""
         # Validar si es mes futuro
         if self.es_mes_futuro:
-            hoy = QDateTime.currentDateTime()
+            # Obtener nombre del mes en español
+            meses_es = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                       "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+            mes_nombre = meses_es[self.mes - 1]
+            
             dialog = ConfirmacionDialog(
                 self,
-                "Acción No Permitida",
+                " Acción No Permitida",
                 f"No puede marcar como IMPAGO un mes futuro.\n\n"
                 f"El cliente {self.cliente.nombre} tiene hasta el día {self.cliente.dia_cobro} "
-                f"del mes actual para realizar el pago.\n\n"
-                f"Fecha límite: {hoy.date().year()}-{hoy.date().month():02d}-{self.cliente.dia_cobro:02d}",
-                tipo="error"
+                f"de {mes_nombre} para realizar el pago.\n\n"
+                f" Fecha límite de pago:  {self.cliente.dia_cobro:02d} de {mes_nombre} de {self.año}",
+                tipo="warning"
             )
             dialog.exec()
             return
@@ -1016,14 +1038,14 @@ class MetodoPagoSeleccionDialog(QDialog):
         self.metodos = metodos
         self.metodo_seleccionado = None
         self.setWindowTitle("Seleccionar Método de Pago")
-        self.setMinimumWidth(350)
+        self.setMinimumWidth(UIScale.px(350))
         self._init_ui()
     
     def _init_ui(self):
         """Inicializa la interfaz"""
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(UIScale.px(20))
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
         
         # Detectar tema actual desde la ventana principal
         main_window = self.parent()
@@ -1058,7 +1080,7 @@ class MetodoPagoSeleccionDialog(QDialog):
         for metodo in self.metodos:
             if metodo.activo:
                 btn = QPushButton(metodo.nombre)
-                btn.setMinimumHeight(50)
+                btn.setMinimumHeight(UIScale.px(50))
                 btn.setCursor(Qt.CursorShape.PointingHandCursor)
                 
                 # Determinar color del texto según brillo del fondo
@@ -1140,14 +1162,14 @@ class ConfirmacionDialog(QDialog):
         self.mensaje = mensaje
         self.tipo = tipo  # "success", "error", "warning", "question", "info"
         self.setWindowTitle(titulo)
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(UIScale.px(400))
         self._init_ui()
     
     def _init_ui(self):
         """Inicializa la interfaz del diálogo"""
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(UIScale.px(20))
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
         
         # Detectar tema actual desde la ventana principal - navegar hasta MainWindow
         is_dark = True
@@ -1206,10 +1228,10 @@ class ConfirmacionDialog(QDialog):
         if self.tipo == "question":
             # Dos botones: Sí y No
             btn_layout = QHBoxLayout()
-            btn_layout.setSpacing(15)
+            btn_layout.setSpacing(UIScale.px(15))
             
             btn_si = QPushButton("Sí")
-            btn_si.setMinimumHeight(40)
+            btn_si.setMinimumHeight(UIScale.px(40))
             btn_si.setCursor(Qt.CursorShape.PointingHandCursor)
             if is_dark:
                 btn_si_style = """
@@ -1244,7 +1266,7 @@ class ConfirmacionDialog(QDialog):
             btn_layout.addWidget(btn_si)
             
             btn_no = QPushButton("No")
-            btn_no.setMinimumHeight(40)
+            btn_no.setMinimumHeight(UIScale.px(40))
             btn_no.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_no.setStyleSheet("""
                 QPushButton {
@@ -1266,7 +1288,7 @@ class ConfirmacionDialog(QDialog):
         else:
             # Un solo botón: Aceptar
             btn_aceptar = QPushButton("Aceptar")
-            btn_aceptar.setMinimumHeight(40)
+            btn_aceptar.setMinimumHeight(UIScale.px(40))
             btn_aceptar.setCursor(Qt.CursorShape.PointingHandCursor)
             
             if self.tipo == "success":

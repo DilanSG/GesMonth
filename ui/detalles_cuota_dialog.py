@@ -5,6 +5,7 @@ Diálogo para mostrar detalles de una cuota registrada
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QFrame, QWidget)
 from PyQt6.QtCore import Qt
+from .responsive import UIScale
 from database.models import Cliente, CuotaMensual, MetodoPago
 
 
@@ -17,14 +18,14 @@ class ConfirmacionDialog(QDialog):
         self.mensaje = mensaje
         self.tipo = tipo  # "success", "error", "warning", "question", "info"
         self.setWindowTitle(titulo)
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(UIScale.px(400))
         self._init_ui()
     
     def _init_ui(self):
         """Inicializa la interfaz del diálogo"""
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(UIScale.px(20))
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
         
         # Detectar tema actual desde la ventana principal - navegar hasta MainWindow
         is_dark = True
@@ -62,10 +63,10 @@ class ConfirmacionDialog(QDialog):
         if self.tipo == "question":
             # Dos botones: Sí y No
             btn_layout = QHBoxLayout()
-            btn_layout.setSpacing(15)
+            btn_layout.setSpacing(UIScale.px(15))
             
             btn_si = QPushButton("Sí")
-            btn_si.setMinimumHeight(40)
+            btn_si.setMinimumHeight(UIScale.px(40))
             btn_si.setCursor(Qt.CursorShape.PointingHandCursor)
             if is_dark:
                 btn_si_style = """
@@ -100,7 +101,7 @@ class ConfirmacionDialog(QDialog):
             btn_layout.addWidget(btn_si)
             
             btn_no = QPushButton("No")
-            btn_no.setMinimumHeight(40)
+            btn_no.setMinimumHeight(UIScale.px(40))
             btn_no.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_no.setStyleSheet("""
                 QPushButton {
@@ -122,7 +123,7 @@ class ConfirmacionDialog(QDialog):
         else:
             # Un solo botón: Aceptar
             btn_aceptar = QPushButton("Aceptar")
-            btn_aceptar.setMinimumHeight(40)
+            btn_aceptar.setMinimumHeight(UIScale.px(40))
             btn_aceptar.setCursor(Qt.CursorShape.PointingHandCursor)
             
             if self.tipo == "success":
@@ -235,25 +236,26 @@ class ConfirmacionDialog(QDialog):
 class DetallesCuotaDialog(QDialog):
     """Diálogo que muestra información detallada de una cuota registrada"""
     
-    def __init__(self, parent, cliente: Cliente, año: int, mes: int, cuota: CuotaMensual):
+    def __init__(self, parent, cliente: Cliente, año: int, mes: int, cuota: CuotaMensual, usuario_actual=None):
         super().__init__(parent)
         self.cliente = cliente
         self.año = año
         self.mes = mes
         self.cuota = cuota
+        self.usuario_actual = usuario_actual
         
         meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
                  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
         
         self.setWindowTitle(f"Detalles - {meses[mes - 1]} {año}")
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(UIScale.px(500))
         self._init_ui()
     
     def _init_ui(self):
         """Inicializa la interfaz"""
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(UIScale.px(20))
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
         
         # Detectar tema actual desde la ventana principal - navegar hasta MainWindow
         self.is_dark = True
@@ -290,7 +292,7 @@ class DetallesCuotaDialog(QDialog):
         
         # Botón eliminar
         btn_eliminar = QPushButton("🗑️ Eliminar Registro")
-        btn_eliminar.setMinimumHeight(45)
+        btn_eliminar.setMinimumHeight(UIScale.px(45))
         btn_eliminar.setCursor(Qt.CursorShape.PointingHandCursor)
         if self.is_dark:
             btn_eliminar_style = """
@@ -510,7 +512,37 @@ class DetallesCuotaDialog(QDialog):
         )
         
         if dialog.exec() == QDialog.DialogCode.Accepted:
+            # Obtener información del registro antes de eliminarlo
+            estado = self.cuota.estado.upper()
+            monto = self.cuota.monto if self.cuota.monto else 0
+            deuda_acumulada = self.cuota.deuda_acumulada if self.cuota.deuda_acumulada else 0
+            metodo_pago = self.cuota.metodo_pago if self.cuota.metodo_pago else "N/A"
+            
             CuotaMensual.eliminar(self.cuota.id)
+            
+            # Registrar log
+            if self.usuario_actual:
+                from controllers.log_controller import LogController
+                log_ctrl = LogController()
+                
+                # Construir detalles según el estado
+                if estado == "PAGADO":
+                    detalles = f"Se eliminó un registro PAGADO: Cliente: {self.cliente.nombre}, Mes: {meses[self.mes - 1]} {self.año}, Monto: ${monto:,.2f}, Método: {metodo_pago}"
+                elif estado == "IMPAGO":
+                    detalles = f"Se eliminó un registro IMPAGO: Cliente: {self.cliente.nombre}, Mes: {meses[self.mes - 1]} {self.año}, Cuota: ${self.cliente.valor_cuota:,.2f}"
+                elif estado == "CON_DEUDA":
+                    # Para con_deuda (parcial), monto es la cuota original y deuda_acumulada es lo que queda por pagar
+                    monto_pagado = monto - deuda_acumulada if monto > deuda_acumulada else 0
+                    detalles = f"Se eliminó un registro PARCIAL: Cliente: {self.cliente.nombre}, Mes: {meses[self.mes - 1]} {self.año}, Cuota: ${monto:,.2f}, Deuda pendiente: ${deuda_acumulada:,.2f}"
+                else:
+                    detalles = f"Se eliminó un registro: Cliente: {self.cliente.nombre}, Mes: {meses[self.mes - 1]} {self.año}, Estado: {estado}"
+                
+                log_ctrl.registrar_log(
+                    usuario_id=self.usuario_actual.id if hasattr(self.usuario_actual, 'id') else None,
+                    usuario_nombre=self.usuario_actual.username if hasattr(self.usuario_actual, 'username') else self.usuario_actual.nombre_completo if hasattr(self.usuario_actual, 'nombre_completo') else "Usuario",
+                    accion='Eliminar Registro de Cuota',
+                    detalles=detalles
+                )
             
             success_dialog = ConfirmacionDialog(
                 self,

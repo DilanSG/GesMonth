@@ -2,13 +2,27 @@
 Vista de gestión de clientes
 """
 
+# PyQt6 Widgets: Componentes gráficos de la interfaz
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QTableWidget, QTableWidgetItem,
                              QLineEdit, QDialog, QComboBox, QHeaderView, 
                              QDoubleSpinBox, QSizePolicy)
-from PyQt6.QtCore import Qt
-from database.models import Cliente
-from controllers.cliente_controller import ClienteController
+# QWidget: widget base, QVBoxLayout/QHBoxLayout: layouts, QLabel: etiquetas
+# QPushButton: botones, QTableWidget/QTableWidgetItem: tablas, QLineEdit: campos de texto
+# QDialog: diálogos, QComboBox: listas desplegables, QHeaderView: encabezados de tabla
+# QDoubleSpinBox: selector numérico decimal, QSizePolicy: política de tamaño
+
+# PyQt6 Core: Funcionalidades centrales de Qt
+from PyQt6.QtCore import Qt  # Qt: constantes globales de alineación, cursor, etc
+
+# Responsive: espaciado y escala adaptables
+from .responsive import Sp, UIScale, expanding
+
+# Database: Modelo de datos de clientes
+from database.models import Cliente  # Cliente: CRUD de clientes
+
+# Controllers: Lógica de negocio de clientes
+from controllers.cliente_controller import ClienteController  # ClienteController: validaciones y operaciones de clientes
 
 
 class ClientesView(QWidget):
@@ -22,8 +36,8 @@ class ClientesView(QWidget):
     def _init_ui(self):
         """Inicializa la interfaz"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
+        layout.setSpacing(UIScale.px(20))
         
         # Título y botón de agregar
         header_layout = QHBoxLayout()
@@ -44,7 +58,7 @@ class ClientesView(QWidget):
         search_layout = QHBoxLayout()
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Buscar por nombre o documento...")
-        self.search_input.setMinimumHeight(40)
+        self.search_input.setMinimumHeight(UIScale.px(40))
         self.search_input.textChanged.connect(self._search_clientes)
         search_layout.addWidget(self.search_input)
         
@@ -72,7 +86,9 @@ class ClientesView(QWidget):
         self.table.setAlternatingRowColors(True)
         self.table.setShowGrid(False)
         self.table.verticalHeader().setVisible(False)
-        self.table.setMinimumHeight(400)
+        # La tabla ocupa todo el espacio vertical disponible
+        self.table.setSizePolicy(expanding())
+        self.table.setMinimumHeight(UIScale.px(300))
         
         layout.addWidget(self.table)
         
@@ -114,13 +130,13 @@ class ClientesView(QWidget):
             # Botones de acción con iconos compactos
             actions_widget = QWidget()
             actions_layout = QHBoxLayout(actions_widget)
-            actions_layout.setContentsMargins(0, 0, 0, 0)
-            actions_layout.setSpacing(6)
+            actions_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+            actions_layout.setSpacing(UIScale.px(6))
             actions_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             
             # Botón Editar (icono)
             btn_edit = QPushButton("✏️")
-            btn_edit.setFixedSize(26, 26)
+            btn_edit.setFixedSize(UIScale.px(26), UIScale.px(26))
             btn_edit.setToolTip("Editar cliente")
             btn_edit.setStyleSheet("""
                 QPushButton {
@@ -146,7 +162,7 @@ class ClientesView(QWidget):
             
             # Botón Eliminar (icono)
             btn_delete = QPushButton("🗑️")
-            btn_delete.setFixedSize(26, 26)
+            btn_delete.setFixedSize(UIScale.px(26), UIScale.px(26))
             btn_delete.setToolTip("Eliminar cliente")
             if is_dark:
                 btn_delete_style = """
@@ -302,14 +318,14 @@ class ClienteDialog(QDialog):
         super().__init__(parent)
         self.cliente = cliente
         self.setWindowTitle("Editar Cliente" if cliente else "Agregar Cliente")
-        self.setMinimumWidth(450)
+        self.setMinimumWidth(UIScale.px(450))
         self._init_ui()
     
     def _init_ui(self):
         """Inicializa la interfaz del diálogo"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
+        layout.setSpacing(UIScale.px(20))
         
         # Detectar tema actual desde la ventana principal
         main_window = self.parent()
@@ -333,17 +349,17 @@ class ClienteDialog(QDialog):
         # Campos con diseño mejorado
         self.input_nombre = QLineEdit()
         self.input_nombre.setPlaceholderText("Nombre completo del cliente")
-        self.input_nombre.setMinimumHeight(40)
+        self.input_nombre.setMinimumHeight(UIScale.px(40))
         self._add_field(layout, "Nombre:", self.input_nombre)
         
         self.input_documento = QLineEdit()
         self.input_documento.setPlaceholderText("Número de documento")
-        self.input_documento.setMinimumHeight(40)
+        self.input_documento.setMinimumHeight(UIScale.px(40))
         self._add_field(layout, "Documento:", self.input_documento)
         
         self.input_telefono = QLineEdit()
         self.input_telefono.setPlaceholderText("Teléfono (opcional)")
-        self.input_telefono.setMinimumHeight(40)
+        self.input_telefono.setMinimumHeight(UIScale.px(40))
         self._add_field(layout, "Teléfono:", self.input_telefono)
         
         # Campo para el valor de la cuota
@@ -352,7 +368,7 @@ class ClienteDialog(QDialog):
         self.input_valor_cuota.setRange(0, 999999999)
         self.input_valor_cuota.setDecimals(2)
         self.input_valor_cuota.setValue(0)
-        self.input_valor_cuota.setMinimumHeight(40)
+        self.input_valor_cuota.setMinimumHeight(UIScale.px(40))
         self.input_valor_cuota.setStyleSheet("font-size: 14px;")
         self._add_field(layout, "Cuota Mensual:", self.input_valor_cuota)
         
@@ -360,12 +376,12 @@ class ClienteDialog(QDialog):
         self.input_dia_cobro = QComboBox()
         self.input_dia_cobro.addItems([str(i) for i in range(1, 32)])  # Días del 1 al 31
         self.input_dia_cobro.setCurrentText("5")  # Por defecto día 5
-        self.input_dia_cobro.setMinimumHeight(40)
+        self.input_dia_cobro.setMinimumHeight(UIScale.px(40))
         self._add_field(layout, "Día de Cobro:", self.input_dia_cobro)
         
         self.combo_estado = QComboBox()
         self.combo_estado.addItems(['Activo', 'Inactivo'])
-        self.combo_estado.setMinimumHeight(40)
+        self.combo_estado.setMinimumHeight(UIScale.px(40))
         self._add_field(layout, "Estado:", self.combo_estado)
         
         # Si es edición, llenar datos
@@ -381,10 +397,10 @@ class ClienteDialog(QDialog):
         
         # Botones con diseño mejorado
         buttons_layout = QHBoxLayout()
-        buttons_layout.setSpacing(15)
+        buttons_layout.setSpacing(UIScale.px(15))
         
         btn_cancel = QPushButton("Cancelar")
-        btn_cancel.setMinimumHeight(45)
+        btn_cancel.setMinimumHeight(UIScale.px(45))
         btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_cancel.setStyleSheet("""
             QPushButton {
@@ -402,7 +418,7 @@ class ClienteDialog(QDialog):
         btn_cancel.clicked.connect(self.reject)
         
         btn_save = QPushButton("Guardar")
-        btn_save.setMinimumHeight(45)
+        btn_save.setMinimumHeight(UIScale.px(45))
         btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
         if self.is_dark:
             btn_save_style = """
@@ -495,14 +511,14 @@ class ConfirmacionDialog(QDialog):
         self.mensaje = mensaje
         self.tipo = tipo  # "success", "error", "warning", "question", "info"
         self.setWindowTitle(titulo)
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(UIScale.px(400))
         self._init_ui()
     
     def _init_ui(self):
         """Inicializa la interfaz del diálogo"""
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(UIScale.px(20))
+        layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
         
         # Detectar tema actual desde la ventana principal - navegar hasta MainWindow
         is_dark = True
@@ -540,10 +556,10 @@ class ConfirmacionDialog(QDialog):
         if self.tipo == "question":
             # Dos botones: Sí y No
             btn_layout = QHBoxLayout()
-            btn_layout.setSpacing(15)
+            btn_layout.setSpacing(UIScale.px(15))
             
             btn_si = QPushButton("Sí")
-            btn_si.setMinimumHeight(40)
+            btn_si.setMinimumHeight(UIScale.px(40))
             btn_si.setCursor(Qt.CursorShape.PointingHandCursor)
             if is_dark:
                 btn_si_style = """
@@ -578,7 +594,7 @@ class ConfirmacionDialog(QDialog):
             btn_layout.addWidget(btn_si)
             
             btn_no = QPushButton("No")
-            btn_no.setMinimumHeight(40)
+            btn_no.setMinimumHeight(UIScale.px(40))
             btn_no.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_no.setStyleSheet("""
                 QPushButton {
@@ -600,7 +616,7 @@ class ConfirmacionDialog(QDialog):
         else:
             # Un solo botón: Aceptar
             btn_aceptar = QPushButton("Aceptar")
-            btn_aceptar.setMinimumHeight(40)
+            btn_aceptar.setMinimumHeight(UIScale.px(40))
             btn_aceptar.setCursor(Qt.CursorShape.PointingHandCursor)
             
             if self.tipo == "success":

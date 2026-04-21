@@ -5,6 +5,7 @@ Vista de reportes y estadísticas
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QFrame, QGridLayout, QScrollArea, QSizePolicy, QComboBox)
 from PyQt6.QtCore import Qt, QDateTime
+from .responsive import UIScale
 from database.models import CuotaMensual, MetodoPago
 
 
@@ -291,8 +292,8 @@ class ReportesView(QWidget):
         """Inicializa la interfaz"""
         # Layout principal
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        main_layout.setSpacing(UIScale.px(0))
         
         # Scroll area para todo el contenido
         scroll = QScrollArea()
@@ -314,8 +315,8 @@ class ReportesView(QWidget):
             }
         """)
         scroll_layout = QVBoxLayout(scroll_widget)
-        scroll_layout.setContentsMargins(30, 30, 30, 30)
-        scroll_layout.setSpacing(25)
+        scroll_layout.setContentsMargins(UIScale.px(30), UIScale.px(30), UIScale.px(30), UIScale.px(30))
+        scroll_layout.setSpacing(UIScale.px(25))
         
         # Header
         self._crear_header(scroll_layout)
@@ -376,8 +377,8 @@ class ReportesView(QWidget):
             """)
         
         selector_layout = QHBoxLayout(self.selector_frame)
-        selector_layout.setContentsMargins(25, 20, 25, 20)
-        selector_layout.setSpacing(20)
+        selector_layout.setContentsMargins(UIScale.px(25), UIScale.px(20), UIScale.px(25), UIScale.px(20))
+        selector_layout.setSpacing(UIScale.px(20))
         
         # Label
         label = QLabel("Período:")
@@ -397,7 +398,7 @@ class ReportesView(QWidget):
         
         # Seleccionar mes actual por defecto
         self.combo_mes.setCurrentIndex(self.mes_seleccionado)
-        self.combo_mes.setMinimumWidth(180)
+        self.combo_mes.setMinimumWidth(UIScale.px(180))
         if is_dark:
             self.combo_mes.setStyleSheet("""
                 QComboBox {
@@ -463,7 +464,7 @@ class ReportesView(QWidget):
         if index_año >= 0:
             self.combo_año.setCurrentIndex(index_año)
         
-        self.combo_año.setMinimumWidth(150)
+        self.combo_año.setMinimumWidth(UIScale.px(150))
         if is_dark:
             self.combo_año.setStyleSheet("""
                 QComboBox {
@@ -562,8 +563,8 @@ class ReportesView(QWidget):
             """)
         
         container_layout = QVBoxLayout(self.container_cuotas)
-        container_layout.setContentsMargins(25, 25, 25, 25)
-        container_layout.setSpacing(20)
+        container_layout.setContentsMargins(UIScale.px(25), UIScale.px(25), UIScale.px(25), UIScale.px(25))
+        container_layout.setSpacing(UIScale.px(20))
         
         # Título de la sección
         section_title = QLabel("Estadísticas de Cuotas")
@@ -575,8 +576,8 @@ class ReportesView(QWidget):
         
         # Grid de estadísticas
         grid = QGridLayout()
-        grid.setSpacing(20)
-        grid.setContentsMargins(0, 0, 0, 0)
+        grid.setSpacing(UIScale.px(20))
+        grid.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         
         # Crear widgets de estadísticas
         self.stat_total_cuotas = self._crear_stat_card(
@@ -651,8 +652,8 @@ class ReportesView(QWidget):
             """)
         
         container_layout = QVBoxLayout(self.container_metodos)
-        container_layout.setContentsMargins(25, 25, 25, 25)
-        container_layout.setSpacing(20)
+        container_layout.setContentsMargins(UIScale.px(25), UIScale.px(25), UIScale.px(25), UIScale.px(25))
+        container_layout.setSpacing(UIScale.px(20))
         
         # Título de la sección
         section_title = QLabel("Estadísticas por Método de Pago")
@@ -664,8 +665,8 @@ class ReportesView(QWidget):
         
         # Contenedor dinámico para los métodos
         self.metodos_container = QVBoxLayout()
-        self.metodos_container.setSpacing(12)
-        self.metodos_container.setContentsMargins(0, 0, 0, 0)
+        self.metodos_container.setSpacing(UIScale.px(12))
+        self.metodos_container.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         container_layout.addLayout(self.metodos_container)
         
         layout.addWidget(self.container_metodos)
@@ -679,7 +680,7 @@ class ReportesView(QWidget):
             is_dark = main_window.current_theme == 'dark'
         
         card = QFrame()
-        card.setMinimumHeight(130)
+        card.setMinimumHeight(UIScale.px(130))
         card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         if is_dark:
             card.setStyleSheet(f"""
@@ -707,8 +708,8 @@ class ReportesView(QWidget):
             """)
         
         card_layout = QVBoxLayout(card)
-        card_layout.setContentsMargins(25, 25, 25, 25)
-        card_layout.setSpacing(15)
+        card_layout.setContentsMargins(UIScale.px(25), UIScale.px(25), UIScale.px(25), UIScale.px(25))
+        card_layout.setSpacing(UIScale.px(15))
         
         # Título
         titulo_label = QLabel(titulo)
@@ -738,7 +739,7 @@ class ReportesView(QWidget):
             is_dark = main_window.current_theme == 'dark'
         
         row = QFrame()
-        row.setMinimumHeight(70)
+        row.setMinimumHeight(UIScale.px(70))
         row.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         if is_dark:
             row.setStyleSheet("""
@@ -766,14 +767,14 @@ class ReportesView(QWidget):
             """)
         
         row_layout = QHBoxLayout(row)
-        row_layout.setContentsMargins(20, 15, 20, 15)
-        row_layout.setSpacing(15)
+        row_layout.setContentsMargins(UIScale.px(20), UIScale.px(15), UIScale.px(20), UIScale.px(15))
+        row_layout.setSpacing(UIScale.px(15))
         
         # Columna 1: Nombre del método con indicador de color
         nombre_widget = QWidget()
         nombre_layout = QVBoxLayout(nombre_widget)
-        nombre_layout.setContentsMargins(0, 0, 0, 0)
-        nombre_layout.setSpacing(2)
+        nombre_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        nombre_layout.setSpacing(UIScale.px(2))
         
         label_metodo = QLabel("Método")
         label_metodo.setStyleSheet("font-size: 11px; color: #64748b;")
@@ -782,8 +783,8 @@ class ReportesView(QWidget):
         # Contenedor horizontal para el color + nombre
         nombre_container = QWidget()
         nombre_container_layout = QHBoxLayout(nombre_container)
-        nombre_container_layout.setContentsMargins(0, 0, 0, 0)
-        nombre_container_layout.setSpacing(10)
+        nombre_container_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        nombre_container_layout.setSpacing(UIScale.px(10))
         
         # Buscar el color del método de pago
         metodos = MetodoPago.obtener_todos()
@@ -806,8 +807,8 @@ class ReportesView(QWidget):
         # Columna 2: Cantidad de pagos
         cantidad_widget = QWidget()
         cantidad_layout = QVBoxLayout(cantidad_widget)
-        cantidad_layout.setContentsMargins(0, 0, 0, 0)
-        cantidad_layout.setSpacing(2)
+        cantidad_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        cantidad_layout.setSpacing(UIScale.px(2))
         
         label_cantidad = QLabel("Cantidad")
         label_cantidad.setStyleSheet("font-size: 11px; color: #64748b;")
@@ -825,8 +826,8 @@ class ReportesView(QWidget):
         # Columna 3: Total
         total_widget = QWidget()
         total_layout = QVBoxLayout(total_widget)
-        total_layout.setContentsMargins(0, 0, 0, 0)
-        total_layout.setSpacing(2)
+        total_layout.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
+        total_layout.setSpacing(UIScale.px(2))
         
         label_total = QLabel("Total")
         label_total.setStyleSheet("font-size: 11px; color: #64748b;")

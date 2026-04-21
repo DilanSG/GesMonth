@@ -8,6 +8,7 @@ from .clientes_view import ClientesView
 from .cuotas_view import CuotasView
 from .reportes_view import ReportesView
 from .configuracion_view import ConfiguracionView
+from .responsive import UIScale, Sp, BaseView, expanding, h_expanding, v_expanding, fixed_size
 
 __all__ = [
     'MainWindow',
@@ -15,5 +16,12 @@ __all__ = [
     'ClientesView',
     'CuotasView',
     'ReportesView',
-    'ConfiguracionView'
+    'ConfiguracionView',
+    'UIScale',
+    'Sp',
+    'BaseView',
+    'expanding',
+    'h_expanding',
+    'v_expanding',
+    'fixed_size',
 ]

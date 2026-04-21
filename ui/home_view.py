@@ -2,11 +2,23 @@
 Vista de Home - Resumen general
 """
 
+# PyQt6 Widgets: Componentes gráficos de la interfaz
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QFrame, QGridLayout)
-from PyQt6.QtCore import Qt, QDateTime
-from database.models import Pago, Cliente, CuotaMensual
-from database.connection import DatabaseConnection
+# QWidget: widget base, QVBoxLayout/QHBoxLayout: layouts verticales/horizontales
+# QLabel: etiquetas de texto, QFrame: marcos contenedores, QGridLayout: layout en cuadrícula
+
+# PyQt6 Core: Funcionalidades centrales de Qt
+from PyQt6.QtCore import Qt, QDateTime  # Qt: constantes de alineación, QDateTime: fecha y hora actual
+
+# Responsive: espaciado y escala adaptables
+from .responsive import Sp, UIScale, expanding
+
+# Database: Modelos de datos para estadísticas
+from database.models import Pago, Cliente, CuotaMensual  # Pago: registros de pagos, Cliente: clientes, CuotaMensual: estado de cuotas
+
+# Database: Conexión para consultas personalizadas
+from database.connection import DatabaseConnection  # DatabaseConnection: acceso directo a la BD para estadísticas
 
 
 class HomeView(QWidget):
@@ -19,8 +31,8 @@ class HomeView(QWidget):
     def _init_ui(self):
         """Inicializa la interfaz de home"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(30)
+        layout.setContentsMargins(Sp.xl(), Sp.xl(), Sp.xl(), Sp.xl())
+        layout.setSpacing(Sp.xl())
         
         # Título
         title = QLabel("Home")
@@ -29,8 +41,8 @@ class HomeView(QWidget):
         
         # Grid de tarjetas principales (2x2)
         stats_grid = QGridLayout()
-        stats_grid.setSpacing(20)
-        stats_grid.setContentsMargins(0, 0, 0, 0)
+        stats_grid.setSpacing(Sp.lg())
+        stats_grid.setContentsMargins(UIScale.px(0), UIScale.px(0), UIScale.px(0), UIScale.px(0))
         
         # Crear tarjetas principales
         self.card_total_clientes = self._create_stat_card("Total Clientes", "0", "#3b82f6")
@@ -176,11 +188,12 @@ class HomeView(QWidget):
                     background: transparent;
                 }}
             """)
-        card.setMinimumHeight(130)
+        card.setMinimumHeight(UIScale.px(120))
+        card.setSizePolicy(expanding())
         
         card_layout = QVBoxLayout(card)
-        card_layout.setContentsMargins(25, 25, 25, 25)
-        card_layout.setSpacing(15)
+        card_layout.setContentsMargins(Sp.xl(), Sp.xl(), Sp.xl(), Sp.xl())
+        card_layout.setSpacing(Sp.md())
         
         # Título
         title_label = QLabel(title)
@@ -235,16 +248,16 @@ class HomeView(QWidget):
                     background: transparent;
                 }
             """)
-        card.setMinimumHeight(100)
-        card.setMaximumHeight(120)
+        card.setMinimumHeight(UIScale.px(90))
+        # Sin setMaximumHeight: la tarjeta del mes crece con la ventana
         
         card_layout = QHBoxLayout(card)
-        card_layout.setContentsMargins(30, 25, 30, 25)
-        card_layout.setSpacing(20)
+        card_layout.setContentsMargins(Sp.xxl(), Sp.xl(), Sp.xxl(), Sp.xl())
+        card_layout.setSpacing(Sp.lg())
         
         # Columna izquierda: Etiqueta
         label_layout = QVBoxLayout()
-        label_layout.setSpacing(5)
+        label_layout.setSpacing(UIScale.px(5))
         
         month_label = QLabel()
         month_label.setObjectName("monthLabel")
@@ -279,8 +292,8 @@ class HomeView(QWidget):
     def _create_info_footer(self) -> QHBoxLayout:
         """Crea el footer con información del programa"""
         footer_layout = QHBoxLayout()
-        footer_layout.setContentsMargins(0, 20, 0, 0)
-        footer_layout.setSpacing(30)
+        footer_layout.setContentsMargins(UIScale.px(0), UIScale.px(20), UIScale.px(0), UIScale.px(0))
+        footer_layout.setSpacing(UIScale.px(30))
         
         # Nombre de la aplicación
         app_name = QLabel("GesMonth")
